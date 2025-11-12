@@ -20,10 +20,22 @@ rapidfuzz>=3.0.0
 # Machine Learning
 scikit-learn>=1.3.0
 
+# Deep Learning - CRÍTICO para modelos médicos
+torch>=2.6.0  # Requerido por seguridad (CVE-2025-32434)
+tensorflow>=2.15.0
+tf-keras>=2.15.0  # Compatible con transformers
+safetensors>=0.4.0  # Para cargar modelos sin torch.load
+
+# Hugging Face
+huggingface-hub>=0.20.0
+sentencepiece>=0.1.99  # Para algunos tokenizers
+hf_xet>=1.2.0  # Para cargar modelos sin torch.load
+
 # Additional utilities
 jupyter>=1.0.0
 notebook>=6.5.0
 ipywidgets>=8.0.0
 kaleido>=0.2.1
 
+# Translation
 deep-translator>=1.10.0
