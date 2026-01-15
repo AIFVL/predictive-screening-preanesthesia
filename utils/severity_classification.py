@@ -58,6 +58,19 @@ def _hash_text(text: str) -> str:
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
+def _is_valid_text(text) -> bool:
+    """Verifica si un texto es válido para clasificar."""
+    if text is None:
+        return False
+    if pd.isna(text):
+        return False
+    if isinstance(text, float):
+        return False
+    text_str = str(text).strip()
+    if text_str == '' or text_str.lower() == 'none':
+        return False
+    return True
+
 def _classify_batch(
     model_name: str,
     model_id: str,
@@ -65,13 +78,19 @@ def _classify_batch(
     candidate_labels: List[str]
 ):
     """Clasifica un lote de textos con un modelo concreto."""
+    # Filtrar textos válidos (no None, no vacíos)
+    valid_texts = [t for t in texts if _is_valid_text(t)]
+    
+    if not valid_texts:
+        return []
+    
     classifier = _get_pipeline(model_name, model_id)
-    outputs = classifier(texts, candidate_labels, batch_size=len(texts))
+    outputs = classifier(valid_texts, candidate_labels, batch_size=len(valid_texts))
     if isinstance(outputs, dict):  # lote de tamaño 1
         outputs = [outputs]
 
     rows = []
-    for text, output in zip(texts, outputs):
+    for text, output in zip(valid_texts, outputs):
         rows.append({
             "model": model_name,
             "text": text,
@@ -134,6 +153,8 @@ def zero_shot_severity_classification(
      'all_labels', 'all_scores', 'status'].
     """
     if not texts:
+        if verbose:
+            print(f"  ℹ️ No hay textos para procesar")
         return pd.DataFrame()
 
     candidate_labels = candidate_labels or [
@@ -148,9 +169,12 @@ def zero_shot_severity_classification(
     if cache_file:
         cache_df, processed_pairs = _load_cache(cache_file)
 
-    # Filtrar textos pendientes (no presentes para todos los modelos)
+    # Filtrar textos pendientes (no presentes para todos los modelos Y que sean válidos)
     pending_texts = []
     for text in texts:
+        # Saltar textos inválidos (None, NaN, vacíos)
+        if not _is_valid_text(text):
+            continue
         text_hash = _hash_text(text)
         # ¿ya está procesado para todos los modelos?
         if all((text_hash, model_name) in processed_pairs for model_name in models):
@@ -158,7 +182,12 @@ def zero_shot_severity_classification(
         pending_texts.append(text)
 
     if not pending_texts:
+        if verbose:
+            print(f"  ℹ️ No hay textos pendientes por procesar")
         return cache_df.copy() if not cache_df.empty else pd.DataFrame()
+
+    if verbose:
+        print(f"  📝 Textos pendientes: {len(pending_texts)}")
 
     batches = [pending_texts[i:i + batch_size] for i in range(0, len(pending_texts), batch_size)]
     tasks = []
@@ -166,6 +195,9 @@ def zero_shot_severity_classification(
 
     total_to_process = len(pending_texts) * len(models)
     processed_count = 0
+    
+    if verbose:
+        print(f"  🔄 Iniciando procesamiento de {total_to_process} textos en {len(batches)} lotes...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for model_name, model_id in models.items():
@@ -191,6 +223,9 @@ def zero_shot_severity_classification(
             try:
                 task_rows = future.result()
             except Exception as exc:
+                print(f"❌ ERROR durante clasificación: {exc}")
+                import traceback
+                traceback.print_exc()
                 task_rows = []
             if not task_rows:
                 continue
@@ -232,6 +267,8 @@ def process_list_of_texts(
     verbose: bool = True,
 ) -> pd.DataFrame:
     """Wrapper conveniente para procesar una lista completa, con contador de progreso."""
+    if verbose:
+        print(f"  ℹ️ Procesando {len(texts)} textos")
     return zero_shot_severity_classification(
         texts,
         candidate_labels=candidate_labels,
