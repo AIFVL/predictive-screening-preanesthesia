@@ -1,0 +1,19 @@
+Variable,Type_Inferred,Metric,Value,P_Value,Significant,N_Unique,N_Valid
+PrÃ³tesis Dental_movil,Categórica,Cramers_V,0.045121915131624134,6.302539471834353e-15,Sí,2,29865
+PrÃ³tesis Dental_no,Categórica,Cramers_V,0.03431436055928055,3.0287230049197998e-09,Sí,2,29865
+AlÃ©rgeno_med_opioides,Categórica,Cramers_V,0.015434085377045081,0.007647695014369281,Sí,2,29865
+AlÃ©rgeno_suplementos,Categórica,Cramers_V,0.012686276652800713,0.02835222306695688,Sí,2,29865
+AlÃ©rgeno_med_alergias_respiratorio,Categórica,Cramers_V,0.009574542584344014,0.09800081122256565,No,2,29865
+AlÃ©rgeno_ambiental_animales,Categórica,Cramers_V,0.007089789856247982,0.2204917619251368,No,2,29865
+AlÃ©rgeno_med_urologico,Categórica,Cramers_V,0.00504918917866562,0.38289462260298324,No,2,29865
+AlÃ©rgeno_med_neuro_psiquiatria,Categórica,Cramers_V,0.004153637443471986,0.4728740990304172,No,2,29865
+AlÃ©rgeno_med_cardio_renal_hemostasia,Categórica,Cramers_V,0.0038923771765812837,0.5011630550598736,No,2,29865
+AlÃ©rgeno_med_analgesia_no_opioide,Categórica,Cramers_V,0.0038767426287422283,0.5028839233819955,No,2,29865
+AlÃ©rgeno_med_gastrointestinal,Categórica,Cramers_V,0.0037786492548406007,0.5137517617900083,No,2,29865
+AlÃ©rgeno_med_antiinfecciosos,Categórica,Cramers_V,0.00350085726602664,0.5451787288908554,No,2,29865
+AlÃ©rgeno_alimentos,Categórica,Cramers_V,0.003138887783650335,0.5875108349390633,No,2,29865
+AlÃ©rgeno_onco_inmuno_vacunas,Categórica,Cramers_V,0.002478746936601656,0.6683857822158753,No,2,29865
+AlÃ©rgeno_med_anestesia_y_relajantes,Categórica,Cramers_V,0.0013275563060215858,0.8185412883308796,No,2,29865
+PrÃ³tesis Dental_fija,Categórica,Cramers_V,0.0013219315031327075,0.8192968111844283,No,2,29865
+AlÃ©rgeno_contacto_hospitalario,Categórica,Cramers_V,0.0008191178675816413,0.8874308842182699,No,2,29865
+AlÃ©rgeno_otro,Categórica,Cramers_V,0.0002463042644368203,0.9660482529416797,No,2,29865
