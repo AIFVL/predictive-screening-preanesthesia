@@ -30,7 +30,46 @@ ENCODING_FIX_MAP = {
     'Prótesis Dental_no': 'Prótesis Dental_no',
     'Alérgeno_med_opioides': 'Alérgeno_med_opioides',
     'Alérgeno_suplementos': 'Alérgeno_suplementos',
+    'PrÃ³tesis Dental_movil': 'Prótesis Dental_movil',
+    'PrÃ³tesis Dental_no': 'Prótesis Dental_no',
+    'AlÃ©rgeno_med_opioides': 'Alérgeno_med_opioides',
+    'AlÃ©rgeno_suplementos': 'Alérgeno_suplementos',
+    'TensiÃ³n Arterial SistÃ³lica (mm/Hg)': 'Tensión Arterial Sistólica (mm/Hg)',
+    'TensiÃ³n Arterial DiastÃ³lica (mm/Hg)': 'Tensión Arterial Diastólica (mm/Hg)',
+    'TensiÃ³n Arterial Media (mm/Hg)': 'Tensión Arterial Media (mm/Hg)',
+    'Prote\xc3\xadna C reactiva (mg/l)': 'Proteína C reactiva (mg/l)',
 }
+
+def get_imputation_strategies(feature_columns):
+    """
+    Clasifica las columnas según la estrategia de imputación recomendada.
+    
+    Reglas Clínicas:
+    1. Scores/Conteos: Missing = 'No aplica' = 0 riesgo -> Constant(0).
+    2. Mediciones Fisiológicas: Missing aleatorio -> Median.
+    """
+    strategies = {
+        'fill_zero': [],
+        'fill_median': []
+    }
+    
+    zero_keywords = [
+        'score', 'predicted_label', 'ordinal', 'count', 
+        'Antecedente', 'Diagnóstico', 'Procedimiento', 'Tipo de anestesia'
+    ]
+    
+    for col in feature_columns:
+        col_lower = col.lower()
+        
+        if any(k.lower() in col_lower for k in zero_keywords):
+            strategies['fill_zero'].append(col)
+        elif '_encoded' in col or 'OneHot' in col:
+            strategies['fill_zero'].append(col)
+        else:
+            strategies['fill_median'].append(col)
+            
+    return strategies
+
 
 def resolve_feature_columns(selected_names, df_columns, features_meta):
     """
@@ -69,6 +108,8 @@ def resolve_feature_columns(selected_names, df_columns, features_meta):
             real_col = SEVERITY_SCORE_MAP[name]
             if real_col in df_cols_set:
                 resolved.append(real_col)
+            elif name in df_cols_set:  # Fallback: usar el nombre original
+                resolved.append(name)
             else:
                 missing.append(f"{name} → {real_col} (not found)")
         
@@ -77,6 +118,8 @@ def resolve_feature_columns(selected_names, df_columns, features_meta):
             real_col = LABEL_ENCODED_MAP[name]
             if real_col in df_cols_set:
                 resolved.append(real_col)
+            elif name in df_cols_set:  # Fallback: usar el nombre original
+                resolved.append(name)
             else:
                 missing.append(f"{name} → {real_col} (not found)")
         
@@ -112,4 +155,40 @@ def resolve_feature_columns(selected_names, df_columns, features_meta):
             seen.add(col)
             unique_resolved.append(col)
     
+    
     return unique_resolved, missing
+
+
+def sanitize_features_for_subset(df, feature_columns):
+    """
+    Elimina features que son constantes (varianza 0) en el subset actual.
+    
+    Args:
+        df (pd.DataFrame): Subset de datos (ej. solo adultos).
+        feature_columns (list): Lista de columnas seleccionadas.
+        
+    Returns:
+        valid_features (list): Lista depurada.
+        dropped_features (list): Lista de features eliminadas.
+    """
+    valid_features = []
+    dropped_features = []
+    
+    for col in feature_columns:
+        if col not in df.columns:
+            continue
+            
+        # Check variance / unique values
+        if df[col].nunique() <= 1:
+            dropped_features.append(col)
+        else:
+            valid_features.append(col)
+            
+    print(f"Sanitización de Features realizada:")
+    print(f"   - Originales: {len(feature_columns)}")
+    print(f"   - Mantenidas: {len(valid_features)}")
+    print(f"   - Eliminadas (constantes): {len(dropped_features)}")
+    if dropped_features:
+        print(f"   - Ejemplos eliminados: {dropped_features[:5]}")
+        
+    return valid_features, dropped_features
