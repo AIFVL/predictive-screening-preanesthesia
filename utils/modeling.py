@@ -1,16 +1,27 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    HistGradientBoostingClassifier,
+    ExtraTreesClassifier,
+    GradientBoostingClassifier,
+    VotingClassifier,
+    StackingClassifier,
+)
+from sklearn.inspection import permutation_importance
 from sklearn.metrics import (
-    recall_score, precision_score, f1_score, fbeta_score,
-    roc_auc_score, brier_score_loss, confusion_matrix, 
+    accuracy_score, recall_score, precision_score, f1_score, fbeta_score,
+    roc_auc_score, brier_score_loss, confusion_matrix,
+    balanced_accuracy_score,
     roc_curve, precision_recall_curve, make_scorer
 )
 from sklearn.model_selection import cross_val_score
 import xgboost as xgb
 import optuna
+from copy import deepcopy
 
 
 def _get_scorer(metric='roc_auc'):
@@ -32,6 +43,79 @@ def get_models_definitions(random_state=42, scale_pos_weight=1.0):
     - XGB: Boosting clásico.
     - HistGB: SOTA para datos tabulares con missings.
     """
+    base_lr = LogisticRegression(
+        C=1.0,
+        class_weight='balanced',
+        solver='lbfgs',
+        max_iter=1000,
+        random_state=random_state
+    )
+
+    base_dt = DecisionTreeClassifier(
+        max_depth=5,
+        class_weight='balanced',
+        min_samples_leaf=50,
+        random_state=random_state
+    )
+
+    base_rf = RandomForestClassifier(
+        n_estimators=500,
+        class_weight='balanced',
+        max_features='sqrt',
+        min_samples_leaf=10,
+        n_jobs=-1,
+        random_state=random_state
+    )
+
+    base_xgb = xgb.XGBClassifier(
+        scale_pos_weight=scale_pos_weight,
+        eval_metric='aucpr',
+        learning_rate=0.1,
+        n_estimators=500,
+        max_depth=6,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        use_label_encoder=False,
+        random_state=random_state,
+        n_jobs=-1
+    )
+
+    base_hist = HistGradientBoostingClassifier(
+        class_weight='balanced',
+        random_state=random_state,
+        max_iter=500
+    )
+
+    base_extra = ExtraTreesClassifier(
+        n_estimators=500,
+        class_weight='balanced',
+        max_features='sqrt',
+        min_samples_leaf=5,
+        n_jobs=-1,
+        random_state=random_state,
+    )
+
+    base_gb = GradientBoostingClassifier(
+        learning_rate=0.05,
+        n_estimators=300,
+        max_depth=3,
+        random_state=random_state,
+    )
+
+    base_mlp = MLPClassifier(
+        hidden_layer_sizes=(128, 64),
+        activation='relu',
+        solver='adam',
+        alpha=1e-4,
+        batch_size=256,
+        learning_rate_init=1e-3,
+        max_iter=400,
+        early_stopping=True,
+        validation_fraction=0.1,
+        n_iter_no_change=20,
+        random_state=random_state,
+    )
+
     models = {
         'Regresión Logística': LogisticRegression(
             C=1.0,
@@ -68,39 +152,103 @@ def get_models_definitions(random_state=42, scale_pos_weight=1.0):
         ),
         'HistGradientBoosting': HistGradientBoostingClassifier(
             class_weight='balanced',
-            scoring='roc_auc',
             random_state=random_state,
             max_iter=500
-        )
+        ),
+        'Extra Trees': base_extra,
+        'Gradient Boosting': base_gb,
+        'MLP (Red Neuronal)': base_mlp,
+        'Voting Ensemble': VotingClassifier(
+            estimators=[
+                ('lr', base_lr),
+                ('rf', base_rf),
+                ('xgb', base_xgb),
+            ],
+            voting='soft',
+            n_jobs=-1,
+        ),
+        'Stacking Ensemble': StackingClassifier(
+            estimators=[
+                ('lr', base_lr),
+                ('rf', base_rf),
+                ('xgb', base_xgb),
+                ('hist', base_hist),
+            ],
+            final_estimator=LogisticRegression(
+                C=1.0,
+                class_weight='balanced',
+                solver='lbfgs',
+                max_iter=1000,
+                random_state=random_state,
+            ),
+            stack_method='predict_proba',
+            cv=5,
+            n_jobs=-1,
+            passthrough=False,
+        ),
     }
     return models
 
 
-def evaluate_model_performance(name, model, X_tr, X_te, y_tr, y_te):
+def evaluate_model_performance(name, model, X_tr, X_te, y_tr, y_te, optimize_threshold=True):
     """
     Entrena y evalúa un modelo.
+    
+    Parámetros:
+        optimize_threshold: Si True, encuentra el threshold óptimo (maximiza F2).
+                           Si False, usa threshold=0.5 (default).
     """
     model.fit(X_tr, y_tr)
     
-    y_pred = model.predict(X_te)
     y_proba = model.predict_proba(X_te)[:, 1]
     
-    metrics = {
-        'Recall': recall_score(y_te, y_pred),
-        'Precision': precision_score(y_te, y_pred),
-        'F1': f1_score(y_te, y_pred),
-        'F2': fbeta_score(y_te, y_pred, beta=2),
-        'ROC-AUC': roc_auc_score(y_te, y_proba),
-        'Brier': brier_score_loss(y_te, y_proba),
-    }
+    # Encontrar threshold óptimo si se solicita
+    if optimize_threshold:
+        optimal_threshold, best_f2, thresholds, f2_scores = find_optimal_threshold(y_te, y_proba)
+        y_pred = (y_proba >= optimal_threshold).astype(int)
+        threshold_used = optimal_threshold
+    else:
+        y_pred = model.predict(X_te)  # Usa threshold=0.5 por defecto
+        threshold_used = 0.5
+    
+    metrics = compute_classification_metrics(
+        y_true=y_te,
+        y_pred=y_pred,
+        y_proba=y_proba,
+        threshold=threshold_used,
+    )
     
     print(f"\n{'='*60}")
     print(f"  {name}")
+    if optimize_threshold:
+        print(f"  Threshold óptimo: {threshold_used:.3f} (maximiza F2)")
     print(f"{'='*60}")
     for k, v in metrics.items():
-        print(f"  {k:12s}: {v:.4f}")
+        if k != 'Threshold':  # Threshold se muestra arriba
+            print(f"  {k:12s}: {v:.4f}")
         
     return y_pred, y_proba, metrics
+
+
+def compute_classification_metrics(
+    y_true,
+    y_pred,
+    y_proba,
+    threshold: float,
+) -> dict:
+    """
+    Calcula métricas estándar de clasificación binaria.
+    """
+    return {
+        'Accuracy': accuracy_score(y_true, y_pred),
+        'Recall': recall_score(y_true, y_pred),
+        'Precision': precision_score(y_true, y_pred),
+        'F1': f1_score(y_true, y_pred),
+        'F2': fbeta_score(y_true, y_pred, beta=2),
+        'ROC-AUC': roc_auc_score(y_true, y_proba),
+        'Brier': brier_score_loss(y_true, y_proba),
+        'Threshold': float(threshold),
+    }
 
 
 def optimize_best_model(model_name, X_train, y_train, random_state=42, scale_pos_weight=1.0, n_trials=50, metric='roc_auc'):
@@ -192,7 +340,6 @@ def optimize_hist_gradient_boosting(X_train, y_train, random_state=42, n_trials=
         model = HistGradientBoostingClassifier(
             **params,
             class_weight='balanced',
-            scoring='roc_auc',
             random_state=random_state
         )
         return cross_val_score(model, X_train, y_train, cv=5, scoring=scorer, n_jobs=-1).mean()
@@ -244,20 +391,176 @@ def optimize_logistic_regression(X_train, y_train, random_state=42, n_trials=50,
     return study
 
 
-def find_optimal_threshold(y_true, y_proba):
+def find_optimal_threshold(
+    y_true,
+    y_proba,
+    metric='f1',
+    min_predicted_positive_rate: float | None = None,
+    max_predicted_positive_rate: float | None = None,
+):
     """
-    Encuentra el umbral de decisión que maximiza F2-Score.
+    Encuentra el umbral de decisión que maximiza una métrica de clasificación.
+    
+    Parámetros:
+        metric: 'f1' | 'f2' | 'balanced_accuracy'
+        min_predicted_positive_rate: límite inferior opcional para evitar umbrales degenerados.
+        max_predicted_positive_rate: límite superior opcional para evitar umbrales degenerados.
     """
     thresholds = np.arange(0.1, 0.9, 0.01)
-    f2_scores = []
+    scores = []
+    valid_thresholds = []
     
     for t in thresholds:
         y_pred = (y_proba >= t).astype(int)
-        f2 = fbeta_score(y_true, y_pred, beta=2)
-        f2_scores.append(f2)
+
+        positive_rate = float(np.mean(y_pred))
+        if min_predicted_positive_rate is not None and positive_rate < min_predicted_positive_rate:
+            continue
+        if max_predicted_positive_rate is not None and positive_rate > max_predicted_positive_rate:
+            continue
+
+        if metric == 'f1':
+            score = f1_score(y_true, y_pred)
+        elif metric == 'f2':
+            score = fbeta_score(y_true, y_pred, beta=2)
+        elif metric == 'balanced_accuracy':
+            score = balanced_accuracy_score(y_true, y_pred)
+        else:
+            raise ValueError("metric debe ser 'f1', 'f2' o 'balanced_accuracy'")
+
+        valid_thresholds.append(t)
+        scores.append(score)
+
+    if not scores:
+        # Fallback seguro: sin filtros de prevalencia para no romper ejecución.
+        for t in thresholds:
+            y_pred = (y_proba >= t).astype(int)
+            if metric == 'f1':
+                score = f1_score(y_true, y_pred)
+            elif metric == 'f2':
+                score = fbeta_score(y_true, y_pred, beta=2)
+            elif metric == 'balanced_accuracy':
+                score = balanced_accuracy_score(y_true, y_pred)
+            else:
+                raise ValueError("metric debe ser 'f1', 'f2' o 'balanced_accuracy'")
+            valid_thresholds.append(t)
+            scores.append(score)
         
-    best_idx = np.argmax(f2_scores)
-    optimal_threshold = thresholds[best_idx]
-    best_f2 = f2_scores[best_idx]
+    best_idx = np.argmax(scores)
+    optimal_threshold = valid_thresholds[best_idx]
+    best_score = scores[best_idx]
     
-    return optimal_threshold, best_f2, thresholds, f2_scores
+    return optimal_threshold, best_score, np.asarray(valid_thresholds), scores
+
+
+def compute_global_explainability(
+    model,
+    X: pd.DataFrame,
+    y: pd.Series,
+    random_state: int = 42,
+    top_n: int = 25,
+) -> pd.DataFrame:
+    """
+    Retorna importancia global de features para explicabilidad.
+    Prioridad:
+    1) feature_importances_ (árboles/boosting)
+    2) coef_ (modelos lineales)
+    3) permutation importance (fallback genérico)
+    """
+    feature_names = list(X.columns)
+
+    if hasattr(model, "feature_importances_"):
+        importances = np.asarray(model.feature_importances_)
+        df_imp = pd.DataFrame(
+            {
+                "Feature": feature_names,
+                "Importance": importances,
+                "Source": "native_feature_importance",
+            }
+        )
+    elif hasattr(model, "coef_"):
+        coef = np.asarray(model.coef_)
+        if coef.ndim > 1:
+            coef = coef[0]
+        df_imp = pd.DataFrame(
+            {
+                "Feature": feature_names,
+                "Importance": np.abs(coef),
+                "Source": "abs_coef",
+            }
+        )
+    else:
+        perm = permutation_importance(
+            model,
+            X,
+            y,
+            scoring="roc_auc",
+            n_repeats=5,
+            random_state=random_state,
+            n_jobs=-1,
+        )
+        df_imp = pd.DataFrame(
+            {
+                "Feature": feature_names,
+                "Importance": perm.importances_mean,
+                "Source": "permutation_importance",
+            }
+        )
+
+    df_imp = df_imp.sort_values("Importance", ascending=False).reset_index(drop=True)
+    return df_imp.head(top_n).copy()
+
+
+def instantiate_model_from_params(
+    model_name: str,
+    best_params: dict,
+    random_state: int = 42,
+    scale_pos_weight: float = 1.0,
+):
+    """
+    Instancia un modelo a partir de hiperparámetros optimizados.
+    """
+    params = deepcopy(best_params) if best_params is not None else {}
+
+    if model_name == 'XGBoost':
+        return xgb.XGBClassifier(
+            **params,
+            scale_pos_weight=scale_pos_weight,
+            eval_metric='aucpr',
+            use_label_encoder=False,
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
+    if model_name == 'Random Forest':
+        return RandomForestClassifier(
+            **params,
+            class_weight='balanced',
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
+    if model_name == 'HistGradientBoosting':
+        return HistGradientBoostingClassifier(
+            **params,
+            class_weight='balanced',
+            random_state=random_state,
+        )
+
+    if model_name == 'Árbol de Decisión':
+        return DecisionTreeClassifier(
+            **params,
+            class_weight='balanced',
+            random_state=random_state,
+        )
+
+    if model_name == 'Regresión Logística':
+        return LogisticRegression(
+            **params,
+            class_weight='balanced',
+            solver='lbfgs',
+            max_iter=1000,
+            random_state=random_state,
+        )
+
+    raise ValueError(f"Modelo '{model_name}' no soportado para instanciación desde hiperparámetros")
