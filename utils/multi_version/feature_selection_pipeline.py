@@ -16,11 +16,41 @@ def get_version_name(path: Path) -> str:
     return path.stem.replace("OPERA_COMPLETO_", "")
 
 
+def infer_candidate_features(
+    df_input: pd.DataFrame,
+    min_numeric_ratio: float = 0.4,
+) -> list[str]:
+    excluded_exact = {
+        "target",
+        "Documento PMD",
+        "Documento_PMD",
+        "n_flags_relevant",
+    }
+
+    candidates = []
+    for col in df_input.columns:
+        if col in excluded_exact:
+            continue
+        if col.startswith("flag_"):
+            continue
+
+        series_num = pd.to_numeric(df_input[col], errors="coerce")
+        non_null_ratio = float(series_num.notna().mean())
+        if non_null_ratio < min_numeric_ratio:
+            continue
+        if series_num.nunique(dropna=True) <= 1:
+            continue
+
+        candidates.append(col)
+
+    return candidates
+
+
 def rank_features_for_version(
     df_input: pd.DataFrame,
     version_name: str,
-    selected_names: list[str],
-    features_meta: pd.DataFrame,
+    selected_names: list[str] | None,
+    features_meta: pd.DataFrame | None,
     top_n: int = 80,
     random_state: int = 42,
 ):
@@ -33,11 +63,19 @@ def rank_features_for_version(
 
     df = df.rename(columns=ENCODING_FIX_MAP)
 
-    feature_columns, missing = resolve_feature_columns(selected_names, df.columns, features_meta)
-    feature_columns = [ENCODING_FIX_MAP.get(c, c) for c in feature_columns]
+    if selected_names is not None and features_meta is not None:
+        feature_columns, missing = resolve_feature_columns(selected_names, df.columns, features_meta)
+        feature_columns = [ENCODING_FIX_MAP.get(c, c) for c in feature_columns]
+    else:
+        feature_columns = infer_candidate_features(df)
+        missing = []
+
     feature_columns, dropped = sanitize_features_for_subset(df, feature_columns)
 
-    X = df[feature_columns].copy()
+    if not feature_columns:
+        raise ValueError(f"[{version_name}] No se encontraron variables candidatas para ranking")
+
+    X = df[feature_columns].apply(pd.to_numeric, errors="coerce")
     y = df["target"].astype(int).copy()
     X_filled = X.fillna(-1)
 
@@ -81,8 +119,8 @@ def rank_features_for_version(
 
 def run_feature_selection_pipeline(
     merged_dir: Path,
-    features_meta_path: Path,
     output_dir: Path,
+    features_meta_path: Path | None = None,
     top_n: int = 80,
     random_state: int = 42,
     active_versions: list[str] | None = None,
@@ -109,8 +147,11 @@ def run_feature_selection_pipeline(
                 f"{sorted(active_set)}"
             )
 
-    features_meta = pd.read_csv(features_meta_path)
-    selected_names = features_meta["Variable"].tolist()
+    features_meta = None
+    selected_names = None
+    if features_meta_path is not None:
+        features_meta = pd.read_csv(features_meta_path)
+        selected_names = features_meta["Variable"].tolist()
 
     output_dir.mkdir(parents=True, exist_ok=True)
 

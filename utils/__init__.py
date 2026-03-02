@@ -3,6 +3,8 @@ from .version_config import (
 	VERSION_HISTORY,
 	build_target_versions_config,
 	get_active_target_export_names,
+	get_recommended_experimental_versions,
+	get_target_summary_table,
 )
 
 __all__ = [
@@ -10,4 +12,6 @@ __all__ = [
 	"VERSION_HISTORY",
 	"build_target_versions_config",
 	"get_active_target_export_names",
+	"get_recommended_experimental_versions",
+	"get_target_summary_table",
 ]
