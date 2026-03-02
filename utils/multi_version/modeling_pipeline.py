@@ -109,7 +109,7 @@ def build_case_review_table(
     y_pred: np.ndarray,
     y_proba: np.ndarray,
     top_features: list[str],
-    max_cases_per_group: int = 8,
+    max_cases_per_group: int = 10,
 ) -> pd.DataFrame:
     """
     Construye tabla de casos para auditoría clínica con motivos basados en top features.
@@ -167,11 +167,14 @@ def run_modeling_pipeline(
     output_dir: Path,
     random_state: int = 42,
     active_versions: list[str] | None = None,
-    balance_mode: str = "train_only",
+    balance_mode: str = "none",
     val_size: float = 0.2,
     test_size: float = 0.2,
     threshold_metric: str = "balanced_accuracy",
     threshold_prevalence_tolerance: float = 0.5,
+    threshold_restrict_prevalence: bool = False,
+    optimize_for: str | None = None,
+    recall_min: float = 0.80,
 ):
     merged_files = sorted(merged_dir.glob("OPERA_COMPLETO_*.xlsx"))
     feature_files = sorted(features_versioned_dir.glob("*_selected_features_list.txt"))
@@ -237,11 +240,8 @@ def run_modeling_pipeline(
         val_pos_rate_original = float(y_val.mean()) if len(y_val) else np.nan
         test_pos_rate_original = float(y_test.mean()) if len(y_test) else np.nan
 
-        if balance_mode in {"train_only", "train_test"}:
+        if balance_mode == "train_only":
             X_train, y_train = balance_binary_dataset(X_train, y_train, random_state=random_state)
-        if balance_mode == "train_test":
-            X_val, y_val = balance_binary_dataset(X_val, y_val, random_state=random_state)
-            X_test, y_test = balance_binary_dataset(X_test, y_test, random_state=random_state)
 
         train_pos_rate_used = float(y_train.mean()) if len(y_train) else np.nan
         val_pos_rate_used = float(y_val.mean()) if len(y_val) else np.nan
@@ -263,8 +263,13 @@ def run_modeling_pipeline(
 
             y_val_proba = model.predict_proba(X_val)[:, 1]
             val_prevalence = float(np.mean(y_val))
-            min_pos_rate = max(0.05, val_prevalence * (1 - threshold_prevalence_tolerance))
-            max_pos_rate = min(0.95, val_prevalence * (1 + threshold_prevalence_tolerance))
+
+            if threshold_restrict_prevalence:
+                min_pos_rate = max(0.05, val_prevalence * (1 - threshold_prevalence_tolerance))
+                max_pos_rate = min(0.95, val_prevalence * (1 + threshold_prevalence_tolerance))
+            else:
+                min_pos_rate = None
+                max_pos_rate = None
 
             optimal_threshold, best_threshold_score, thresholds, threshold_scores = mod.find_optimal_threshold(
                 y_val,
@@ -272,10 +277,16 @@ def run_modeling_pipeline(
                 metric=threshold_metric,
                 min_predicted_positive_rate=min_pos_rate,
                 max_predicted_positive_rate=max_pos_rate,
+                threshold_restrict_prevalence=threshold_restrict_prevalence,
+                optimize_for=optimize_for,
+                recall_min=recall_min,
             )
 
             y_test_proba = model.predict_proba(X_test)[:, 1]
             y_test_pred = (y_test_proba >= optimal_threshold).astype(int)
+
+            predicted_positive_rate_val = float(np.mean((y_val_proba >= optimal_threshold).astype(int)))
+            predicted_positive_rate_test = float(np.mean(y_test_pred))
 
             metrics = mod.compute_classification_metrics(
                 y_true=y_test,
@@ -308,14 +319,20 @@ def run_modeling_pipeline(
                 "N_Test": len(X_test),
                 "N_Features": len(selected_features),
                 "Balance_Mode": balance_mode,
+                "Real_Prevalence": float(y.mean()),
+                "Train_Prevalence_Used": train_pos_rate_used,
                 "Train_Pos_Rate_Original": train_pos_rate_original,
                 "Val_Pos_Rate_Original": val_pos_rate_original,
                 "Test_Pos_Rate_Original": test_pos_rate_original,
                 "Train_Pos_Rate_Used": train_pos_rate_used,
                 "Val_Pos_Rate_Used": val_pos_rate_used,
                 "Test_Pos_Rate_Used": test_pos_rate_used,
+                "Predicted_Positive_Rate_Val": predicted_positive_rate_val,
+                "Predicted_Positive_Rate_Test": predicted_positive_rate_test,
+                "Threshold_Restrict_Prevalence": threshold_restrict_prevalence,
                 "Threshold_Min_Pos_Rate": min_pos_rate,
                 "Threshold_Max_Pos_Rate": max_pos_rate,
+                "Optimize_For": optimize_for or threshold_metric,
             }
             row.update(metrics)
             results_rows.append(row)
@@ -387,7 +404,7 @@ def run_modeling_pipeline(
             y_pred=y_pr,
             y_proba=y_pb,
             top_features=top_features,
-            max_cases_per_group=8,
+            max_cases_per_group=10,
         )
 
         explainability_global_by_version[version] = global_imp
@@ -446,11 +463,14 @@ def run_hyperparameter_experiments(
     output_dir: Path,
     random_state: int = 42,
     active_versions: list[str] | None = None,
-    balance_mode: str = "train_only",
+    balance_mode: str = "none",
     val_size: float = 0.2,
     test_size: float = 0.2,
     threshold_metric: str = "balanced_accuracy",
     threshold_prevalence_tolerance: float = 0.5,
+    threshold_restrict_prevalence: bool = False,
+    optimize_for: str | None = None,
+    recall_min: float = 0.80,
     tune_models: list[str] | None = None,
     optimize_metric: str = "roc_auc",
     n_trials: int = 40,
@@ -459,8 +479,8 @@ def run_hyperparameter_experiments(
     """
     Ejecuta experimentos de tuning por versión y por combinaciones de subsets de features.
     """
-    if balance_mode not in {"none", "train_only", "train_test"}:
-        raise ValueError("balance_mode debe ser 'none', 'train_only' o 'train_test'")
+    if balance_mode not in {"none", "train_only"}:
+        raise ValueError("balance_mode debe ser 'none' o 'train_only'")
     if threshold_metric not in {"f1", "f2", "balanced_accuracy"}:
         raise ValueError("threshold_metric debe ser 'f1', 'f2' o 'balanced_accuracy'")
     if optimize_metric not in {"roc_auc", "f2"}:
@@ -519,11 +539,8 @@ def run_hyperparameter_experiments(
                 random_state=random_state,
             )
 
-            if balance_mode in {"train_only", "train_test"}:
+            if balance_mode == "train_only":
                 X_train, y_train = balance_binary_dataset(X_train, y_train, random_state=random_state)
-            if balance_mode == "train_test":
-                X_val, y_val = balance_binary_dataset(X_val, y_val, random_state=random_state)
-                X_test, y_test = balance_binary_dataset(X_test, y_test, random_state=random_state)
 
             pos_weight_ratio = (y_train == 0).sum() / max((y_train == 1).sum(), 1)
 
@@ -548,8 +565,13 @@ def run_hyperparameter_experiments(
 
                 y_val_proba = tuned_model.predict_proba(X_val)[:, 1]
                 val_prevalence = float(np.mean(y_val))
-                min_pos_rate = max(0.05, val_prevalence * (1 - threshold_prevalence_tolerance))
-                max_pos_rate = min(0.95, val_prevalence * (1 + threshold_prevalence_tolerance))
+
+                if threshold_restrict_prevalence:
+                    min_pos_rate = max(0.05, val_prevalence * (1 - threshold_prevalence_tolerance))
+                    max_pos_rate = min(0.95, val_prevalence * (1 + threshold_prevalence_tolerance))
+                else:
+                    min_pos_rate = None
+                    max_pos_rate = None
 
                 optimal_threshold, best_threshold_score, _, _ = mod.find_optimal_threshold(
                     y_val,
@@ -557,6 +579,9 @@ def run_hyperparameter_experiments(
                     metric=threshold_metric,
                     min_predicted_positive_rate=min_pos_rate,
                     max_predicted_positive_rate=max_pos_rate,
+                    threshold_restrict_prevalence=threshold_restrict_prevalence,
+                    optimize_for=optimize_for,
+                    recall_min=recall_min,
                 )
 
                 y_test_proba = tuned_model.predict_proba(X_test)[:, 1]

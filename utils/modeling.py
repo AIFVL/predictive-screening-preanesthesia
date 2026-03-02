@@ -15,10 +15,11 @@ from sklearn.inspection import permutation_importance
 from sklearn.metrics import (
     accuracy_score, recall_score, precision_score, f1_score, fbeta_score,
     roc_auc_score, brier_score_loss, confusion_matrix,
-    balanced_accuracy_score,
+    balanced_accuracy_score, average_precision_score,
     roc_curve, precision_recall_curve, make_scorer
 )
-from sklearn.model_selection import cross_val_score
+from sklearn.calibration import calibration_curve
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 import xgboost as xgb
 import optuna
 from copy import deepcopy
@@ -237,16 +238,28 @@ def compute_classification_metrics(
     threshold: float,
 ) -> dict:
     """
-    Calcula métricas estándar de clasificación binaria.
+    Calcula métricas completas de clasificación binaria.
+    Incluye: Accuracy, Recall, Precision, F1, F2, ROC-AUC, PR-AUC,
+    Balanced Accuracy, Specificity, Brier Score, Predicted Positive Rate.
     """
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+    predicted_positive_rate = float(np.mean(y_pred))
+    fn_rate = fn / (fn + tp) if (fn + tp) > 0 else 0.0
+
     return {
         'Accuracy': accuracy_score(y_true, y_pred),
-        'Recall': recall_score(y_true, y_pred),
-        'Precision': precision_score(y_true, y_pred),
-        'F1': f1_score(y_true, y_pred),
-        'F2': fbeta_score(y_true, y_pred, beta=2),
+        'Recall': recall_score(y_true, y_pred, zero_division=0),
+        'Precision': precision_score(y_true, y_pred, zero_division=0),
+        'F1': f1_score(y_true, y_pred, zero_division=0),
+        'F2': fbeta_score(y_true, y_pred, beta=2, zero_division=0),
         'ROC-AUC': roc_auc_score(y_true, y_proba),
+        'PR-AUC': average_precision_score(y_true, y_proba),
+        'Balanced_Accuracy': balanced_accuracy_score(y_true, y_pred),
+        'Specificity': specificity,
         'Brier': brier_score_loss(y_true, y_proba),
+        'Predicted_Positive_Rate': predicted_positive_rate,
+        'FN_Rate': fn_rate,
         'Threshold': float(threshold),
     }
 
@@ -397,32 +410,60 @@ def find_optimal_threshold(
     metric='f1',
     min_predicted_positive_rate: float | None = None,
     max_predicted_positive_rate: float | None = None,
+    threshold_restrict_prevalence: bool = True,
+    optimize_for: str | None = None,
+    recall_min: float = 0.80,
 ):
     """
     Encuentra el umbral de decisión que maximiza una métrica de clasificación.
-    
+
     Parámetros:
         metric: 'f1' | 'f2' | 'balanced_accuracy'
-        min_predicted_positive_rate: límite inferior opcional para evitar umbrales degenerados.
-        max_predicted_positive_rate: límite superior opcional para evitar umbrales degenerados.
+        min_predicted_positive_rate: límite inferior (solo si threshold_restrict_prevalence=True).
+        max_predicted_positive_rate: límite superior (solo si threshold_restrict_prevalence=True).
+        threshold_restrict_prevalence: si False, ignora min/max_predicted_positive_rate.
+        optimize_for: si 'recall_constraint', busca threshold con Recall >= recall_min
+                      y maximiza Precision bajo esa restricción.
+        recall_min: recall mínimo aceptable (solo para optimize_for='recall_constraint').
     """
-    thresholds = np.arange(0.1, 0.9, 0.01)
+    thresholds = np.arange(0.05, 0.95, 0.01)
     scores = []
     valid_thresholds = []
-    
+
+    # Modo recall_constraint: Recall >= recall_min, maximizar Precision
+    if optimize_for == "recall_constraint":
+        for t in thresholds:
+            y_pred = (y_proba >= t).astype(int)
+            rec = recall_score(y_true, y_pred, zero_division=0)
+            if rec >= recall_min:
+                prec = precision_score(y_true, y_pred, zero_division=0)
+                valid_thresholds.append(t)
+                scores.append(prec)
+        if not scores:
+            # Fallback: threshold que maximice recall
+            for t in thresholds:
+                y_pred = (y_proba >= t).astype(int)
+                rec = recall_score(y_true, y_pred, zero_division=0)
+                valid_thresholds.append(t)
+                scores.append(rec)
+        best_idx = np.argmax(scores)
+        return valid_thresholds[best_idx], scores[best_idx], np.asarray(valid_thresholds), scores
+
+    # Modo estándar
     for t in thresholds:
         y_pred = (y_proba >= t).astype(int)
 
-        positive_rate = float(np.mean(y_pred))
-        if min_predicted_positive_rate is not None and positive_rate < min_predicted_positive_rate:
-            continue
-        if max_predicted_positive_rate is not None and positive_rate > max_predicted_positive_rate:
-            continue
+        if threshold_restrict_prevalence:
+            positive_rate = float(np.mean(y_pred))
+            if min_predicted_positive_rate is not None and positive_rate < min_predicted_positive_rate:
+                continue
+            if max_predicted_positive_rate is not None and positive_rate > max_predicted_positive_rate:
+                continue
 
         if metric == 'f1':
-            score = f1_score(y_true, y_pred)
+            score = f1_score(y_true, y_pred, zero_division=0)
         elif metric == 'f2':
-            score = fbeta_score(y_true, y_pred, beta=2)
+            score = fbeta_score(y_true, y_pred, beta=2, zero_division=0)
         elif metric == 'balanced_accuracy':
             score = balanced_accuracy_score(y_true, y_pred)
         else:
@@ -436,21 +477,50 @@ def find_optimal_threshold(
         for t in thresholds:
             y_pred = (y_proba >= t).astype(int)
             if metric == 'f1':
-                score = f1_score(y_true, y_pred)
+                score = f1_score(y_true, y_pred, zero_division=0)
             elif metric == 'f2':
-                score = fbeta_score(y_true, y_pred, beta=2)
+                score = fbeta_score(y_true, y_pred, beta=2, zero_division=0)
             elif metric == 'balanced_accuracy':
                 score = balanced_accuracy_score(y_true, y_pred)
             else:
                 raise ValueError("metric debe ser 'f1', 'f2' o 'balanced_accuracy'")
             valid_thresholds.append(t)
             scores.append(score)
-        
+
     best_idx = np.argmax(scores)
     optimal_threshold = valid_thresholds[best_idx]
     best_score = scores[best_idx]
-    
+
     return optimal_threshold, best_score, np.asarray(valid_thresholds), scores
+
+
+def compute_calibration_metrics(
+    y_true,
+    y_proba,
+    n_bins: int = 10,
+) -> dict:
+    """
+    Calcula métricas de calibración: Brier Score, ECE, curva de calibración.
+    """
+    brier = brier_score_loss(y_true, y_proba)
+
+    # ECE (Expected Calibration Error)
+    fraction_of_positives, mean_predicted_value = calibration_curve(
+        y_true, y_proba, n_bins=n_bins, strategy='uniform'
+    )
+    bin_counts = np.histogram(y_proba, bins=n_bins, range=(0, 1))[0]
+    total = len(y_true)
+    ece = 0.0
+    for i in range(len(fraction_of_positives)):
+        weight = bin_counts[i] / total if total > 0 else 0
+        ece += weight * abs(fraction_of_positives[i] - mean_predicted_value[i])
+
+    return {
+        'Brier_Score': brier,
+        'ECE': ece,
+        'Calibration_Fraction_Positives': fraction_of_positives.tolist(),
+        'Calibration_Mean_Predicted': mean_predicted_value.tolist(),
+    }
 
 
 def compute_global_explainability(
