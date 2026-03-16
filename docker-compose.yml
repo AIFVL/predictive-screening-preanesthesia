@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: preanesthesia-screening-api:latest
+    container_name: preanesthesia_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+    environment:
+      - API_DEBUG=false
+      - API_MODELS_DIR=models
+      - API_MAX_BATCH_SIZE=100
+      - API_ENABLE_SHAP=true
+      - API_SHAP_BACKGROUND_SAMPLES=100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
