@@ -22,7 +22,8 @@ def validate_based_on_tecnica(df: pd.DataFrame) -> pd.DataFrame:
     tecnica = df_result['Técnica anestésica '].fillna('').astype(str)
     
     # Flag: Técnica combinada (más de una técnica listada, separado por coma)
-    df_result['flag_tecnica_combinada'] = tecnica.str.count(',').gt(1).astype(int)
+    # Criterio doc: "COMPLICACIÓN si >1 técnica (contiene ',')" → cualquier coma = 2+ técnicas
+    df_result['flag_tecnica_combinada'] = tecnica.str.count(',').gt(0).astype(int)
     
     # Normalizar monitoreo
     monitoreo = df_result['Monitoreo '].fillna('').astype(str)

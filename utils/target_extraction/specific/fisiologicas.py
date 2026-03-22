@@ -27,32 +27,32 @@ def validate_based_on_fisiologicas(df: pd.DataFrame) -> pd.DataFrame:
             'min': 80,
             'max': 150,
             'imputacion': 115,  # Valor normal medio
-            'limite_invalido_min': 50,  # Físicamente imposible < 20 mmHg
-            'limite_invalido_max': 200  # Físicamente imposible > 300 mmHg
+            'limite_invalido_min': 50,  # Físicamente imposible < 50 mmHg
+            'limite_invalido_max': 200  # Físicamente imposible > 200 mmHg
         },
         'Presión arterial diastólica prequirúrgica': {
             'flag': 'flag_presion_diastolica_anormal',
             'min': 50,
             'max': 100,
             'imputacion': 75,  # Valor normal medio
-            'limite_invalido_min': 20,  # Físicamente imposible < 10 mmHg
-            'limite_invalido_max': 150  # Físicamente imposible > 200 mmHg
+            'limite_invalido_min': 20,  # Físicamente imposible < 20 mmHg
+            'limite_invalido_max': 150  # Físicamente imposible > 150 mmHg
         },
         'Presión arterial media prequirúrgica': {
             'flag': 'flag_presion_media_anormal',
             'min': 60,
             'max': 115,
             'imputacion': 87.5,  # Valor normal medio
-            'limite_invalido_min': 25,  # Físicamente imposible < 15 mmHg
-            'limite_invalido_max': 200  # Físicamente imposible > 250 mmHg
+            'limite_invalido_min': 25,  # Físicamente imposible < 25 mmHg
+            'limite_invalido_max': 200  # Físicamente imposible > 200 mmHg
         },
         'Frecuencia cardiaca prequirúrgica': {
             'flag': 'flag_frecuencia_cardiaca_anormal',
             'min': 50,
             'max': 110,
             'imputacion': 80,  # Valor normal medio
-            'limite_invalido_min': 25,  # Físicamente imposible < 20 bpm
-            'limite_invalido_max': 200  # Físicamente imposible > 250 bpm
+            'limite_invalido_min': 25,  # Físicamente imposible < 25 bpm
+            'limite_invalido_max': 200  # Físicamente imposible > 200 bpm
         },
         'Saturación de oxígeno prequirúrgica': {
             'flag': 'flag_saturacion_oxigeno_anormal',
@@ -113,13 +113,13 @@ def validate_based_on_fisiologicas(df: pd.DataFrame) -> pd.DataFrame:
         (valor_glucometria > 600)
     )
     valor_glucometria_imputado = valor_glucometria.copy()
-    valor_glucometria_imputado[invalidos_glucometria] = 85  # Valor normal medio
+    valor_glucometria_imputado[invalidos_glucometria] = 100  # Valor normal medio
 
     # Replace previous column
     df_result = df_result.drop(columns=['Valor glucometria '])
     df_result['Valor glucometria '] = valor_glucometria_imputado
-    
-    glucometria_valor_anormal = ((valor_glucometria_imputado < 70) | (valor_glucometria_imputado > 100)).astype(int)
+
+    glucometria_valor_anormal = ((valor_glucometria_imputado < 70) | (valor_glucometria_imputado > 180)).astype(int)
     df_result['flag_glucometria_anormal'] = ((glucometria_flag == 1) | (glucometria_valor_anormal == 1)).astype(int)
     
     fisiologicas_flags = [

@@ -43,8 +43,8 @@ def validate_based_on_estancia(df: pd.DataFrame, umbral_estancia: int = 3) -> pd
     # Admisión UCI no planeada: tiene fecha
     df_result['flag_uci_no_planeada'] = df_result['Admisión a cuidado intensivo no planeada'].notna().astype(int)
     
-    # Estancia en UCI: tiene valor
-    df_result['flag_estancia_uci'] = df_result['Estancia en UCI '].notna().astype(int)
+    # Estancia en UCI: valor > 0 días
+    df_result['flag_estancia_uci'] = (pd.to_numeric(df_result['Estancia en UCI '], errors='coerce').fillna(0) > 0).astype(int)
     
     estancia_flags = [
         'flag_estancia_prolongada', 'flag_hospitalizacion_no_anticipada',
