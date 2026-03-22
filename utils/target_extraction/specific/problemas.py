@@ -8,13 +8,15 @@ def validate_based_on_complicaciones_medicas(df: pd.DataFrame) -> pd.DataFrame:
     
     Variables evaluadas:
         - Infarto de miocardio en hospital
+        - Accidente cerebrovascular isquémico
         - Accidente cerebrovascular hemorrágico
         - Ataque isquémico transitorio (TIA)
         - Aspiración pulmonar
         - Complicaciones pulmonares posoperatorias
-    
+
     Columnas agregadas:
         - flag_infarto_miocardio (I214, I219)
+        - flag_acv_isquemico (I630-I639, I640)
         - flag_acv_hemorragico (I618, I619)
         - flag_tia (G453, G454, G458, G459)
         - flag_aspiracion_pulmonar (J690)
@@ -22,16 +24,17 @@ def validate_based_on_complicaciones_medicas(df: pd.DataFrame) -> pd.DataFrame:
         - flag_complicaciones_medicas (agregado)
     """
     df_result = df.copy()
-    
+
     # Flag = 1 si tiene código CIE-10
     df_result['flag_infarto_miocardio'] = df_result['Infarto de miocardio en hospital'].notna().astype(int)
+    df_result['flag_acv_isquemico'] = df_result['Accidente cerebrovascular isquémico'].notna().astype(int)
     df_result['flag_acv_hemorragico'] = df_result['Accidente cerebrovascular hemorrágico'].notna().astype(int)
     df_result['flag_tia'] = df_result['Ataque isquémico transitorio (TIA)'].notna().astype(int)
     df_result['flag_aspiracion_pulmonar'] = df_result['Aspiración pulmonar'].notna().astype(int)
     df_result['flag_complicaciones_pulmonares'] = df_result['Complicaciones pulmonares posoperatorias '].notna().astype(int)
-    
+
     complicaciones_flags = [
-        'flag_infarto_miocardio', 'flag_acv_hemorragico', 'flag_tia',
+        'flag_infarto_miocardio', 'flag_acv_isquemico', 'flag_acv_hemorragico', 'flag_tia',
         'flag_aspiracion_pulmonar', 'flag_complicaciones_pulmonares'
     ]
     df_result['flag_complicaciones_medicas'] = (df_result[complicaciones_flags].sum(axis=1) > 0).astype(int)
