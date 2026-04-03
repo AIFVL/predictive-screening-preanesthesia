@@ -1,3 +1,26 @@
-.vscode/
+# Datos sensibles — prefijo data_ cubre todo
+data_*/
+output/*/data_processed/
+
+# Entornos y secretos
+.env
+.env.*
+*.pyc
 __pycache__/
-/data
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Airflow
+logs/
+airflow.db
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
