@@ -1,10 +1,19 @@
-# Datos sensibles — prefijo data_ cubre todo
+# Datos sensibles — carpetas de datos y outputs intermedios
+data/
 data_*/
+features/
+cache/
 output/*/data_processed/
+
+# Imágenes/plots generados (en raíz)
+*.png
+*.jpg
+*.jpeg
 
 # Entornos y secretos
 .env
 .env.*
+!.env.example
 *.pyc
 __pycache__/
 .pytest_cache/
