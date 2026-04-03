@@ -5,7 +5,7 @@ x-airflow-common: &airflow-common
   environment:
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__FERNET_KEY: "${AIRFLOW__CORE__FERNET_KEY}"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
@@ -39,9 +39,9 @@ services:
     <<: *airflow-common
     command: >
       bash -c "airflow db migrate && airflow users create
-        --username admin --password admin
+        --username ${AIRFLOW_ADMIN_USER:-admin} --password ${AIRFLOW_ADMIN_PASSWORD:-admin}
         --firstname Admin --lastname User
-        --role Admin --email admin@example.com"
+        --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-admin@example.com}"
     restart: "no"
 
   airflow-webserver:

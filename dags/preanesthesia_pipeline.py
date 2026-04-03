@@ -1,8 +1,9 @@
 # dags/preanesthesia_pipeline.py
 from __future__ import annotations
 
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -11,8 +12,7 @@ from airflow.operators.python import PythonOperator
 PROJECT_ROOT = Path("/opt/airflow/project")
 CONFIG_DIR = PROJECT_ROOT / "config"
 
-# Cargar config al inicializar el DAG (una sola vez)
-import sys
+# Asegurar que src/ sea importable dentro del contenedor
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.utils.config import load_config
 

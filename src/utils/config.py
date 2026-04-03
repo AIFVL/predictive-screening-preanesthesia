@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import yaml
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
-@dataclass
+@dataclass(frozen=True)
 class PipelineConfig:
     pipeline_version: str
     dataset_version: str
