@@ -46,13 +46,16 @@ def validate_based_on_estancia(df: pd.DataFrame, umbral_estancia: int = 3) -> pd
     # Estancia en UCI: valor > 0 días
     df_result['flag_estancia_uci'] = (pd.to_numeric(df_result['Estancia en UCI '], errors='coerce').fillna(0) > 0).astype(int)
     
+    # flag_estancia_prolongada excluido del target: umbral fijo no es específico al tipo de cirugía
+    # (colectomía: 5-7 días esperados; colecistectomía laparoscópica: <1 día)
+    # Sigue calculado en el dataframe para análisis exploratorio y como feature predictivo
     estancia_flags = [
-        'flag_estancia_prolongada', 'flag_hospitalizacion_no_anticipada',
+        'flag_hospitalizacion_no_anticipada',
         'flag_uci_no_planeada', 'flag_estancia_uci'
     ]
     df_result['flag_estancia'] = (df_result[estancia_flags].sum(axis=1) > 0).astype(int)
-    
-    print(f"\nVALIDACIÓN ESTANCIA (umbral: >{umbral_estancia} días):")
+
+    print(f"\nVALIDACIÓN ESTANCIA (umbral referencial: >{umbral_estancia} días, no incluido en target):")
     for flag in estancia_flags:
         print_validation_result(flag, df_result[flag], len(df_result))
     print(f"\n  TOTAL flag_estancia: {df_result['flag_estancia'].sum():,} ({df_result['flag_estancia'].mean()*100:.2f}%)")

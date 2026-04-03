@@ -21,9 +21,11 @@ def validate_based_on_via_aerea(df: pd.DataFrame) -> pd.DataFrame:
     valores_intubacion_dificil = ['Dificil', 'Imposible']
     df_result['flag_intubacion_dificil'] = intubacion.isin(valores_intubacion_dificil).astype(int)
     
-    # Laringoscopia: valores numéricos (valores altos indican mayor complejidad)
+    # Laringoscopia: valores numéricos (Cormack-Lehane ≥3 = vía aérea difícil real)
+    # Grado 2 (~15-20% de intubaciones) es manejable; grado ≥3 implica solo epiglotis visible
+    # o sin visualización laríngea (definición ASA/DAS de intubación difícil)
     laringoscopia = pd.to_numeric(df_result['Laringoscopia '], errors='coerce')
-    df_result['flag_laringoscopia_alta'] = (laringoscopia > 1).astype(int)
+    df_result['flag_laringoscopia_alta'] = (laringoscopia >= 3).astype(int)
     
     # Tipo intubación: Orotraqueal, Nasotraqueal, Ninguna, Otro, Traqueostomia
     tipo_intubacion = df_result['Tipo de intubación'].astype(str).str.strip().str.title()

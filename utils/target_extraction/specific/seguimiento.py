@@ -25,7 +25,11 @@ def validate_based_on_seguimiento(df: pd.DataFrame) -> pd.DataFrame:
         df_result['Necesidad de interconsultas a otras especialidades médicas'].str.lower().str.strip() == 'x'
     ).astype(int)
     
-    seguimiento_flags = ['flag_urgencias_30_dias', 'flag_interconsultas']
+    # flag_interconsultas excluido del target: las interconsultas pueden ser parte del manejo
+    # rutinario y planeado (ej. oncología solicitando manejo del dolor postoperatorio)
+    # Solo la consulta a urgencias en 30 días es un indicador validado de reingreso no planeado
+    # flag_interconsultas sigue calculado en el dataframe como posible feature predictivo
+    seguimiento_flags = ['flag_urgencias_30_dias']
     df_result['flag_seguimiento'] = (df_result[seguimiento_flags].sum(axis=1) > 0).astype(int)
     
     print("\nVALIDACIÓN SEGUIMIENTO POST-OPERATORIO:")

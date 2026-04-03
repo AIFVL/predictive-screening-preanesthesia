@@ -28,19 +28,7 @@ def validate_based_on_desenlace(df: pd.DataFrame) -> pd.DataFrame:
     # Flag: Salió intubado
     estado_int = df_result['Estado intubación '].fillna('').astype(str).str.strip().str.title()
     df_result['flag_intubado_salida'] = (estado_int == 'Intubado').astype(int)
-    
-    # Flag: No despertó adecuadamente (Dormido, no Despierto ni Reactivo)
-    estado_consc = df_result['Fallecimiento durante cirugía '].fillna('').astype(str).str.strip()
-    # Limpiar caracteres especiales como \t
-    estado_consc = estado_consc.str.replace(r'^\s+', '', regex=True)
 
-    # Replace previous column
-    df_result = df_result.drop(columns=['Fallecimiento durante cirugía '])
-    df_result['Fallecimiento durante cirugía '] = estado_consc
-
-    despierto = estado_consc.str.lower().isin(['despierto', 'reactivo'])
-    tiene_dato = estado_consc != ''
-    df_result['flag_no_despierto'] = (tiene_dato & ~despierto).astype(int)
     
     # Flag: Complicación registrada
     complicaciones = df_result['Complicaciones '].fillna('').astype(str).str.strip()
@@ -48,7 +36,7 @@ def validate_based_on_desenlace(df: pd.DataFrame) -> pd.DataFrame:
     
     # Flag agregado
     desenlace_flags = [
-        'flag_destino_uci', 'flag_intubado_salida', 'flag_no_despierto', 'flag_complicacion'
+        'flag_destino_uci', 'flag_intubado_salida', 'flag_complicacion'
     ]
     df_result['flag_desenlace'] = (df_result[desenlace_flags].sum(axis=1) > 0).astype(int)
     

@@ -191,43 +191,55 @@ def get_models_definitions(random_state=42, scale_pos_weight=1.0):
     return models
 
 
-def evaluate_model_performance(name, model, X_tr, X_te, y_tr, y_te, optimize_threshold=True):
+def evaluate_model_performance(
+    name, model, X_tr, X_te, y_tr, y_te,
+    optimize_threshold=True,
+    recall_min: float = 0.80,
+):
     """
     Entrena y evalúa un modelo.
-    
+
     Parámetros:
-        optimize_threshold: Si True, encuentra el threshold óptimo (maximiza F2).
-                           Si False, usa threshold=0.5 (default).
+        optimize_threshold: Si True, encuentra el threshold óptimo.
+                            Si False, usa threshold=0.5 (default).
+        recall_min: Recall mínimo garantizado al optimizar el threshold.
+                    El threshold se elige maximizando Precision sujeto a
+                    Recall >= recall_min, evitando el clasificador trivial
+                    que predice siempre positivo.
     """
     model.fit(X_tr, y_tr)
-    
+
     y_proba = model.predict_proba(X_te)[:, 1]
-    
+
     # Encontrar threshold óptimo si se solicita
     if optimize_threshold:
-        optimal_threshold, best_f2, thresholds, f2_scores = find_optimal_threshold(y_te, y_proba)
+        optimal_threshold, best_score, thresholds, scores = find_optimal_threshold(
+            y_te, y_proba,
+            optimize_for='recall_constraint',
+            recall_min=recall_min,
+        )
         y_pred = (y_proba >= optimal_threshold).astype(int)
         threshold_used = optimal_threshold
     else:
         y_pred = model.predict(X_te)  # Usa threshold=0.5 por defecto
         threshold_used = 0.5
-    
+
     metrics = compute_classification_metrics(
         y_true=y_te,
         y_pred=y_pred,
         y_proba=y_proba,
         threshold=threshold_used,
     )
-    
+
     print(f"\n{'='*60}")
     print(f"  {name}")
     if optimize_threshold:
-        print(f"  Threshold óptimo: {threshold_used:.3f} (maximiza F2)")
+        print(f"  Threshold óptimo: {threshold_used:.3f} (Recall ≥ {recall_min:.0%}, maximiza Precision)")
     print(f"{'='*60}")
     for k, v in metrics.items():
-        if k != 'Threshold':  # Threshold se muestra arriba
+        if k != 'Threshold':
             print(f"  {k:12s}: {v:.4f}")
-        
+
     return y_pred, y_proba, metrics
 
 
@@ -407,7 +419,7 @@ def optimize_logistic_regression(X_train, y_train, random_state=42, n_trials=50,
 def find_optimal_threshold(
     y_true,
     y_proba,
-    metric='f1',
+    metric='f2',
     min_predicted_positive_rate: float | None = None,
     max_predicted_positive_rate: float | None = None,
     threshold_restrict_prevalence: bool = True,
@@ -418,12 +430,12 @@ def find_optimal_threshold(
     Encuentra el umbral de decisión que maximiza una métrica de clasificación.
 
     Parámetros:
-        metric: 'f1' | 'f2' | 'balanced_accuracy'
+        metric: 'f2' | 'f1' | 'balanced_accuracy'. Default 'f2' (recall pesa 4x más que precision).
         min_predicted_positive_rate: límite inferior (solo si threshold_restrict_prevalence=True).
         max_predicted_positive_rate: límite superior (solo si threshold_restrict_prevalence=True).
         threshold_restrict_prevalence: si False, ignora min/max_predicted_positive_rate.
-        optimize_for: si 'recall_constraint', busca threshold con Recall >= recall_min
-                      y maximiza Precision bajo esa restricción.
+        optimize_for: si 'recall_constraint', garantiza Recall >= recall_min y maximiza
+                      Precision bajo esa restricción (modo clínico recomendado).
         recall_min: recall mínimo aceptable (solo para optimize_for='recall_constraint').
     """
     thresholds = np.arange(0.05, 0.95, 0.01)
