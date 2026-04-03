@@ -1,0 +1,79 @@
+active_targets:
+  - target_a_sensible
+  - target_b_clinicamente_relevante
+  - target_c_alta_severidad
+  - target_d_eventos_adversos
+  - target_e_alta_senal
+
+targets:
+  target_a_sensible:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target A - Sensible: todas las flags, threshold=1"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_fisiologicas
+      - flag_tiempos
+      - flag_induccion
+      - flag_via_aerea
+      - flag_ventilacion
+      - flag_tecnica
+      - flag_liquidos
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_b_clinicamente_relevante:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target B - Clínicamente Relevante: flags preop estrictas, threshold=1"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_via_aerea
+      - flag_induccion
+      - flag_tiempos
+      - flag_tecnica
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_c_alta_severidad:
+    threshold: 2
+    apply_cancel_non_medico_rule: true
+    description: "Target C - Alta Severidad: mismas flags que B, threshold=2"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_via_aerea
+      - flag_induccion
+      - flag_tiempos
+      - flag_tecnica
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_d_eventos_adversos:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target D - Eventos Adversos: flags clínicamente refinadas, objetivo 15-30%"
+    flags:
+      - flag_cancelacion
+      - flag_via_aerea
+      - flag_liquidos
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_e_alta_senal:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target E - Señal Alta: solo flags con MI>0.01 desde preop"
+    flags:
+      - flag_estancia
+      - flag_tecnica
+      - flag_tiempos
+      - flag_fisiologicas
