@@ -52,3 +52,55 @@ def test_compute_metrics_perfect_classifier():
     assert metrics["Recall"] == 1.0
     assert metrics["Precision"] == 1.0
     assert metrics["ROC_AUC"] == 1.0
+
+
+from src.models.registry import build_model
+from src.models.trainer import train_model, load_model
+
+
+@pytest.fixture
+def simple_dataset():
+    rng = np.random.RandomState(42)
+    X = pd.DataFrame({
+        "feat_a": rng.randn(100),
+        "feat_b": rng.randn(100),
+        "feat_c": rng.randn(100),
+    })
+    y = pd.Series((X["feat_a"] + X["feat_b"] > 0).astype(int))
+    return X, y
+
+
+def test_train_model_returns_artifact(simple_dataset, tmp_path):
+    X, y = simple_dataset
+    cfg = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+           "params": {"C": 1.0, "class_weight": "balanced", "solver": "lbfgs", "max_iter": 200}}
+    artifact = train_model(cfg, X, y, out_dir=tmp_path, model_name="lr", random_state=42)
+    assert "metrics" in artifact
+    assert "threshold" in artifact
+    assert "model_path" in artifact
+
+
+def test_train_model_writes_joblib(simple_dataset, tmp_path):
+    X, y = simple_dataset
+    cfg = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+           "params": {"C": 1.0, "class_weight": "balanced", "solver": "lbfgs", "max_iter": 200}}
+    train_model(cfg, X, y, out_dir=tmp_path, model_name="lr", random_state=42)
+    assert (tmp_path / "lr_model.joblib").exists()
+
+
+def test_train_model_writes_metrics_json(simple_dataset, tmp_path):
+    X, y = simple_dataset
+    cfg = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+           "params": {"C": 1.0, "class_weight": "balanced", "solver": "lbfgs", "max_iter": 200}}
+    train_model(cfg, X, y, out_dir=tmp_path, model_name="lr", random_state=42)
+    assert (tmp_path / "lr_metrics.json").exists()
+
+
+def test_load_model_returns_fitted_model(simple_dataset, tmp_path):
+    X, y = simple_dataset
+    cfg = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+           "params": {"C": 1.0, "class_weight": "balanced", "solver": "lbfgs", "max_iter": 200}}
+    artifact = train_model(cfg, X, y, out_dir=tmp_path, model_name="lr", random_state=42)
+    model = load_model(artifact["model_path"])
+    preds = model.predict(X)
+    assert len(preds) == len(y)
