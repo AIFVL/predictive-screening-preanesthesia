@@ -1,5 +1,6 @@
 # Datos sensibles — carpetas de datos y outputs intermedios
 data/
+!src/data/
 data_*/
 features/
 cache/
