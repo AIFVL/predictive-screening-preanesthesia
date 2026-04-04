@@ -157,8 +157,129 @@ def make_task_eda_correlation(target_name: str):
     return _task
 
 
-def _placeholder_model(task_name: str, **kwargs):
-    logger.info(f"Task {task_name} — pendiente (Plan 3)")
+def make_task_train_model(target_name: str, model_key: str):
+    def _task(**kwargs):
+        from src.utils.io import read_parquet
+        from src.models.trainer import train_model
+        from src.models.hyperparameter_search import search_hyperparameters
+
+        proc_dir = cfg.output_path() / "data_processed"
+        splits_dir = proc_dir / target_name / "splits"
+
+        X_train = read_parquet(splits_dir / "X_train.parquet")
+        y_train = read_parquet(splits_dir / "y_train.parquet")["target"]
+
+        model_cfg = cfg.enabled_models()[model_key]
+        hp_cfg = cfg.hyperparameter_search
+
+        if hp_cfg.get("enabled", False):
+            best_params = search_hyperparameters(
+                model_cfg, X_train, y_train,
+                n_iter=hp_cfg.get("n_iter", 70),
+                scoring=hp_cfg.get("scoring", "f2"),
+                cv_folds=hp_cfg.get("cv_folds", 5),
+                random_state=cfg.train_test_split.get("random_state", 42),
+            )
+            model_cfg = {**model_cfg, "params": best_params}
+
+        out_dir = cfg.output_path() / "models" / target_name
+        train_model(
+            model_cfg, X_train, y_train,
+            out_dir=out_dir,
+            model_name=model_key,
+            random_state=cfg.train_test_split.get("random_state", 42),
+            threshold_metric=model_cfg.get("target_metric", "f2"),
+        )
+    _task.__name__ = f"task_train_{model_key}_{target_name}"
+    return _task
+
+
+def make_task_evaluate_model(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import pandas as pd
+        from src.utils.io import read_parquet, read_json, write_json
+        from src.models.trainer import load_model
+        from src.evaluation.metrics import compute_classification_metrics
+        from src.evaluation.subgroups import cross_validate_model
+
+        proc_dir = cfg.output_path() / "data_processed"
+        splits_dir = proc_dir / target_name / "splits"
+        models_dir = cfg.output_path() / "models" / target_name
+
+        X_test = read_parquet(splits_dir / "X_test.parquet")
+        y_test = read_parquet(splits_dir / "y_test.parquet")["target"]
+        X_train = read_parquet(splits_dir / "X_train.parquet")
+        y_train = read_parquet(splits_dir / "y_train.parquet")["target"]
+
+        artifact = read_json(models_dir / f"{model_key}_metrics.json")
+        threshold = artifact.get("Threshold", 0.5)
+
+        model = load_model(models_dir / f"{model_key}_model.joblib")
+        X_test_num = X_test.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        y_proba = model.predict_proba(X_test_num)[:, 1]
+        y_pred = (y_proba >= threshold).astype(int)
+
+        test_metrics = compute_classification_metrics(y_test, y_pred, y_proba, threshold)
+        cv_metrics = cross_validate_model(
+            model, X_train, y_train,
+            n_folds=cfg.cross_validation.get("n_folds", 10),
+        )
+
+        write_json({"test": test_metrics, "cv": cv_metrics},
+                   models_dir / f"{model_key}_eval.json")
+        logger.info(
+            f"[{target_name}/{model_key}] Test F2={test_metrics['F2']:.3f} | "
+            f"CV F2={cv_metrics['F2_mean']:.3f}±{cv_metrics['F2_std']:.3f}"
+        )
+    _task.__name__ = f"task_evaluate_{model_key}_{target_name}"
+    return _task
+
+
+def make_task_model_plots(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import pandas as pd
+        from src.utils.io import read_parquet, read_json
+        from src.models.trainer import load_model
+        from src.evaluation.metrics import find_optimal_threshold
+        from src.reports.model_plots import plot_roc_pr, plot_confusion_matrix, plot_threshold_curve
+
+        proc_dir = cfg.output_path() / "data_processed"
+        splits_dir = proc_dir / target_name / "splits"
+        models_dir = cfg.output_path() / "models" / target_name
+        plots_dir = cfg.output_path() / "plots" / target_name
+
+        X_test = read_parquet(splits_dir / "X_test.parquet")
+        y_test = read_parquet(splits_dir / "y_test.parquet")["target"]
+        artifact = read_json(models_dir / f"{model_key}_metrics.json")
+        threshold = artifact.get("Threshold", 0.5)
+
+        model = load_model(models_dir / f"{model_key}_model.joblib")
+        X_test_num = X_test.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        y_proba = model.predict_proba(X_test_num)[:, 1]
+        y_pred = (y_proba >= threshold).astype(int)
+
+        _, _, thresholds, scores = find_optimal_threshold(y_test, y_proba, metric="f2")
+        plot_roc_pr(y_test, y_proba, model_key, target_name, plots_dir)
+        plot_confusion_matrix(y_test, y_pred, model_key, target_name, plots_dir)
+        plot_threshold_curve(thresholds, scores, threshold, model_key, target_name, plots_dir)
+    _task.__name__ = f"task_model_plots_{model_key}_{target_name}"
+    return _task
+
+
+def task_generate_comparison_report(**kwargs):
+    from src.evaluation.comparison import aggregate_model_results
+    from src.reports.comparison_plots import plot_comparison_heatmap, plot_ranking_bars
+
+    models_dir = cfg.output_path() / "models"
+    plots_dir = cfg.output_path() / "plots"
+    reports_dir = cfg.output_path() / "reports"
+
+    df = aggregate_model_results(models_dir, reports_dir)
+    if not df.empty:
+        plot_comparison_heatmap(df, "F2", plots_dir)
+        plot_comparison_heatmap(df, "ROC_AUC", plots_dir)
+        plot_ranking_bars(df, "F2", plots_dir)
+        logger.info("Reporte comparativo generado")
 
 
 # ── DAG ──────────────────────────────────────────────────────────────────────
@@ -211,24 +332,20 @@ with DAG(
             key = f"{model}__{target}"
             train_tasks[key] = PythonOperator(
                 task_id=f"train__{model}__{target}",
-                python_callable=_placeholder_model,
-                op_kwargs={"task_name": f"train__{model}__{target}"},
+                python_callable=make_task_train_model(target, model),
             )
             evaluate_tasks[key] = PythonOperator(
                 task_id=f"evaluate__{model}__{target}",
-                python_callable=_placeholder_model,
-                op_kwargs={"task_name": f"evaluate__{model}__{target}"},
+                python_callable=make_task_evaluate_model(target, model),
             )
             plot_tasks[key] = PythonOperator(
                 task_id=f"model_plots__{model}__{target}",
-                python_callable=_placeholder_model,
-                op_kwargs={"task_name": f"model_plots__{model}__{target}"},
+                python_callable=make_task_model_plots(target, model),
             )
 
     comparison_report = PythonOperator(
         task_id="generate_comparison_report",
-        python_callable=_placeholder_model,
-        op_kwargs={"task_name": "generate_comparison_report"},
+        python_callable=task_generate_comparison_report,
     )
 
     # ── Dependencias ─────────────────────────────────────────────────────────
