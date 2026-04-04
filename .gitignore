@@ -3,6 +3,7 @@ data/
 !src/data/
 data_*/
 features/
+!src/features/
 cache/
 output/*/data_processed/
 
