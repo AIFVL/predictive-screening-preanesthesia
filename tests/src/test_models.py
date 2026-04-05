@@ -104,3 +104,51 @@ def test_load_model_returns_fitted_model(simple_dataset, tmp_path):
     model = load_model(artifact["model_path"])
     preds = model.predict(X)
     assert len(preds) == len(y)
+
+
+def test_build_model_stacking():
+    """StackingClassifier se construye correctamente desde config."""
+    base_lr = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+               "params": {"C": 1.0, "solver": "lbfgs", "max_iter": 200}}
+    base_rf = {"module": "sklearn.ensemble", "class": "RandomForestClassifier",
+               "params": {"n_estimators": 10}}
+    stacking_cfg = {
+        "module": "sklearn.ensemble",
+        "class": "StackingClassifier",
+        "estimators": ["rf", "lr"],
+        "meta_estimator": "lr",
+        "params": {"cv": 3, "passthrough": False},
+        "_estimator_configs": {"rf": base_rf, "lr": base_lr},
+    }
+    model = build_model(stacking_cfg, random_state=42)
+    from sklearn.ensemble import StackingClassifier
+    assert isinstance(model, StackingClassifier)
+    assert len(model.estimators) == 2
+
+
+def test_build_model_voting():
+    """VotingClassifier soft se construye correctamente."""
+    base_lr = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+               "params": {"C": 1.0, "solver": "lbfgs", "max_iter": 200}}
+    base_rf = {"module": "sklearn.ensemble", "class": "RandomForestClassifier",
+               "params": {"n_estimators": 10}}
+    voting_cfg = {
+        "module": "sklearn.ensemble",
+        "class": "VotingClassifier",
+        "estimators": ["rf", "lr"],
+        "params": {"voting": "soft"},
+        "_estimator_configs": {"rf": base_rf, "lr": base_lr},
+    }
+    model = build_model(voting_cfg, random_state=42)
+    from sklearn.ensemble import VotingClassifier
+    assert isinstance(model, VotingClassifier)
+    assert model.voting == "soft"
+
+
+def test_build_model_with_calibration():
+    """build_model con calibrate=True devuelve CalibratedClassifierCV."""
+    cfg = {"module": "sklearn.ensemble", "class": "RandomForestClassifier",
+           "params": {"n_estimators": 10}, "calibrate": True}
+    model = build_model(cfg, random_state=42)
+    from sklearn.calibration import CalibratedClassifierCV
+    assert isinstance(model, CalibratedClassifierCV)
