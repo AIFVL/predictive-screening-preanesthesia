@@ -177,8 +177,18 @@ def make_task_train_model(target_name: str, model_key: str):
         X_train = read_parquet(splits_dir / "X_train.parquet")
         y_train = read_parquet(splits_dir / "y_train.parquet")["target"]
 
-        model_cfg = cfg.enabled_models()[model_key]
+        all_models = cfg.enabled_models()
+        model_cfg = dict(all_models[model_key])
         hp_cfg = cfg.hyperparameter_search
+
+        # Resolve sub-estimator configs for ensemble models
+        if "estimators" in model_cfg:
+            model_cfg["_estimator_configs"] = {
+                name: all_models[name] for name in model_cfg["estimators"]
+            }
+            if "meta_estimator" in model_cfg:
+                meta_name = model_cfg["meta_estimator"]
+                model_cfg["_estimator_configs"][meta_name] = all_models[meta_name]
 
         if hp_cfg.get("enabled", False):
             best_params = search_hyperparameters(
@@ -197,6 +207,8 @@ def make_task_train_model(target_name: str, model_key: str):
             model_name=model_key,
             random_state=cfg.train_test_split.get("random_state", 42),
             threshold_metric=model_cfg.get("target_metric", "f2"),
+            optimize_for=cfg.optimize_for,
+            recall_min=cfg.recall_min,
         )
     _task.__name__ = f"task_train_{model_key}_{target_name}"
     return _task
@@ -243,6 +255,45 @@ def make_task_evaluate_model(target_name: str, model_key: str):
     return _task
 
 
+def make_task_explainability(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import pandas as pd
+        from src.utils.io import read_parquet, read_json
+        from src.models.trainer import load_model
+        from src.evaluation.explainability import compute_global_explainability, build_case_review_table
+
+        proc_dir = cfg.output_path() / "data_processed"
+        splits_dir = proc_dir / target_name / "splits"
+        models_dir = cfg.output_path() / "models" / target_name
+        expl_dir = cfg.output_path() / "reports" / "explainability" / target_name
+        expl_dir.mkdir(parents=True, exist_ok=True)
+
+        X_test = read_parquet(splits_dir / "X_test.parquet")
+        y_test = read_parquet(splits_dir / "y_test.parquet")["target"]
+
+        artifact = read_json(models_dir / f"{model_key}_metrics.json")
+        threshold = artifact.get("Threshold", 0.5)
+
+        model = load_model(models_dir / f"{model_key}_model.joblib")
+        X_test_num = X_test.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        y_proba = model.predict_proba(X_test_num)[:, 1]
+        y_pred = (y_proba >= threshold).astype(int)
+
+        df_global = compute_global_explainability(model, X_test_num, y_test)
+        df_global.to_csv(expl_dir / f"explainability_global_{model_key}.csv", index=False)
+
+        top_features = df_global["Feature"].tolist()
+        df_cases = build_case_review_table(X_test, y_test, y_pred, y_proba, top_features)
+        df_cases.to_csv(expl_dir / f"explainability_cases_{model_key}.csv", index=False)
+
+        logger.info(
+            f"[{target_name}/{model_key}] Explicabilidad: {len(df_global)} features | "
+            f"{len(df_cases)} casos auditables"
+        )
+    _task.__name__ = f"task_explainability_{model_key}_{target_name}"
+    return _task
+
+
 def make_task_model_plots(target_name: str, model_key: str):
     def _task(**kwargs):
         import pandas as pd
@@ -272,6 +323,19 @@ def make_task_model_plots(target_name: str, model_key: str):
         plot_threshold_curve(thresholds, scores, threshold, model_key, target_name, plots_dir)
     _task.__name__ = f"task_model_plots_{model_key}_{target_name}"
     return _task
+
+
+def task_pre_post_analysis(**kwargs):
+    from src.reports.pre_post_analysis import run_pre_post_linkage_analysis
+
+    proc_dir = cfg.output_path() / "data_processed"
+    output_dir = cfg.output_path() / "reports"
+    run_pre_post_linkage_analysis(
+        proc_dir=proc_dir,
+        output_dir=output_dir,
+        active_targets=ACTIVE_TARGETS,
+        random_state=cfg.train_test_split.get("random_state", 42),
+    )
 
 
 def task_generate_comparison_report(**kwargs):
@@ -312,6 +376,7 @@ with DAG(
     eda_correlation_tasks: dict = {}
     train_tasks: dict = {}
     evaluate_tasks: dict = {}
+    explainability_tasks: dict = {}
     plot_tasks: dict = {}
 
     for target in ACTIVE_TARGETS:
@@ -346,11 +411,19 @@ with DAG(
                 task_id=f"evaluate__{model}__{target}",
                 python_callable=make_task_evaluate_model(target, model),
             )
+            explainability_tasks[key] = PythonOperator(
+                task_id=f"explainability__{model}__{target}",
+                python_callable=make_task_explainability(target, model),
+            )
             plot_tasks[key] = PythonOperator(
                 task_id=f"model_plots__{model}__{target}",
                 python_callable=make_task_model_plots(target, model),
             )
 
+    pre_post_task = PythonOperator(
+        task_id="pre_post_analysis",
+        python_callable=task_pre_post_analysis,
+    )
     comparison_report = PythonOperator(
         task_id="generate_comparison_report",
         python_callable=task_generate_comparison_report,
@@ -366,9 +439,14 @@ with DAG(
         merge_tasks[target] >> select_features_tasks[target]
         [eda_posop_tasks[target], select_features_tasks[target]] >> eda_correlation_tasks[target]
 
+        select_features_tasks[target] >> pre_post_task
+
         for model in ENABLED_MODELS:
             key = f"{model}__{target}"
             eda_correlation_tasks[target] >> train_tasks[key]
             train_tasks[key] >> evaluate_tasks[key]
-            evaluate_tasks[key] >> plot_tasks[key]
+            evaluate_tasks[key] >> explainability_tasks[key]
+            explainability_tasks[key] >> plot_tasks[key]
             plot_tasks[key] >> comparison_report
+
+    pre_post_task >> comparison_report

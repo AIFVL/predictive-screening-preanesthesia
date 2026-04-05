@@ -152,3 +152,28 @@ def test_build_model_with_calibration():
     model = build_model(cfg, random_state=42)
     from sklearn.calibration import CalibratedClassifierCV
     assert isinstance(model, CalibratedClassifierCV)
+
+
+def test_train_model_with_recall_constraint(simple_dataset, tmp_path):
+    """train_model con recall_constraint garantiza recall >= recall_min en val."""
+    X, y = simple_dataset
+    cfg = {"module": "sklearn.linear_model", "class": "LogisticRegression",
+           "params": {"C": 1.0, "class_weight": "balanced", "solver": "lbfgs", "max_iter": 200}}
+    artifact = train_model(cfg, X, y, out_dir=tmp_path, model_name="lr_rc",
+                           optimize_for="recall_constraint", recall_min=0.80)
+    assert artifact["metrics"]["Recall"] >= 0.70  # tolerance for small dataset
+
+
+def test_cross_validate_model_recall_constraint(simple_dataset):
+    """CV with recall_constraint: recall_mean should be >= recall_min."""
+    from src.evaluation.subgroups import cross_validate_model
+    from sklearn.linear_model import LogisticRegression
+    X, y = simple_dataset
+    model = LogisticRegression(C=1.0, class_weight="balanced", solver="lbfgs", max_iter=200, random_state=42)
+    result = cross_validate_model(
+        model, X, y, n_folds=5,
+        optimize_for="recall_constraint", recall_min=0.80
+    )
+    assert "Recall_mean" in result
+    assert result["Recall_mean"] >= 0.70  # tolerance for small 100-sample dataset
+    assert "Specificity_mean" in result

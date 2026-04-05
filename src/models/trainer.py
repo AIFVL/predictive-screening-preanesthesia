@@ -23,8 +23,8 @@ def train_model(
     random_state: int = 42,
     val_size: float = 0.2,
     threshold_metric: str = "f2",
-    optimize_for: str | None = None,
-    recall_min: float = 0.80,
+    optimize_for: str | None = "recall_constraint",
+    recall_min: float = 0.85,
 ) -> dict:
     """
     Entrena un modelo, encuentra threshold óptimo, serializa joblib y escribe métricas JSON.
