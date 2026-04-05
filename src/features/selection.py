@@ -16,6 +16,7 @@ def rank_and_select_features(
     version_name: str,
     encoding_fix_map: dict | None = None,
     top_n: int | None = None,
+    min_combined_score: float | None = None,
     min_age: int = 18,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, list[str], dict]:
@@ -66,7 +67,13 @@ def rank_and_select_features(
     ranking["Combined_Score"] = ranking[["MI_Norm", "RF_Norm"]].mean(axis=1)
     ranking = ranking.sort_values("Combined_Score", ascending=False).reset_index(drop=True)
 
-    selected_features = list((ranking.head(top_n) if top_n else ranking)["Variable"])
+    if top_n is not None:
+        selected = ranking.head(top_n)
+    elif min_combined_score is not None:
+        selected = ranking[ranking["Combined_Score"] >= min_combined_score]
+    else:
+        selected = ranking
+    selected_features = list(selected["Variable"])
 
     metadata = {
         "version": version_name,
@@ -74,12 +81,15 @@ def rank_and_select_features(
         "target_pct": round(float(y.mean()) * 100, 2),
         "candidate_features": len(valid_features),
         "selected_features": len(selected_features),
+        "dropped_low_score": len(ranking) - len(selected_features),
         "dropped_constant": len(dropped),
+        "min_combined_score_used": min_combined_score,
     }
 
     logger.info(
         f"[{version_name}] Selección: {len(selected_features)} features "
-        f"de {len(valid_features)} candidatas"
+        f"de {len(valid_features)} candidatas "
+        f"(descartadas por score bajo: {metadata['dropped_low_score']})"
     )
 
     return ranking, selected_features, metadata

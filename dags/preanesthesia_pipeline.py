@@ -128,10 +128,12 @@ def make_task_select_features(target_name: str):
         proc_dir = cfg.output_path() / "data_processed"
         df_merged = read_parquet(proc_dir / target_name / "merged.parquet")
 
+        feature_sel_cfg = cfg.features.get("feature_selection", {})
         ranking, selected_features, metadata = rank_and_select_features(
             df_merged,
             version_name=target_name,
             encoding_fix_map=cfg.features.get("encoding_fix_map"),
+            min_combined_score=feature_sel_cfg.get("min_combined_score"),
             random_state=cfg.train_test_split.get("random_state", 42),
         )
 
