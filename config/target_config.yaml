@@ -1,9 +1,7 @@
 active_targets:
-  - target_a_sensible
-  - target_b_clinicamente_relevante
-  - target_c_alta_severidad
-  - target_d_eventos_adversos
-  - target_e_alta_senal
+  - target_d_v2
+  - target_d_v2_hosp
+  - target_d_v5
 
 targets:
   target_a_sensible:

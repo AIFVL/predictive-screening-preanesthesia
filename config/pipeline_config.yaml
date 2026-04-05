@@ -5,11 +5,6 @@ paths:
   raw_data: "/opt/airflow/project/data_raw"
   output: "/opt/airflow/project/output"
 
-active_targets:
-  - target_d_v2
-  - target_d_v2_hosp
-  - target_d_v5
-
 train_test_split:
   test_size: 0.2
   random_state: 42

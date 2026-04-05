@@ -1,6 +1,0 @@
-Version,Post_Variable,Prevalencia,Max_MI,Max_Pearson,N_Features_Informativas,Top3_Features_PRE
-target_a_sensible,target,0.5996,0.05552,0.20504,12,score_proc_low_severity | score_proc_high_severity | score_proc_moderate_severity
-target_b_clinicamente_relevante,target,0.4355,0.08484,0.24255,14,score_proc_low_severity | score_proc_moderate_severity | score_proc_critical
-target_c_alta_severidad,target,0.1759,0.06375,0.22923,13,score_proc_moderate_severity | score_proc_low_severity | score_proc_critical
-target_d_eventos_adversos,target,0.4377,0.07274,0.21327,14,score_proc_critical | score_proc_high_severity | score_proc_moderate_severity
-target_e_alta_senal,target,0.4023,0.08038,0.18874,13,score_proc_low_severity | score_proc_high_severity | score_proc_critical
