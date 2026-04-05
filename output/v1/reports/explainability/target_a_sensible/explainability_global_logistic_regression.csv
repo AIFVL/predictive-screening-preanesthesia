@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_sedacion,0.7939037059680188,abs_coef
+Tipo de anestesia propuesta_raquidea,0.37332931288802823,abs_coef
+Tipo de anestesia propuesta_local,0.25051713624786087,abs_coef
+Tipo de anestesia propuesta_general,0.18356141526707961,abs_coef
+Tipo de anestesia propuesta_peridural,0.17065468474195028,abs_coef
+Procedimiento propuesto Code_L,0.16110504626349267,abs_coef
+Examen_Na (meq/L),0.14729901782252397,abs_coef
+Dx Preoperatorio Code_O,0.13824238342477618,abs_coef
+Tipo de anestesia propuesta_bloqueo n,0.12619711762602914,abs_coef
+RH_Sin Dato,0.11241050995803599,abs_coef
+Grupo Sanguíneo_Sin Dato,0.11235075649109413,abs_coef
+Procedimiento propuesto Code_C,0.11178827680615681,abs_coef
+Dx Preoperatorio Code_H,0.10871862872768566,abs_coef
+RH_Positivo,0.10695667441196972,abs_coef
+Examen_PT (INR),0.09794418352501341,abs_coef
+Grupo Sanguíneo_O,0.09666630936539432,abs_coef
+Prótesis Dental_movil,0.09612017788810925,abs_coef
+Procedimiento propuesto Code_G,0.08974953149645842,abs_coef
+Puntaje Mallampati,0.08773367196308318,abs_coef
+score_proc_high_severity,0.08436710359426827,abs_coef
+Sexo_encoded,0.08106289920636903,abs_coef
+Sistema Nervioso_Sin dato,0.07653154939676389,abs_coef
+Sistema Nervioso_normal,0.07482876382606024,abs_coef
+Dx Preoperatorio Code_K,0.07415801642094191,abs_coef
+Antecedente endocrinológicos_diabetes,0.07414376192083731,abs_coef

@@ -1,0 +1,17 @@
+{
+  "Accuracy": 0.43826830571886694,
+  "Recall": 1.0,
+  "Precision": 0.4379679144385027,
+  "F1": 0.6091483822982522,
+  "F2": 0.7957636999611348,
+  "ROC_AUC": 0.678310427953964,
+  "PR_AUC": 0.6424677948878776,
+  "Balanced_Accuracy": 0.5004752851711026,
+  "Specificity": 0.0009505703422053232,
+  "Brier": 0.2205937822911099,
+  "Predicted_Positive_Rate": 0.9994655264564404,
+  "FN_Rate": 0.0,
+  "Threshold": 0.1,
+  "threshold": 0.1,
+  "model_name": "random_forest"
+}

@@ -1,0 +1,21 @@
+case_index,case_type,y_true,y_pred,y_proba,reason
+1369,FP,0,1,0.1278377174822676,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=30.0 | Antecedentes anestésicos=2015.0
+1367,FP,0,1,0.15291591663391682,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=2024.0
+836,FP,0,1,0.1617769752660357,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=34.8304 | Antecedentes anestésicos=2020.0
+1289,FP,0,1,0.17231869341447054,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=36.0728 | Antecedentes anestésicos=2021.0
+2854,FP,0,1,0.1772628893674346,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=2023.0
+1272,FP,0,1,0.18251571570242306,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=50.0 | Antecedentes anestésicos=2016.0
+4020,FP,0,1,0.1854212414609155,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=2023.0
+2918,FP,0,1,0.18602310383670204,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=56.0 | Antecedentes anestésicos=2024.0
+2071,FP,0,1,0.1895263108468495,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=2021.0
+2694,FP,0,1,0.19878849792270967,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=2024.0
+3573,TP,1,1,0.999949928593346,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=80.0 | Antecedentes anestésicos=2018.0
+320,TP,1,1,0.9998611082844228,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=80.0 | Antecedentes anestésicos=0.0
+1099,TP,1,1,0.9987152977150754,Tipo de anestesia propuesta_sedacion=1.0 | Tensión Arterial Diastólica (mm/Hg)=133.7158 | Antecedentes anestésicos=2007.0
+3072,TP,1,1,0.9935130190811592,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=76.0 | Antecedentes anestésicos=0.0
+3030,TP,1,1,0.9915586744329883,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=70.0 | Antecedentes anestésicos=0.0
+2712,TP,1,1,0.991514314460514,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=60.0 | Antecedentes anestésicos=0.0
+26,TP,1,1,0.991472872849345,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=92.2025 | Antecedentes anestésicos=0.0
+3347,TP,1,1,0.9904401094476373,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=80.0 | Antecedentes anestésicos=0.0
+2840,TP,1,1,0.9903111360516066,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=129.806 | Antecedentes anestésicos=0.0
+1285,TP,1,1,0.9901226226021794,Tipo de anestesia propuesta_sedacion=0.0 | Tensión Arterial Diastólica (mm/Hg)=70.0 | Antecedentes anestésicos=0.0

@@ -1,0 +1,46 @@
+{
+  "target": "target_a_sensible",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.04770161750162849
+    },
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.04635090302339995
+    },
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.04592170204235124
+    },
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.04192175896944983
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.04173053164995544
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.037525849580621884
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.031184763003525795
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.030407880604051307
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.028729889401479358
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.02810328698750597
+    }
+  ]
+}

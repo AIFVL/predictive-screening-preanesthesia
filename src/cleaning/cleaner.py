@@ -227,15 +227,21 @@ def clean_variables_fisiologicas(df: pd.DataFrame) -> pd.DataFrame:
     )
     dfc = imputar_fuera_de_rango(dfc, RANGOS_POR_EDAD)
 
-    # Recalcular TAM si está fuera de rango
-    tam = (
-        dfc["Tensión Arterial Sistólica (mm/Hg)"]
-        + 2 * dfc["Tensión Arterial Diastólica (mm/Hg)"]
-    ) / 3
-    ok = dfc["Tensión Arterial Media (mm/Hg)"].between(40, 200)
-    dfc["Tensión Arterial Media (mm/Hg)"] = np.where(
-        ok, dfc["Tensión Arterial Media (mm/Hg)"], tam
-    )
+    # Recalcular TAM si está fuera de rango (solo si las columnas existen)
+    _tam_cols = [
+        "Tensión Arterial Sistólica (mm/Hg)",
+        "Tensión Arterial Diastólica (mm/Hg)",
+        "Tensión Arterial Media (mm/Hg)",
+    ]
+    if all(c in dfc.columns for c in _tam_cols):
+        tam = (
+            dfc["Tensión Arterial Sistólica (mm/Hg)"]
+            + 2 * dfc["Tensión Arterial Diastólica (mm/Hg)"]
+        ) / 3
+        ok = dfc["Tensión Arterial Media (mm/Hg)"].between(40, 200)
+        dfc["Tensión Arterial Media (mm/Hg)"] = np.where(
+            ok, dfc["Tensión Arterial Media (mm/Hg)"], tam
+        )
     return dfc
 
 
@@ -302,6 +308,9 @@ def clean_antecedentes_anestesia(df: pd.DataFrame) -> pd.DataFrame:
         df_copy["Antecedentes anestésicos"] == 0,
         ["Antecedentes quirúrgicos", "Anestesia previa"],
     ] = None
+    # Drop free-text surgical history — it feeds clean_anestesia_previa upstream
+    # and has no further use after that encoding step
+    df_copy = df_copy.drop(columns=["Antecedentes quirúrgicos"], errors="ignore")
     return df_copy
 
 
@@ -379,6 +388,7 @@ def clean_anestesia_previa(df: pd.DataFrame) -> pd.DataFrame:
         lambda x: create_multi_label(x, ANESTESIA_KEY_WORDS, "desconocido")
     )
     df_copy = encode_multilabel(df_copy, "Anestesia previa", delimiter=",")
+    df_copy = df_copy.drop(columns=["Anestesia previa"], errors="ignore")
     return df_copy
 
 
@@ -979,6 +989,21 @@ def clean_preop(df: pd.DataFrame, cleaning_cfg: dict) -> pd.DataFrame:
     if "Sexo" in df.columns and "Atención" in df.columns:
         df = clean_sexo_atencion(df)
         logger.info("clean_sexo_atencion OK")
+
+    # 3b. Aplicar outlier_rules del config: marcar valores fuera de rango como NaN
+    outlier_rules = cleaning_cfg.get("outlier_rules", {})
+    for col, bounds in outlier_rules.items():
+        if col in df.columns:
+            lo = bounds.get("min")
+            hi = bounds.get("max")
+            mask = pd.Series(False, index=df.index)
+            if lo is not None:
+                mask |= df[col] < lo
+            if hi is not None:
+                mask |= df[col] > hi
+            df.loc[mask, col] = float("nan")
+    if outlier_rules:
+        logger.info(f"outlier_rules aplicadas: {list(outlier_rules.keys())}")
 
     # 4. Limpiar variables fisiológicas (edad, peso, talla, IMC, signos vitales)
     df = clean_variables_fisiologicas(df)

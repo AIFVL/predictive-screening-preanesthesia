@@ -1,0 +1,17 @@
+{
+  "Accuracy": 0.4377338321753073,
+  "Recall": 1.0,
+  "Precision": 0.4377338321753073,
+  "F1": 0.6089219330855019,
+  "F2": 0.7956090926753449,
+  "ROC_AUC": 0.6417780307989432,
+  "PR_AUC": 0.5804699331311198,
+  "Balanced_Accuracy": 0.5,
+  "Specificity": 0.0,
+  "Brier": 0.23357050630398135,
+  "Predicted_Positive_Rate": 1.0,
+  "FN_Rate": 0.0,
+  "Threshold": 0.05,
+  "threshold": 0.05,
+  "model_name": "logistic_regression"
+}

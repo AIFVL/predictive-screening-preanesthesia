@@ -74,6 +74,12 @@ def imputar_fuera_de_rango(
 
     df_copy["recalculado_flag"] = False
 
+    # Skip body-composition imputation if the required columns are absent
+    _has_talla = "Talla (cm)" in df_copy.columns
+    _has_peso = "Peso (Kg)" in df_copy.columns
+    if not (_has_talla and _has_peso):
+        return df_copy
+
     talla_m = df_copy["Talla (cm)"] / 100
     imc_calculado = np.where(
         talla_m > 0, df_copy["Peso (Kg)"] / (talla_m ** 2), np.nan

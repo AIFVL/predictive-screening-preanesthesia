@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_sedacion,0.033293843185725994,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.025080158538309517,permutation_importance
+Peso (Kg),0.024601145708382455,permutation_importance
+Tipo de anestesia propuesta_peridural,0.01464138080968862,permutation_importance
+Talla (cm),0.010066832988982255,permutation_importance
+Examen_Hemoglobina(g/dl),0.009728259134424499,permutation_importance
+Edad,0.007155622348002799,permutation_importance
+Examen_PT (INR),0.005662256236706686,permutation_importance
+Dx Preoperatorio Code_O,0.004823119105933871,permutation_importance
+Dx Preoperatorio Code_K,0.003659204967168805,permutation_importance
+Dx Preoperatorio Code_C,0.0034790858049832175,permutation_importance
+Antecedente endocrinológicos_diabetes,0.0033386468296138006,permutation_importance
+Tensión Arterial Sistólica (mm/Hg),0.0033124214187870704,permutation_importance
+Tipo de anestesia propuesta_bloqueo n,0.003034432064023385,permutation_importance
+Dx Preoperatorio Code_A,0.002600914620704464,permutation_importance
+Tensión Arterial Diastólica (mm/Hg),0.002301374819652713,permutation_importance
+Dx Preoperatorio Code_G,0.0021024037679453268,permutation_importance
+Tensión Arterial Media (mm/Hg),0.001983021136920926,permutation_importance
+Sexo_encoded,0.0018925624734894785,permutation_importance
+Procedimiento propuesto Code_L,0.0016589282700806064,permutation_importance
+Examen_PTT,0.001408608624131258,permutation_importance
+Dx Preoperatorio Code_E,0.0012915824792969933,permutation_importance
+Temperatura,0.001146658578597859,permutation_importance
+Dx Preoperatorio Code_Z,0.0011429718179453818,permutation_importance
+Dx Preoperatorio Code_S,0.0010913191609692064,permutation_importance

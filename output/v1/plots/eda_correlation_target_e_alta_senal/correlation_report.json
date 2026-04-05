@@ -1,0 +1,46 @@
+{
+  "target": "target_e_alta_senal",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.07226907716369046
+    },
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.07206059420552258
+    },
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.0709929013663575
+    },
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.06970170541624254
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.06800698456715493
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.05348125107881163
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.05244023976389833
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.05114788384123958
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.050113751835392684
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.04562133858461914
+    }
+  ]
+}

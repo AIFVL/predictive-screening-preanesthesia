@@ -1,0 +1,17 @@
+{
+  "Accuracy": 0.5996793158738642,
+  "Recall": 1.0,
+  "Precision": 0.5996793158738642,
+  "F1": 0.7497494153023722,
+  "F2": 0.8822141846202233,
+  "ROC_AUC": 0.6758506291216573,
+  "PR_AUC": 0.7564022529585412,
+  "Balanced_Accuracy": 0.5,
+  "Specificity": 0.0,
+  "Brier": 0.2161058851475741,
+  "Predicted_Positive_Rate": 1.0,
+  "FN_Rate": 0.0,
+  "Threshold": 0.05,
+  "threshold": 0.05,
+  "model_name": "extra_trees"
+}

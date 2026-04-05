@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_sedacion,0.01986902725949873,permutation_importance
+Tensión Arterial Diastólica (mm/Hg),0.019618159548438173,permutation_importance
+Antecedentes anestésicos,0.01306404074030727,permutation_importance
+Examen_Hemoglobina(g/dl),0.011921469650812377,permutation_importance
+Talla (cm),0.007221335556500974,permutation_importance
+IMC,0.004382000336901326,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.0043042275396787625,permutation_importance
+Tipo de anestesia propuesta_peridural,0.0036016076090195303,permutation_importance
+Tipo de anestesia propuesta_local,0.003340880302031124,permutation_importance
+Dx Preoperatorio Code_O,0.002588124897097632,permutation_importance
+predicted_label_proc_encoded,0.0024809636517812315,permutation_importance
+Dx Preoperatorio Code_H,0.0017918959070305496,permutation_importance
+Procedimiento propuesto Code_L,0.0016402713101938194,permutation_importance
+predicted_label_proc_ant_encoded,0.0013399533477421067,permutation_importance
+Frecuencia Respiratoria,0.0011911457783133407,permutation_importance
+Prótesis Dental_movil,0.0009786505487018094,permutation_importance
+Tipo de anestesia propuesta_bloqueo n,0.0008849653534180435,permutation_importance
+Antecedentes quirúrgicos Code_nan,0.0007981704549024027,permutation_importance
+Examen_Hematocrito (%),0.0007534406278165262,permutation_importance
+dia_semana,0.0007197885706727192,permutation_importance
+RH_Positivo,0.0006543497853444879,permutation_importance
+Dx Preoperatorio Code_F,0.0006317754981428169,permutation_importance
+Anestesia previa_desconocido,0.0005973620822401271,permutation_importance
+Grupo Sanguíneo_O,0.0005597128916120964,permutation_importance
+Procedimiento propuesto Code_G,0.0005158205591609732,permutation_importance

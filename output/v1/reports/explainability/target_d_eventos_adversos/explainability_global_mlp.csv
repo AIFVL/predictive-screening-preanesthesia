@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_sedacion,0.03225960967205328,permutation_importance
+Examen_Hemoglobina(g/dl),0.016702560598859374,permutation_importance
+Tipo de anestesia propuesta_local,0.014086598443441112,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.012149588581273796,permutation_importance
+Tipo de anestesia propuesta_peridural,0.007148623158270029,permutation_importance
+Edad,0.004115226948669259,permutation_importance
+Dx Preoperatorio Code_H,0.0037720562024714964,permutation_importance
+Examen_Glicemia (mg/dl),0.003144419855038061,permutation_importance
+Procedimiento propuesto Code_L,0.0028410171102662084,permutation_importance
+Dx Preoperatorio Code_A,0.002831585670152137,permutation_importance
+Dx Preoperatorio Code_S,0.0025740776497147786,permutation_importance
+Dx Preoperatorio Code_Z,0.002439958115494312,permutation_importance
+Dx Preoperatorio Code_O,0.0024071337333650077,permutation_importance
+recalculado_flag,0.0021247475047529107,permutation_importance
+Tensión Arterial Diastólica (mm/Hg),0.0020550142585551434,permutation_importance
+Respuesta Motora_encoded,0.001822347314638817,permutation_importance
+Talla (cm),0.0018177058578898065,permutation_importance
+Examen_PT (INR),0.0011883614543726439,permutation_importance
+Dx Preoperatorio Code_G,0.001040243286596998,permutation_importance
+Tensión Arterial Sistólica (mm/Hg),0.0009314846720532178,permutation_importance
+score_proc_high_severity,0.0008144085670152678,permutation_importance
+Sistema Nervioso_Sin dato,0.0007963997148289215,permutation_importance
+Dx Preoperatorio Code_D,0.0006992261763308471,permutation_importance
+Dx Preoperatorio Code_Q,0.0006536285052282098,permutation_importance
+Antecedente hematológicos _transfusiones,0.0006169424310837002,permutation_importance

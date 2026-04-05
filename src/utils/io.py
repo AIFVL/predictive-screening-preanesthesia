@@ -14,6 +14,13 @@ def read_parquet(path: Path | str) -> pd.DataFrame:
 def write_parquet(df: pd.DataFrame, path: Path | str) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    df = df.copy()
+    # Drop duplicate columns — keep first occurrence
+    df = df.loc[:, ~df.columns.duplicated()]
+    # Cast mixed-type object columns to str so PyArrow doesn't fail on
+    # columns like "Inicio anestesia" that contain both strings and ints.
+    for col in df.select_dtypes(include="object").columns:
+        df[col] = df[col].astype(str)
     df.to_parquet(path, index=False)
 
 
