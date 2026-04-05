@@ -243,6 +243,8 @@ def make_task_evaluate_model(target_name: str, model_key: str):
         cv_metrics = cross_validate_model(
             model, X_train, y_train,
             n_folds=cfg.cross_validation.get("n_folds", 10),
+            optimize_for=cfg.optimize_for,
+            recall_min=cfg.recall_min,
         )
 
         write_json({"test": test_metrics, "cv": cv_metrics},
