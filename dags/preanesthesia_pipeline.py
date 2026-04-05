@@ -49,13 +49,21 @@ def task_eda_preop_raw(**kwargs):
 def task_clean_data(**kwargs):
     from src.data.loader import load_raw_data
     from src.cleaning.cleaner import clean_preop
+    from src.cleaning.enrichment import enrich_preop
     from src.cleaning.report import generate_cleaning_report
     from src.utils.io import write_parquet
 
     raw_dir = PROJECT_ROOT / cfg.raw_data_path()
     proc_dir = cfg.output_path() / "data_processed"
+    cache_dir = PROJECT_ROOT / "cache"
     df_pre, _ = load_raw_data(raw_dir, proc_dir)
+
+    # Etapas deterministas (sin APIs)
     df_clean = clean_preop(df_pre, cfg.cleaning)
+
+    # Etapas de enriquecimiento con APIs externas (medicamentos, dx/proc, severidad)
+    df_clean = enrich_preop(df_clean, cache_dir)
+
     write_parquet(df_clean, proc_dir / "cleaned.parquet")
     generate_cleaning_report(df_pre, df_clean, cfg.output_path() / "reports")
 
