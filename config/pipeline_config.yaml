@@ -2,8 +2,13 @@ pipeline_version: "v1"
 dataset_version: "v1"
 
 paths:
-  raw_data: "data_raw/"
-  output: "output/"
+  raw_data: "/opt/airflow/project/data_raw"
+  output: "/opt/airflow/project/output"
+
+active_targets:
+  - target_d_v2
+  - target_d_v2_hosp
+  - target_d_v5
 
 train_test_split:
   test_size: 0.2
@@ -12,6 +17,10 @@ train_test_split:
 cross_validation:
   n_folds: 10
   n_jobs: -1
+
+threshold:
+  optimize_for: "recall_constraint"
+  recall_min: 0.85
 
 hyperparameter_search:
   enabled: false
