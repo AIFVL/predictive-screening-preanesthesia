@@ -97,3 +97,26 @@ def test_missing_config_file_raises(tmp_path):
     (tmp_path / "pipeline_config.yaml").write_text("pipeline_version: v1")
     with pytest.raises(FileNotFoundError):
         load_config(tmp_path)
+
+
+def test_pipeline_config_has_recall_min(tmp_path):
+    """PipelineConfig expone recall_min desde sección threshold."""
+    cfg_data = {
+        "pipeline_version": "v1",
+        "dataset_version": "v1",
+        "paths": {"raw_data": "/tmp/raw", "output": "/tmp/out"},
+        "active_targets": ["target_d_v2"],
+        "train_test_split": {"test_size": 0.2, "random_state": 42},
+        "cross_validation": {"n_folds": 5, "n_jobs": -1},
+        "threshold": {"optimize_for": "recall_constraint", "recall_min": 0.85},
+        "hyperparameter_search": {"enabled": False},
+    }
+    (tmp_path / "pipeline_config.yaml").write_text(yaml.dump(cfg_data))
+    (tmp_path / "target_config.yaml").write_text(yaml.dump({"active_targets": [], "targets": {}}))
+    (tmp_path / "models_config.yaml").write_text(yaml.dump({"models": {}}))
+    (tmp_path / "features_config.yaml").write_text(yaml.dump({}))
+    (tmp_path / "cleaning_config.yaml").write_text(yaml.dump({}))
+    from src.utils.config import load_config
+    cfg = load_config(tmp_path)
+    assert cfg.recall_min == 0.85
+    assert cfg.optimize_for == "recall_constraint"

@@ -18,6 +18,7 @@ class PipelineConfig:
     cleaning: dict
     features: dict
     models: dict
+    threshold: dict = field(default_factory=dict)
 
     def enabled_models(self) -> dict:
         """Retorna solo los modelos con enabled=true."""
@@ -37,6 +38,14 @@ class PipelineConfig:
 
     def output_path(self) -> Path:
         return Path(self.paths["output"]) / self.pipeline_version
+
+    @property
+    def recall_min(self) -> float:
+        return float(self.threshold.get("recall_min", 0.85))
+
+    @property
+    def optimize_for(self) -> str:
+        return str(self.threshold.get("optimize_for", "recall_constraint"))
 
 
 def _load_yaml(path: Path) -> dict:
@@ -67,4 +76,5 @@ def load_config(config_dir: Path | str = "config") -> PipelineConfig:
         cleaning=cleaning,
         features=features,
         models=models["models"],
+        threshold=pipeline.get("threshold", {}),
     )
