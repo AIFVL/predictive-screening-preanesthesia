@@ -49,6 +49,7 @@ _FLAGS_EXCLUIR = {
 
 def run_flag_predictability(
     merged_path: str | Path,
+    posop_path: str | Path,
     output_dir: str | Path,
     min_prevalence: float = 0.01,
     n_folds: int = 5,
@@ -58,7 +59,8 @@ def run_flag_predictability(
     Calcula ROC AUC de cada flag posoperatorio usando features preoperatorias.
 
     Parámetros:
-        merged_path:     path a merged.parquet (preop + flags posop + target)
+        merged_path:     path a merged.parquet (features preoperatorias)
+        posop_path:      path a posop_raw.parquet (flags posoperatorios)
         output_dir:      directorio de salida para CSV y PNG
         min_prevalence:  prevalencia mínima del flag para incluirlo
         n_folds:         folds para cross-validation estratificada
@@ -68,16 +70,36 @@ def run_flag_predictability(
         flag, prevalence, n_positives, roc_auc_mean, roc_auc_std, interpretacion
     """
     merged_path = Path(merged_path)
+    posop_path = Path(posop_path)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    df = pd.read_parquet(merged_path)
-    if "Edad" in df.columns:
-        df = df[df["Edad"] >= 18].reset_index(drop=True)
+    df_merged = pd.read_parquet(merged_path)
+    if "Edad" in df_merged.columns:
+        df_merged = df_merged[df_merged["Edad"] >= 18]
 
+    df_posop = pd.read_parquet(posop_path)
+
+    # Join por clave de paciente
+    merged_key = "Documento PMD"
+    posop_key = "Documento PMD (valoración preanestésica)"
+    flag_cols_posop = [c for c in df_posop.columns if c.startswith("flag_")]
+
+    if merged_key in df_merged.columns and posop_key in df_posop.columns:
+        df_joined = df_merged.merge(
+            df_posop[[posop_key] + flag_cols_posop].rename(columns={posop_key: merged_key}),
+            on=merged_key,
+            how="inner",
+        ).reset_index(drop=True)
+        logger.info(f"Join preop+posop: {len(df_joined)} filas.")
+    else:
+        logger.warning("Clave Documento PMD no disponible — usando merged sin flags.")
+        df_joined = df_merged.reset_index(drop=True)
+
+    df = df_joined
     flag_cols = [c for c in df.columns if c.startswith("flag_")]
-    exclude = set(flag_cols) | {"target", "Documento PMD", "Documento_PMD", "n_flags_relevant"}
-    pre_cols = [c for c in df.columns if c not in exclude]
+    non_feature = set(flag_cols) | {"target", "Documento PMD", "Documento_PMD", "n_flags_relevant"}
+    pre_cols = [c for c in df.columns if c not in non_feature]
 
     X = df[pre_cols].apply(pd.to_numeric, errors="coerce")
     X = X.loc[:, X.notna().mean() >= 0.4]

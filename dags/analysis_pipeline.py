@@ -46,6 +46,7 @@ def task_flag_predictability(**kwargs):
     from src.analysis.flag_predictability import run_flag_predictability
     run_flag_predictability(
         merged_path=_MERGED_PATH,
+        posop_path=_POSOP_PATH,
         output_dir=_OUTPUT_DIR,
         min_prevalence=0.01,
         n_folds=5,
