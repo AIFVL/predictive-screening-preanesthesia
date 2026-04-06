@@ -142,7 +142,7 @@ def run_posop_clustering(
         ["cluster", "pca_1", "pca_2"]
         + (["target"] if "target" in df_posop.columns else [])
     ].copy()
-    df_labels.to_csv(output_dir / "clustering_labels.csv", index=True)
+    df_labels.to_csv(output_dir / "clustering_labels.csv", index=False)
     df_profile.to_csv(output_dir / "clustering_profile.csv", index=False)
     logger.info(f"Exportado: {output_dir / 'clustering_labels.csv'}")
     logger.info(f"Exportado: {output_dir / 'clustering_profile.csv'}")
