@@ -85,6 +85,8 @@ def run_posop_clustering(
 
     df_posop = pd.read_parquet(posop_path)
     flags_available = [f for f in _FLAGS_CLUSTERING if f in df_posop.columns]
+    if not flags_available:
+        raise ValueError("No clustering flags found in posop_raw.parquet")
     logger.info(f"Flags para clustering: {len(flags_available)}")
 
     X_flags = df_posop[flags_available].fillna(0).astype(float)
@@ -106,28 +108,36 @@ def run_posop_clustering(
         profile_rows.append(row)
     df_profile = pd.DataFrame(profile_rows).sort_values("cluster").reset_index(drop=True)
 
-    # ── Perfil preoperatorio por cluster (desde merged) ───────────────────────
+    # ── Perfil preoperatorio por cluster (desde merged, join por Documento PMD) ──
     df_merged = pd.read_parquet(merged_path)
     if "Edad" in df_merged.columns:
-        df_merged = df_merged[df_merged["Edad"] >= 18].reset_index(drop=True)
+        df_merged = df_merged[df_merged["Edad"] >= 18]
 
     preop_cols = [c for c in _PREOP_PROFILE_COLS if c in df_merged.columns]
-    common_idx = df_posop.index.intersection(df_merged.index)
 
-    if len(common_idx) > 100:
-        df_merged_sub = df_merged.loc[common_idx, preop_cols].copy()
-        df_merged_sub["cluster"] = df_posop.loc[common_idx, "cluster"].values
-        preop_rows = []
-        for c in range(n_clusters):
-            sub = df_merged_sub[df_merged_sub["cluster"] == c]
-            row = {"cluster": c}
-            for col in preop_cols:
-                row[f"preop_{col}_mean"] = round(float(sub[col].mean()), 3)
-            preop_rows.append(row)
-        df_profile = df_profile.merge(pd.DataFrame(preop_rows), on="cluster", how="left")
-        logger.info("Perfil preoperatorio por cluster incorporado.")
+    posop_key = "Documento PMD (valoración preanestésica)"
+    merged_key = "Documento PMD"
+
+    if posop_key in df_posop.columns and merged_key in df_merged.columns:
+        # Join por clave de paciente para evitar alineación posicional incorrecta
+        df_posop_keys = df_posop[[posop_key, "cluster"]].rename(columns={posop_key: "_key"})
+        df_merged_keys = df_merged[[merged_key] + preop_cols].rename(columns={merged_key: "_key"})
+        df_joined = df_posop_keys.merge(df_merged_keys, on="_key", how="inner")
+
+        if len(df_joined) > 100:
+            preop_rows = []
+            for c in range(n_clusters):
+                sub = df_joined[df_joined["cluster"] == c]
+                row = {"cluster": c}
+                for col in preop_cols:
+                    row[f"preop_{col}_mean"] = round(float(sub[col].mean()), 3)
+                preop_rows.append(row)
+            df_profile = df_profile.merge(pd.DataFrame(preop_rows), on="cluster", how="left")
+            logger.info(f"Perfil preoperatorio por cluster incorporado ({len(df_joined)} pacientes).")
+        else:
+            logger.warning("Pocos matches en join por Documento PMD — perfil preop no incorporado.")
     else:
-        logger.warning("Índices no compatibles — perfil preop no incorporado.")
+        logger.warning("Columna clave no disponible — perfil preop no incorporado.")
 
     # ── PCA 2D ────────────────────────────────────────────────────────────────
     pca = PCA(n_components=2, random_state=random_state)
@@ -163,7 +173,7 @@ def run_posop_clustering(
 
     # PCA scatter (muestra para velocidad)
     sample = df_labels.sample(min(3000, len(df_labels)), random_state=random_state)
-    palette = cm.get_cmap("tab10", n_clusters)
+    palette = matplotlib.colormaps["tab10"]
     for c in range(n_clusters):
         mask = sample["cluster"] == c
         n_c = int((df_labels["cluster"] == c).sum())
