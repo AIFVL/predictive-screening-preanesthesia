@@ -76,7 +76,7 @@ def run_error_subgroups(
 
     df_merged = pd.read_parquet(merged_path)
     if "Edad" in df_merged.columns:
-        df_merged = df_merged[df_merged["Edad"] >= 18].reset_index(drop=True)
+        df_merged = df_merged[df_merged["Edad"] >= 18]
 
     df_ctx = df_merged.loc[X_test.index].copy()
     df_ctx["y_true"] = y_test.values
@@ -118,7 +118,7 @@ def run_error_subgroups(
     if "Edad" in df_ctx.columns:
         bins = [18, 40, 60, 75, 120]
         labels_edad = ["18-40", "41-60", "61-75", "76+"]
-        edad_group = pd.cut(df_ctx["Edad"], bins=bins, labels=labels_edad)
+        edad_group = pd.cut(df_ctx["Edad"], bins=bins, labels=labels_edad, include_lowest=True)
         for eg in labels_edad:
             _add_subgroup("grupo_edad", eg, edad_group == eg)
 
