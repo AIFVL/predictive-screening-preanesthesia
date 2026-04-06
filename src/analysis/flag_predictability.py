@@ -85,7 +85,7 @@ def run_flag_predictability(
 
     model = RandomForestClassifier(
         n_estimators=100, max_depth=6, min_samples_leaf=20,
-        random_state=random_state, n_jobs=-1,
+        random_state=random_state, n_jobs=1,
     )
     cv = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_state)
 
@@ -134,6 +134,10 @@ def run_flag_predictability(
         .reset_index(drop=True)
     )
 
+    if df_result.empty:
+        logger.warning("No flags passed filters — skipping CSV/PNG output.")
+        return df_result
+
     # ── CSV ───────────────────────────────────────────────────────────────────
     csv_path = output_dir / "flag_predictability.csv"
     df_result.to_csv(csv_path, index=False)
@@ -159,7 +163,7 @@ def run_flag_predictability(
     ax.axvline(0.75, color="#2ecc71", linestyle=":", linewidth=1, label="Buena señal (0.75)")
 
     for i, (_, row) in enumerate(df_result.iterrows()):
-        ax.text(0.505, i, f"prev={row['prevalence']:.1%}", va="center", fontsize=7, color="#555")
+        ax.text(row["roc_auc_mean"] + 0.005, i, f"prev={row['prevalence']:.1%}", va="center", fontsize=7, color="#555")
 
     ax.set_xlabel("ROC AUC (CV 5-fold)")
     ax.set_title(
