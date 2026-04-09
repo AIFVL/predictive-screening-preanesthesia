@@ -472,9 +472,9 @@ def run_hyperparameter_experiments(
     optimize_for: str | None = None,
     recall_min: float = 0.80,
     tune_models: list[str] | None = None,
-    optimize_metric: str = "roc_auc",
+    optimize_metric: str = "f2",
     n_trials: int = 40,
-    feature_subset_fractions: tuple[float, ...] = (1.0, 0.75, 0.5),
+    feature_subset_fractions: tuple[float, ...] = (1.0,),
 ):
     """
     Ejecuta experimentos de tuning por versión y por combinaciones de subsets de features.

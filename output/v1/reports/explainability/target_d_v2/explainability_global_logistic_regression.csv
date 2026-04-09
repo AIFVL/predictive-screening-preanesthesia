@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_sedacion,0.7227877052268956,abs_coef
+Tipo de anestesia propuesta_peridural,0.48132852858645986,abs_coef
+Tipo de anestesia propuesta_raquidea,0.4683972527554884,abs_coef
+Tipo de anestesia propuesta_local,0.3055209463872457,abs_coef
+Dx Preoperatorio Code_Z,0.2720456188892487,abs_coef
+Dx Preoperatorio Code_S,0.2711427838443701,abs_coef
+Puntaje Mallampati,0.2607819502180229,abs_coef
+Dx Preoperatorio Code_O,0.2102340622062727,abs_coef
+Dx Preoperatorio Code_H,0.18476382561902563,abs_coef
+Examen_PT (INR),0.16345094004023605,abs_coef
+Antecedente hematológicos _negativo,0.15916675009773823,abs_coef
+Sexo_encoded,0.14019965601013096,abs_coef
+Procedimiento propuesto Code_S,0.13662425051656915,abs_coef
+Antecedentes cardiovasculares_negativo,0.13274390834497612,abs_coef
+Procedimiento propuesto Code_L,0.12715465789637811,abs_coef
+Dx Preoperatorio Code_NO ENCONTRADO,0.1233935567056248,abs_coef
+Antecedentes cardiovasculares_hta,0.10828998869316252,abs_coef
+Tipo de anestesia propuesta_sin dato,0.10270548211677644,abs_coef
+Procedimiento propuesto Code_NO ENCONTRADO,0.10184688872169641,abs_coef
+Dx Preoperatorio Code_G,0.10139596023958532,abs_coef
+Estado Nutricional_encoded,0.09802006947421613,abs_coef
+Prótesis Dental_movil,0.08516635645594003,abs_coef
+Tensión Arterial Media (mm/Hg),0.07932097942210099,abs_coef
+Dx Preoperatorio Code_A,0.07676965900530883,abs_coef
+Examen_Na (meq/L),0.07277348838890525,abs_coef

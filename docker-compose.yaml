@@ -1,0 +1,87 @@
+x-airflow-common: &airflow-common
+  build: .
+  user: "1000:0"
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: "${AIRFLOW__CORE__FERNET_KEY}"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__CORE__PARALLELISM: "20"
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "20"
+    PYTHONPATH: /opt/airflow/project
+    # HuggingFace: cache models in the named volume so bart-large-mnli
+    # (≈1.6 GB) is only downloaded once across container restarts
+    HF_HOME: /opt/airflow/hf_cache
+    TRANSFORMERS_CACHE: /opt/airflow/hf_cache
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - airflow_logs:/opt/airflow/logs
+    - ./config:/opt/airflow/project/config
+    - ./src:/opt/airflow/project/src
+    # Raw data: the actual Excel files live in data/
+    - ./data:/opt/airflow/project/data_raw
+    # API CSV caches (RxNorm, ClinicalTables, Google Translate, severity)
+    - ./cache:/opt/airflow/project/cache
+    # Pipeline outputs (parquets, models, plots, reports)
+    - ./output:/opt/airflow/project/output
+    # HuggingFace model weights — persisted in a named volume
+    - hf_cache:/opt/airflow/hf_cache
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  airflow-init:
+    <<: *airflow-common
+    command: bash -c "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USER:-admin} --password ${AIRFLOW_ADMIN_PASSWORD:-admin} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-admin@example.com}"
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      retries: 3
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: unless-stopped
+
+  # api service is future work — not yet implemented
+  # api:
+  #   build:
+  #     context: ./api
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./output:/app/output:ro
+  #     - ./config:/app/config:ro
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+  hf_cache:
+  airflow_logs:
+  airflow_output:
+  airflow_cache:

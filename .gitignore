@@ -1,3 +1,37 @@
-.vscode/
+# Datos sensibles — carpetas de datos y outputs intermedios
+data/
+!src/data/
+data_*/
+features/
+!src/features/
+cache/
+output/*/data_processed/
+
+# Imágenes/plots generados (en raíz)
+*.png
+*.jpg
+*.jpeg
+
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+*.pyc
 __pycache__/
-/data
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Airflow
+logs/
+airflow.db
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_raquidea,1.0512709417550121,abs_coef
+Tipo de anestesia propuesta_sedacion,1.0362579462856663,abs_coef
+Tipo de anestesia propuesta_local,0.5074095121374452,abs_coef
+Tipo de anestesia propuesta_peridural,0.49943687111607615,abs_coef
+Procedimiento propuesto Code_L,0.3745991827309445,abs_coef
+Dx Preoperatorio Code_O,0.35130120144635035,abs_coef
+Dx Preoperatorio Code_S,0.3407038170895222,abs_coef
+Dx Preoperatorio Code_Z,0.23926244810579914,abs_coef
+Grupo Sanguíneo_Sin Dato,0.2361948280214341,abs_coef
+RH_Sin Dato,0.23100694251103665,abs_coef
+Antecedente hematológicos _negativo,0.22975292335326916,abs_coef
+Dx Preoperatorio Code_H,0.22823640200396975,abs_coef
+Puntaje Mallampati,0.19927472354910544,abs_coef
+Antecedente renales_negativo,0.19003483906248922,abs_coef
+Dx Preoperatorio Code_A,0.18988028732073087,abs_coef
+Tipo de anestesia propuesta_general,0.1796856729702523,abs_coef
+Sistema Nervioso_Sin dato,0.17125802424866382,abs_coef
+Procedimiento propuesto Code_NO ENCONTRADO,0.1638858556509202,abs_coef
+Examen_PT (INR),0.1619779402044967,abs_coef
+Prótesis Dental_movil,0.16041310480532106,abs_coef
+Grupo Sanguíneo_O,0.13729849811268335,abs_coef
+Respuesta Motora_encoded,0.1371849063839155,abs_coef
+Antecedente renales_litiasis,0.13681867401440842,abs_coef
+score_proc_high_severity,0.1283263825553615,abs_coef
+Tipo de anestesia propuesta_sin dato,0.12673209766258883,abs_coef

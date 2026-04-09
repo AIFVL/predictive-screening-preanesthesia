@@ -51,7 +51,7 @@ def rank_features_for_version(
     version_name: str,
     selected_names: list[str] | None,
     features_meta: pd.DataFrame | None,
-    top_n: int = 80,
+    top_n: int | None = None,
     random_state: int = 42,
 ):
     df = df_input.copy()
@@ -102,7 +102,7 @@ def rank_features_for_version(
     ranking["Combined_Score"] = ranking[["MI_Norm", "RF_Norm"]].mean(axis=1)
     ranking = ranking.sort_values("Combined_Score", ascending=False).reset_index(drop=True)
 
-    selected = ranking.head(top_n).copy()
+    selected = (ranking.copy() if top_n is None else ranking.head(top_n).copy())
     selected["Selected"] = True
 
     metadata = {
@@ -121,7 +121,7 @@ def run_feature_selection_pipeline(
     merged_dir: Path,
     output_dir: Path,
     features_meta_path: Path | None = None,
-    top_n: int = 80,
+    top_n: int | None = None,
     random_state: int = 42,
     active_versions: list[str] | None = None,
 ):

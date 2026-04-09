@@ -1,0 +1,125 @@
+active_targets:
+  - target_d_v2
+  - target_d_v2_hosp
+  - target_d_v5
+
+targets:
+  target_a_sensible:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target A - Sensible: todas las flags, threshold=1"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_fisiologicas
+      - flag_tiempos
+      - flag_induccion
+      - flag_via_aerea
+      - flag_ventilacion
+      - flag_tecnica
+      - flag_liquidos
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_b_clinicamente_relevante:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target B - Clínicamente Relevante: flags preop estrictas, threshold=1"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_via_aerea
+      - flag_induccion
+      - flag_tiempos
+      - flag_tecnica
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_c_alta_severidad:
+    threshold: 2
+    apply_cancel_non_medico_rule: true
+    description: "Target C - Alta Severidad: mismas flags que B, threshold=2"
+    flags:
+      - flag_cancelacion
+      - flag_reservas
+      - flag_via_aerea
+      - flag_induccion
+      - flag_tiempos
+      - flag_tecnica
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_d_eventos_adversos:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target D - Eventos Adversos: flags clínicamente refinadas, objetivo 15-30%"
+    flags:
+      - flag_cancelacion
+      - flag_via_aerea
+      - flag_liquidos
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_estancia
+      - flag_seguimiento
+
+  target_d_v2:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target D-v2: flags intraoperatorios refinados sin ruido de registro"
+    flags:
+      - flag_via_aerea
+      - flag_estancia
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_liquidos
+      - flag_seguimiento
+    subflag_logic:
+      flag_via_aerea_r: "flag_intubacion_dificil OR flag_tipo_intubacion_complejo OR flag_elemento_via_aerea_complejo"
+      flag_estancia_r: "flag_uci_no_planeada OR flag_estancia_uci"
+      flag_desenlace_r: "flag_destino_uci OR (flag_intubado_salida AND flag_uci_no_planeada)"
+      _target_flags: "flag_via_aerea_r OR flag_estancia_r OR flag_desenlace_r OR flag_complicaciones_medicas OR flag_liquidos OR flag_seguimiento"
+
+  target_d_v2_hosp:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target D-v2+hosp: D-v2 más hospitalización no anticipada (25.8% positivos)"
+    flags:
+      - flag_via_aerea
+      - flag_estancia
+      - flag_desenlace
+      - flag_complicaciones_medicas
+      - flag_liquidos
+      - flag_seguimiento
+    subflag_logic:
+      flag_via_aerea_r: "flag_intubacion_dificil OR flag_tipo_intubacion_complejo OR flag_elemento_via_aerea_complejo"
+      flag_estancia_r: "flag_uci_no_planeada OR flag_estancia_uci"
+      flag_desenlace_r: "flag_destino_uci OR (flag_intubado_salida AND flag_uci_no_planeada)"
+      _target_flags: "flag_via_aerea_r OR flag_estancia_r OR flag_desenlace_r OR flag_complicaciones_medicas OR flag_liquidos OR flag_seguimiento OR flag_hospitalizacion_no_anticipada"
+
+  target_d_v5:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target D-v5: solo eventos de alta severidad + hospitalización no anticipada (23.3% positivos)"
+    flags:
+      - flag_desenlace
+      - flag_estancia
+      - flag_complicaciones_medicas
+      - flag_liquidos
+      - flag_seguimiento
+      - flag_via_aerea
+    subflag_logic:
+      _target_flags: "flag_destino_uci OR flag_uci_no_planeada OR flag_complicaciones_medicas OR flag_intubacion_dificil OR flag_aferesis OR flag_perdidas_altas OR flag_urgencias_30_dias OR flag_hospitalizacion_no_anticipada"
+
+  target_e_alta_senal:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target E - Señal Alta: solo flags con MI>0.01 desde preop"
+    flags:
+      - flag_estancia
+      - flag_tecnica
+      - flag_tiempos
+      - flag_fisiologicas

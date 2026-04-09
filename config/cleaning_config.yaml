@@ -1,0 +1,25 @@
+# Columnas identificadoras — se eliminan antes del modelado
+identifier_columns:
+  - CODIGO
+
+# Columnas a eliminar por fuga de datos u otras razones clínicas
+leakage_columns: []
+
+# Filtro de edad mínima
+age_filter:
+  column: "Edad"
+  min: 18
+
+# Reglas de outliers por columna: valores fuera del rango se marcan como nulos
+outlier_rules:
+  Edad:
+    min: 0
+    max: 120
+
+# Encoding: correcciones de nombres de columnas con caracteres problemáticos
+# (se completan al implementar src/cleaning/ en Plan 2)
+encoding_fixes: {}
+
+# APIs y modelos auxiliares usados durante la limpieza
+# (se completan al implementar src/cleaning/ en Plan 2)
+external_services: {}

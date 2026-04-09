@@ -1,0 +1,26 @@
+Feature,Importance,Source
+Tipo de anestesia propuesta_raquidea,1.1866307506812401,abs_coef
+Tipo de anestesia propuesta_sedacion,1.1707587057859838,abs_coef
+Tipo de anestesia propuesta_local,0.5446750785591702,abs_coef
+Tipo de anestesia propuesta_peridural,0.5249715879585657,abs_coef
+Dx Preoperatorio Code_O,0.4024867886762873,abs_coef
+Procedimiento propuesto Code_L,0.3782691956714419,abs_coef
+Dx Preoperatorio Code_S,0.32467158969817045,abs_coef
+Grupo Sanguíneo_Sin Dato,0.31434219367479654,abs_coef
+RH_Sin Dato,0.3142478630066251,abs_coef
+Dx Preoperatorio Code_H,0.26880394600081337,abs_coef
+Dx Preoperatorio Code_Z,0.2609782691984741,abs_coef
+Antecedente hematológicos _negativo,0.21723426683879465,abs_coef
+Grupo Sanguíneo_O,0.20899176128121488,abs_coef
+Dx Preoperatorio Code_A,0.19292459173837068,abs_coef
+Tipo de anestesia propuesta_general,0.19048624843845463,abs_coef
+Antecedente renales_negativo,0.18170695274848092,abs_coef
+Examen_PT (INR),0.18082812415213023,abs_coef
+score_proc_high_severity,0.17658657475777517,abs_coef
+Procedimiento propuesto Code_S,0.16018927151716064,abs_coef
+score_dx_high_severity,0.1539548333353303,abs_coef
+Procedimiento propuesto Code_NO ENCONTRADO,0.1251132964373924,abs_coef
+Antecedente renales_litiasis,0.1204309435681702,abs_coef
+Prótesis Dental_no,0.11337911693385472,abs_coef
+score_proc_critical,0.09490259019011446,abs_coef
+Grupo Sanguíneo_A,0.08850504121106485,abs_coef
