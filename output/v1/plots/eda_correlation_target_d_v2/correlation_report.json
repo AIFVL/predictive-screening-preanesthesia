@@ -1,0 +1,46 @@
+{
+  "target": "target_d_v2",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.02771817223885109
+    },
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.027063266414082632
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.02654017869843983
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.02572210380574913
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.02505524773414458
+    },
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.02449351297361102
+    },
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.02400141204270656
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.02263432799596199
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.02091215549681391
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.01586216781946148
+    }
+  ]
+}

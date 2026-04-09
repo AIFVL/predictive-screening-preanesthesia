@@ -1,0 +1,131 @@
+models:
+  logistic_regression:
+    enabled: true
+    module: "sklearn.linear_model"
+    class: "LogisticRegression"
+    target_metric: "f2"
+    calibrate: false
+    params:
+      C: 1.0
+      class_weight: "balanced"
+      solver: "lbfgs"
+      max_iter: 1000
+    search_space:
+      C: [0.01, 0.1, 1.0, 10.0, 100.0]
+
+  random_forest:
+    enabled: true
+    module: "sklearn.ensemble"
+    class: "RandomForestClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      n_estimators: 300
+      max_depth: null
+      class_weight: "balanced"
+      n_jobs: -1
+    search_space:
+      n_estimators: [100, 200, 300, 500]
+      max_depth: [null, 5, 10, 20]
+
+  extra_trees:
+    enabled: true
+    module: "sklearn.ensemble"
+    class: "ExtraTreesClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      n_estimators: 300
+      max_depth: null
+      class_weight: "balanced"
+      n_jobs: -1
+
+  xgboost:
+    enabled: true
+    module: "xgboost"
+    class: "XGBClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      n_estimators: 300
+      learning_rate: 0.05
+      max_depth: 6
+      subsample: 0.8
+      colsample_bytree: 0.8
+      eval_metric: "logloss"
+      n_jobs: -1
+    search_space:
+      n_estimators: [100, 300, 500]
+      learning_rate: [0.01, 0.05, 0.1]
+      max_depth: [4, 6, 8]
+
+  hist_gradient_boosting:
+    enabled: true
+    module: "sklearn.ensemble"
+    class: "HistGradientBoostingClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      max_iter: 300
+      learning_rate: 0.05
+      max_depth: null
+    search_space:
+      max_iter: [100, 200, 300]
+      learning_rate: [0.01, 0.05, 0.1]
+
+  lightgbm:
+    enabled: true
+    module: "lightgbm"
+    class: "LGBMClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      n_estimators: 300
+      learning_rate: 0.05
+      max_depth: -1
+      num_leaves: 31
+      class_weight: "balanced"
+      n_jobs: -1
+      verbosity: -1
+
+  mlp:
+    enabled: true
+    module: "sklearn.neural_network"
+    class: "MLPClassifier"
+    target_metric: "f2"
+    calibrate: true
+    params:
+      hidden_layer_sizes: [128, 64]
+      activation: "relu"
+      max_iter: 500
+      early_stopping: true
+      validation_fraction: 0.1
+      random_state: 42
+
+  stacking:
+    enabled: true
+    module: "sklearn.ensemble"
+    class: "StackingClassifier"
+    target_metric: "f2"
+    calibrate: false
+    estimators:
+      - random_forest
+      - xgboost
+      - hist_gradient_boosting
+    meta_estimator: logistic_regression
+    params:
+      cv: 5
+      passthrough: false
+
+  voting:
+    enabled: true
+    module: "sklearn.ensemble"
+    class: "VotingClassifier"
+    target_metric: "f2"
+    calibrate: false
+    estimators:
+      - random_forest
+      - xgboost
+      - hist_gradient_boosting
+    params:
+      voting: "soft"

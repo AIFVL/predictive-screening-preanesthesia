@@ -1,0 +1,10 @@
+{
+  "rows_before": 30962,
+  "rows_after": 24279,
+  "rows_removed": 6683,
+  "cols_before": 236,
+  "cols_after": 238,
+  "cols_dropped": [],
+  "null_pct_before": 0.0,
+  "null_pct_after": 0.0
+}

@@ -1,0 +1,24 @@
+pipeline_version: "v1"
+dataset_version: "v1"
+
+paths:
+  raw_data: "/opt/airflow/project/data_raw"
+  output: "/opt/airflow/project/output"
+
+train_test_split:
+  test_size: 0.2
+  random_state: 42
+
+cross_validation:
+  n_folds: 10
+  n_jobs: -1
+
+threshold:
+  optimize_for: "recall_constraint"
+  recall_min: 0.85
+
+hyperparameter_search:
+  enabled: false
+  n_iter: 70
+  scoring: "f2"
+  cv_folds: 10

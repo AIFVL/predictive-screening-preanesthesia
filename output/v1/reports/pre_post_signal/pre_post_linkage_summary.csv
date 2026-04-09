@@ -1,0 +1,4 @@
+Version,Post_Variable,Prevalencia,Max_MI,Max_Pearson,N_Features_Informativas,Top3_Features_PRE
+target_d_v2,target,0.1693,0.03074,0.15389,11,score_proc_moderate_severity | score_proc_medium_severity | score_proc_low_severity
+target_d_v2_hosp,target,0.2769,0.10032,0.23227,16,score_proc_high_severity | score_proc_moderate_severity | score_proc_medium_severity
+target_d_v5,target,0.2563,0.10657,0.25063,16,score_proc_high_severity | score_proc_moderate_severity | score_proc_low_severity

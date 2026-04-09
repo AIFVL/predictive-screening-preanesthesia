@@ -1,6 +1,7 @@
 from .merge_pipeline import run_merge_pipeline
 from .feature_selection_pipeline import run_feature_selection_pipeline
 from .modeling_pipeline import run_modeling_pipeline, run_hyperparameter_experiments
+from .pre_post_analysis import run_pre_post_linkage_analysis
 from .validation_pipeline import (
     run_target_prevalence_analysis,
     run_target_signal_analysis,
@@ -25,4 +26,5 @@ __all__ = [
     "run_subgroup_analysis",
     "compute_final_ranking",
     "generate_clinical_review_cases",
+    "run_pre_post_linkage_analysis",
 ]

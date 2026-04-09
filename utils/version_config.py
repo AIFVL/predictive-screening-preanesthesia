@@ -29,7 +29,7 @@ PREOP_STRICT_FLAGS = [
 ]
 
 # ---------------------------------------------------------------------------
-# 3 versiones clínicas congeladas (Target A / B / C)
+# Versiones clínicas congeladas (Target A / B / C / D)
 # ---------------------------------------------------------------------------
 # Target A – Sensible: todas las flags, threshold=1
 TARGET_A_FLAGS = list(ALL_FLAGS)
@@ -37,6 +37,24 @@ TARGET_A_FLAGS = list(ALL_FLAGS)
 TARGET_B_FLAGS = list(PREOP_FOCUS_FLAGS)
 # Target C – Alta Severidad: mismas flags que B, threshold=2
 TARGET_C_FLAGS = list(PREOP_FOCUS_FLAGS)
+# Target D – Eventos Adversos: flags clínicamente refinadas (solo complicaciones reales)
+# Excluye intervenciones planeadas (tecnica, tiempos, induccion) y precauciones (reservas)
+# Usa umbrales revisados en via_aerea (≥3), liquidos (perdidas>1000, balance<-1000|>2000)
+# y estancia (solo no planeada/UCI). Objetivo: tasa 15-30%.
+TARGET_D_FLAGS = list(RELEVANT_FLAGS)
+
+# Target E – Señal Alta (experimento de techo):
+# Solo los flags que demostraron señal predictiva real desde el preoperatorio
+# según análisis de Información Mutua (MI > 0.01) en run_pre_post_linkage_analysis.
+# Seleccionados: flag_estancia (MI=0.13), flag_tecnica (MI=0.05), flag_tiempos (MI=0.04),
+# flag_fisiologicas (MI=0.02). El resto de flags tienen MI ≈ 0.007 (ruido).
+# Propósito: establecer el techo de rendimiento alcanzable con los datos actuales.
+TARGET_E_FLAGS = [
+    "flag_estancia",     # MI=0.1297 — el más predictible (hospitalizacion no anticipada/UCI)
+    "flag_tecnica",      # MI=0.0530 — técnica combinada/monitoreo avanzado (decisión planeada)
+    "flag_tiempos",      # MI=0.0429 — duración larga (cirugías complejas planificadas)
+    "flag_fisiologicas", # MI=0.0209 — alteraciones fisiológicas intraop (FC, TA, SatO2, Tº)
+]
 
 
 RECOMMENDED_EXPERIMENTAL_VERSION_SPECS: list[dict] = [
@@ -63,6 +81,22 @@ RECOMMENDED_EXPERIMENTAL_VERSION_SPECS: list[dict] = [
         "apply_cancel_non_medico_rule": True,
         "export_name": "OPERA_POS_target_c_alta_severidad.xlsx",
         "description": "Target C - Alta Severidad: mismas flags que B, threshold=2",
+    },
+    {
+        "version": "target_d_eventos_adversos",
+        "threshold": 1,
+        "flags_to_use": TARGET_D_FLAGS,
+        "apply_cancel_non_medico_rule": True,
+        "export_name": "OPERA_POS_target_d_eventos_adversos.xlsx",
+        "description": "Target D - Eventos Adversos: flags refinadas clínicamente, threshold=1 (objetivo: 15-30%)",
+    },
+    {
+        "version": "target_e_alta_senal",
+        "threshold": 1,
+        "flags_to_use": TARGET_E_FLAGS,
+        "apply_cancel_non_medico_rule": True,
+        "export_name": "OPERA_POS_target_e_alta_senal.xlsx",
+        "description": "Target E - Señal Alta: solo flags con MI>0.01 desde preop (techo de rendimiento alcanzable)",
     },
 ]
 
@@ -91,6 +125,22 @@ TARGET_VERSION_CATALOG: dict[str, dict] = {
         "apply_cancel_non_medico_rule": True,
         "export_name": "OPERA_POS_target_c_alta_severidad.xlsx",
         "description": "Target C - Alta Severidad: mismas flags que B, threshold=2",
+    },
+    "target_d_eventos_adversos": {
+        "name": "target_d_eventos_adversos",
+        "threshold": 1,
+        "flags_to_use": TARGET_D_FLAGS,
+        "apply_cancel_non_medico_rule": True,
+        "export_name": "OPERA_POS_target_d_eventos_adversos.xlsx",
+        "description": "Target D - Eventos Adversos: flags refinadas clínicamente, threshold=1 (objetivo: 15-30%)",
+    },
+    "target_e_alta_senal": {
+        "name": "target_e_alta_senal",
+        "threshold": 1,
+        "flags_to_use": TARGET_E_FLAGS,
+        "apply_cancel_non_medico_rule": True,
+        "export_name": "OPERA_POS_target_e_alta_senal.xlsx",
+        "description": "Target E - Señal Alta: solo flags con MI>0.01 desde preop (techo de rendimiento alcanzable)",
     },
 }
 
@@ -134,6 +184,8 @@ ACTIVE_VERSIONS: list[str] = [
     "target_a_sensible",
     "target_b_clinicamente_relevante",
     "target_c_alta_severidad",
+    "target_d_eventos_adversos",
+    "target_e_alta_senal",
 ]
 
 

@@ -1,0 +1,245 @@
+[
+  {
+    "target": "target_d_v2",
+    "model": "hist_gradient_boosting",
+    "F2": 0.5138557533492384,
+    "ROC_AUC": 0.6482923888286665,
+    "Recall": 0.8832807570977917,
+    "Precision": 0.1922416752488843,
+    "Threshold": 0.11000000000000001
+  },
+  {
+    "target": "target_d_v2",
+    "model": "stacking",
+    "F2": 0.5136092468307233,
+    "ROC_AUC": 0.6434864337072539,
+    "Recall": 0.8690851735015773,
+    "Precision": 0.19483734087694485,
+    "Threshold": 0.39000000000000007
+  },
+  {
+    "target": "target_d_v2",
+    "model": "random_forest",
+    "F2": 0.5126771066368382,
+    "ROC_AUC": 0.6396211161589711,
+    "Recall": 0.8675078864353313,
+    "Precision": 0.19448373408769448,
+    "Threshold": 0.12000000000000001
+  },
+  {
+    "target": "target_d_v2",
+    "model": "voting",
+    "F2": 0.5117093859487368,
+    "ROC_AUC": 0.642885562443922,
+    "Recall": 0.8753943217665615,
+    "Precision": 0.19224108070661586,
+    "Threshold": 0.11000000000000001
+  },
+  {
+    "target": "target_d_v2",
+    "model": "xgboost",
+    "F2": 0.5097437748105377,
+    "ROC_AUC": 0.6345000081198819,
+    "Recall": 0.8911671924290221,
+    "Precision": 0.18795741849634065,
+    "Threshold": 0.11000000000000001
+  },
+  {
+    "target": "target_d_v2",
+    "model": "logistic_regression",
+    "F2": 0.5061032863849765,
+    "ROC_AUC": 0.6288356292299508,
+    "Recall": 0.8501577287066246,
+    "Precision": 0.19325923269989242,
+    "Threshold": 0.42000000000000004
+  },
+  {
+    "target": "target_d_v2",
+    "model": "mlp",
+    "F2": 0.503213802435724,
+    "ROC_AUC": 0.5225065365049593,
+    "Recall": 0.9384858044164038,
+    "Precision": 0.1762440758293839,
+    "Threshold": 0.14
+  },
+  {
+    "target": "target_d_v2",
+    "model": "lightgbm",
+    "F2": 0.501448225923244,
+    "ROC_AUC": 0.6237665391845203,
+    "Recall": 0.8738170347003155,
+    "Precision": 0.1854082998661312,
+    "Threshold": 0.11000000000000001
+  },
+  {
+    "target": "target_d_v2",
+    "model": "extra_trees",
+    "F2": 0.49642136171774637,
+    "ROC_AUC": 0.6325083533285427,
+    "Recall": 0.8533123028391167,
+    "Precision": 0.18571918983865432,
+    "Threshold": 0.12000000000000001
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "lightgbm",
+    "F2": 0.6766687078995713,
+    "ROC_AUC": 0.7613836119933681,
+    "Recall": 0.8532818532818532,
+    "Precision": 0.37018425460636517,
+    "Threshold": 0.18000000000000005
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "stacking",
+    "F2": 0.676145817576766,
+    "ROC_AUC": 0.760763654056337,
+    "Recall": 0.862934362934363,
+    "Precision": 0.36238346169436564,
+    "Threshold": 0.34
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "xgboost",
+    "F2": 0.6759398496240602,
+    "ROC_AUC": 0.7590992560504756,
+    "Recall": 0.8677606177606177,
+    "Precision": 0.3587390263367917,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "hist_gradient_boosting",
+    "F2": 0.6750037667620913,
+    "ROC_AUC": 0.7560524374548765,
+    "Recall": 0.8648648648648649,
+    "Precision": 0.3594063377456879,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "voting",
+    "F2": 0.6746273197444478,
+    "ROC_AUC": 0.7601593912569522,
+    "Recall": 0.8561776061776062,
+    "Precision": 0.36502057613168726,
+    "Threshold": 0.19
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "extra_trees",
+    "F2": 0.6714520711828922,
+    "ROC_AUC": 0.7462551044868118,
+    "Recall": 0.8667953667953668,
+    "Precision": 0.353126228863547,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "random_forest",
+    "F2": 0.6686177397568662,
+    "ROC_AUC": 0.7592768964720183,
+    "Recall": 0.86003861003861,
+    "Precision": 0.3537117903930131,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "mlp",
+    "F2": 0.6590574374079529,
+    "ROC_AUC": 0.7063084822231164,
+    "Recall": 0.8638996138996139,
+    "Precision": 0.3382464096749811,
+    "Threshold": 0.19
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "logistic_regression",
+    "F2": 0.6538009979454065,
+    "ROC_AUC": 0.7051368758685832,
+    "Recall": 0.86003861003861,
+    "Precision": 0.33370786516853934,
+    "Threshold": 0.38000000000000006
+  },
+  {
+    "target": "target_d_v5",
+    "model": "voting",
+    "F2": 0.6642969984202212,
+    "ROC_AUC": 0.7610795770687291,
+    "Recall": 0.8769551616266945,
+    "Precision": 0.3372093023255814,
+    "Threshold": 0.16000000000000003
+  },
+  {
+    "target": "target_d_v5",
+    "model": "stacking",
+    "F2": 0.6609241668008372,
+    "ROC_AUC": 0.761455762436692,
+    "Recall": 0.8561001042752867,
+    "Precision": 0.3456842105263158,
+    "Threshold": 0.33
+  },
+  {
+    "target": "target_d_v5",
+    "model": "hist_gradient_boosting",
+    "F2": 0.6593670076726342,
+    "ROC_AUC": 0.7534262281384407,
+    "Recall": 0.8602711157455682,
+    "Precision": 0.3409090909090909,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v5",
+    "model": "xgboost",
+    "F2": 0.6587758916056689,
+    "ROC_AUC": 0.7599633856233492,
+    "Recall": 0.8821689259645464,
+    "Precision": 0.32727272727272727,
+    "Threshold": 0.15000000000000002
+  },
+  {
+    "target": "target_d_v5",
+    "model": "lightgbm",
+    "F2": 0.657519035532995,
+    "ROC_AUC": 0.7599135523026928,
+    "Recall": 0.8644421272158499,
+    "Precision": 0.3358995137763371,
+    "Threshold": 0.16000000000000003
+  },
+  {
+    "target": "target_d_v5",
+    "model": "random_forest",
+    "F2": 0.6563954421441182,
+    "ROC_AUC": 0.7587151171438987,
+    "Recall": 0.8529718456725756,
+    "Precision": 0.341544885177453,
+    "Threshold": 0.16000000000000003
+  },
+  {
+    "target": "target_d_v5",
+    "model": "extra_trees",
+    "F2": 0.6545425412594136,
+    "ROC_AUC": 0.7569643939050477,
+    "Recall": 0.8519290928050052,
+    "Precision": 0.33970893970893973,
+    "Threshold": 0.16000000000000003
+  },
+  {
+    "target": "target_d_v5",
+    "model": "mlp",
+    "F2": 0.6476484194294526,
+    "ROC_AUC": 0.7252971920609899,
+    "Recall": 0.8759124087591241,
+    "Precision": 0.3171007927519819,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v5",
+    "model": "logistic_regression",
+    "F2": 0.6446516037288671,
+    "ROC_AUC": 0.7221324015126848,
+    "Recall": 0.8508863399374348,
+    "Precision": 0.32731648616125153,
+    "Threshold": 0.37000000000000005
+  }
+]
