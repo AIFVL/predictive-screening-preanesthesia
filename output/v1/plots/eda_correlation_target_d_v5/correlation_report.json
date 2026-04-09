@@ -1,0 +1,46 @@
+{
+  "target": "target_d_v5",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.09671424556444475
+    },
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.09549208573726364
+    },
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.09548318346794482
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.09412542896243559
+    },
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.09276502882306503
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.08007851930403587
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.07769324162071478
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.0771782536860095
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.07416539962630697
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.07370063265457993
+    }
+  ]
+}
