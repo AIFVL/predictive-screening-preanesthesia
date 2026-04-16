@@ -1,0 +1,235 @@
+Version,Post_Variable,Feature,Mutual_Information,Abs_Pearson,Combined_Score,Prevalencia_Post
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_raquidea,0.038324631355723726,0.30335308893684854,0.11783316863006117,0.1943
+target_f_predictibilidad_maxima,target,score_proc_critical,0.12083892181125155,0.07359942380434445,0.10666707240917941,0.1943
+target_f_predictibilidad_maxima,target,score_proc_high_severity,0.1284698074804369,0.04799123315187092,0.10432623518186711,0.1943
+target_f_predictibilidad_maxima,target,score_proc_medium_severity,0.12472664304349523,0.04401596769165804,0.10051344043794407,0.1943
+target_f_predictibilidad_maxima,target,score_proc_moderate_severity,0.12972278090558387,0.007893105759651672,0.0931738783618042,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_peridural,0.023138078272021634,0.2517447192217987,0.09172007055695475,0.1943
+target_f_predictibilidad_maxima,target,score_proc_low_severity,0.12478815069662219,0.002863188764125018,0.08821066211687303,0.1943
+target_f_predictibilidad_maxima,target,score_dx_high_severity,0.10877134924376297,0.027661405535018627,0.08443836613113967,0.1943
+target_f_predictibilidad_maxima,target,score_dx_medium_severity,0.1095174008764015,0.023246593362332164,0.08363615862218068,0.1943
+target_f_predictibilidad_maxima,target,score_dx_moderate_severity,0.10691915760575665,0.02121417572812,0.08120766304246566,0.1943
+target_f_predictibilidad_maxima,target,score_dx_low_severity,0.1033370201234165,0.029439933225145078,0.08116789405393507,0.1943
+target_f_predictibilidad_maxima,target,score_dx_critical,0.10671212641463002,0.010104008773055392,0.07772969112215762,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_O,0.015651143144657764,0.20799786364363188,0.07335515929434999,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_sedacion,0.020367530000975576,0.18039821771019302,0.0683767363137408,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_local,0.014881970784777376,0.13783582964820257,0.051768128443804934,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_L,0.00660816849175494,0.12419341318337357,0.04188374189924053,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_Z,0.003183364049230697,0.10463536056573933,0.03361896300418329,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_S,0.007041082732239579,0.09307825752563653,0.03285223517025866,0.1943
+target_f_predictibilidad_maxima,target,Antecedente renales_negativo,0.014898070425429122,0.06429476831260783,0.02971707979158273,0.1943
+target_f_predictibilidad_maxima,target,Grupo Sanguíneo_Sin Dato,0.007597996432668452,0.08107772627559826,0.02964191538554739,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_A,0.00549985085008986,0.0842625378901717,0.02912865696211441,0.1943
+target_f_predictibilidad_maxima,target,IMC,0.003892024881733791,0.08763268320584618,0.029014222378967506,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_general,0.008782576017941635,0.07579941677252441,0.02888762824431647,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_H,0.006008456526281458,0.08034809554731895,0.028310348232592705,0.1943
+target_f_predictibilidad_maxima,target,RH_Sin Dato,0.005930529792345096,0.07957291700167761,0.02802324595514485,0.1943
+target_f_predictibilidad_maxima,target,Examen_Hemoglobina(g/dl),0.004846595145147292,0.08012811294601499,0.0274310504854076,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _negativo,0.008231598589571565,0.07054127414209686,0.026924501255329154,0.1943
+target_f_predictibilidad_maxima,target,RH_Positivo,0.0018225414427026632,0.0744060730854647,0.02359760093553127,0.1943
+target_f_predictibilidad_maxima,target,Grupo Sanguíneo_O,0.006248476974048067,0.06130712394412572,0.022766071065071364,0.1943
+target_f_predictibilidad_maxima,target,Estado Nutricional_encoded,0.0020803388424728286,0.06951181150378026,0.022309780640865057,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_NO ENCONTRADO,0.006848271962033747,0.05137104634625406,0.020205104277299837,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_K,0.00010791199828519282,0.06070449250266293,0.018286886149598513,0.1943
+target_f_predictibilidad_maxima,target,Antecedente renales_litiasis,0.001405922264279269,0.0531391653267898,0.016925895183032426,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_S,0.0011529784956583189,0.0518900428408087,0.01637409779920343,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _transfusiones,0.0,0.054333564535765176,0.01630006936072955,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_sin dato,0.0018027058883227642,0.04891748819904589,0.0159371405815397,0.1943
+target_f_predictibilidad_maxima,target,Prótesis Dental_movil,0.0,0.05203830979613356,0.015611492938840068,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_hta,0.0044546476818667635,0.040435509206278065,0.015248906139190154,0.1943
+target_f_predictibilidad_maxima,target,Condición_embarazo actual,0.00195833979088067,0.04481851340100695,0.014816391873918552,0.1943
+target_f_predictibilidad_maxima,target,Tensión Arterial Media (mm/Hg),0.003996360813117716,0.0390703907860865,0.01451856980500835,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_NO ENCONTRADO,0.00559631306412256,0.0341663905518966,0.014167336310454772,0.1943
+target_f_predictibilidad_maxima,target,Antecedente renales_infeccion urinaria,0.0024999057869081742,0.04054814204227716,0.013914376663518871,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_negativo,0.0016813112061542235,0.04243899022269816,0.013908614911117405,0.1943
+target_f_predictibilidad_maxima,target,Grupo Sanguíneo_A,0.0014844690388955417,0.042894505785938494,0.013907480063008428,0.1943
+target_f_predictibilidad_maxima,target,Examen_PT (INR),0.0013248930629923272,0.043118526377458465,0.013862983057332169,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_D,0.0,0.04611868450895906,0.013835605352687718,0.1943
+target_f_predictibilidad_maxima,target,Abdomen_normal,3.0184891220086385e-05,0.045720179966655054,0.013737183413850577,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_G,0.0,0.045784527213725924,0.013735358164117776,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _aspirina,4.6280419299771225e-05,0.04454640693746826,0.013396318374750318,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_E,0.003352188922286947,0.03622655181096945,0.013214497788891697,0.1943
+target_f_predictibilidad_maxima,target,predicted_label_proc_encoded,0.0022566289034988696,0.036981819351242826,0.012674186037822055,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_P,0.0,0.04198219633298048,0.012594658899894145,0.1943
+target_f_predictibilidad_maxima,target,Abdomen_otro,0.003637694213554976,0.0331870273832248,0.012502494164455922,0.1943
+target_f_predictibilidad_maxima,target,Tensión Arterial Sistólica (mm/Hg),0.0012303040743566473,0.037975906094387946,0.012253984680366037,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_C,0.0,0.04055119599058881,0.012165358797176644,0.1943
+target_f_predictibilidad_maxima,target,Prótesis Dental_no,0.004903961771697496,0.02898494852689017,0.012128257798255299,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_J,0.0016890279692929333,0.036223922041361066,0.012049496190913372,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_G,0.0008193320840554907,0.036664949549025466,0.011573017323546483,0.1943
+target_f_predictibilidad_maxima,target,Peso (Kg),0.0,0.03840374009500513,0.011521122028501538,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_Q,0.0008557007942948669,0.0352967177601775,0.011188005884059656,0.1943
+target_f_predictibilidad_maxima,target,Antecedente endocrinológicos_negativo,0.004066855592788743,0.02677860352773025,0.010880379973271195,0.1943
+target_f_predictibilidad_maxima,target,Abdomen_distension,0.004000737499459284,0.02643074290901287,0.010729739122325358,0.1943
+target_f_predictibilidad_maxima,target,Antecedente gastrointestinales_rge,0.0001319112779130105,0.035442643902867665,0.010725131065399407,0.1943
+target_f_predictibilidad_maxima,target,Puntaje Mallampati,0.0,0.035443873414402714,0.010633162024320814,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_neoplasia,0.0030650783859988984,0.02774157615128342,0.010468027715584253,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_neuropatia,0.003974465053434351,0.0252349201806361,0.010352601591594875,0.1943
+target_f_predictibilidad_maxima,target,Sistema cardiovascular_normal,0.008172921392324062,0.015275594794612558,0.010303723413010609,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_sedacion,0.004919746079505405,0.022686827472864508,0.010249870497513136,0.1943
+target_f_predictibilidad_maxima,target,Abdomen_masas,0.000843341954601895,0.03150867908955598,0.01004294309508812,0.1943
+target_f_predictibilidad_maxima,target,Sistema Nervioso_normal,0.0013324741190419154,0.028898862989291743,0.009602390780116864,0.1943
+target_f_predictibilidad_maxima,target,Sistema Nervioso_Sin dato,0.0012764904257005494,0.02853184059857909,0.00945309547756411,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_conductiva,0.0,0.030556535548865168,0.00916696066465955,0.1943
+target_f_predictibilidad_maxima,target,score_proc_ant_moderate_severity,0.005835623947914703,0.01687213147097105,0.009146576204831607,0.1943
+target_f_predictibilidad_maxima,target,anio,0.0,0.03034011836741241,0.009102035510223722,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_espinal,0.000555312291538268,0.029027316618073715,0.009096913589498903,0.1943
+target_f_predictibilidad_maxima,target,Tensión Arterial Diastólica (mm/Hg),0.0,0.02989801722937604,0.008969405168812812,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_E,0.002171612729047645,0.024673462603851847,0.008922167691488906,0.1943
+target_f_predictibilidad_maxima,target,score_proc_ant_critical,0.005397041177507722,0.017088053765971296,0.008904344954046794,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_nan,0.005958549944036662,0.014257244317640782,0.008448158256117898,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_A,0.002312330229823134,0.02215587042654884,0.008265392288840845,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_bloqueo n,0.0,0.027317960052046234,0.00819538801561387,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_Q,0.004819057519577008,0.016066394944219246,0.008193258746969679,0.1943
+target_f_predictibilidad_maxima,target,Grupo Sanguíneo_B,0.003976666827679276,0.017420807459535205,0.008009909017236054,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_M,0.002642617142518011,0.02046711622512716,0.007989966867300757,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _anemia,1.6607299979654044e-08,0.026328157358197636,0.007898458832569276,0.1943
+target_f_predictibilidad_maxima,target,Antecedente endocrinológicos_diabetes,0.0,0.026047284349128366,0.00781418530473851,0.1943
+target_f_predictibilidad_maxima,target,Condición_ninguna,0.004588869037447374,0.015203438166620514,0.007773239776199316,0.1943
+target_f_predictibilidad_maxima,target,score_proc_ant_low_severity,0.004846989947027369,0.013795199776256985,0.007531452895796253,0.1943
+target_f_predictibilidad_maxima,target,Sexo_encoded,0.0014170941936759718,0.02176778855385877,0.007522302501730811,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_trastorno psiquiatrico,0.00036864811034953426,0.023946332476611997,0.007441953420228273,0.1943
+target_f_predictibilidad_maxima,target,recalculado_flag,0.0,0.02474525292063058,0.007423575876189174,0.1943
+target_f_predictibilidad_maxima,target,Examen_Hematocrito (%),0.0,0.02447700091058242,0.007343100273174726,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_P,0.0,0.02421745022503369,0.007265235067510107,0.1943
+target_f_predictibilidad_maxima,target,Antecedente gastrointestinales_negativo,0.004354384166457725,0.013586948516247858,0.007124153471394765,0.1943
+target_f_predictibilidad_maxima,target,Examen_P de O,0.004459871035697338,0.013314307509713349,0.007116201977902141,0.1943
+target_f_predictibilidad_maxima,target,Color de Piel_normal,0.005096929700045383,0.011708108688612998,0.007080283396615667,0.1943
+target_f_predictibilidad_maxima,target,RH_Negativo,0.0,0.023295170360032768,0.00698855110800983,0.1943
+target_f_predictibilidad_maxima,target,predicted_label_proc_ant_encoded,0.002270655744458061,0.017848858538749228,0.006944116582745411,0.1943
+target_f_predictibilidad_maxima,target,Sistema Respiratorio_disnea,0.0030718880568334495,0.015976810702363325,0.006943364850492411,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_V,0.0018011844372103347,0.01843555292536507,0.006791494983656755,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_L,0.0003223230830831092,0.021319674166019376,0.006621528407963989,0.1943
+target_f_predictibilidad_maxima,target,score_proc_ant_high_severity,0.002423380239263251,0.016141224021778797,0.0065387333740179136,0.1943
+target_f_predictibilidad_maxima,target,Antecedente renales_falla renal,0.0016010379169202338,0.01797911538646097,0.006514461157782455,0.1943
+target_f_predictibilidad_maxima,target,Examen_Plaquetas (ml),0.0007482880713869378,0.019728487298728215,0.006442347839589321,0.1943
+target_f_predictibilidad_maxima,target,Talla (cm),0.0003459423580391974,0.020575269865977096,0.006414740610420566,0.1943
+target_f_predictibilidad_maxima,target,Edad,0.003977461055035825,0.011330577692847274,0.006183396046379259,0.1943
+target_f_predictibilidad_maxima,target,Respuesta Motora_encoded,0.003118768015780038,0.013272772190276871,0.006164969268129088,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_F,0.0007717994723550614,0.018707781516030444,0.0061525940854576765,0.1943
+target_f_predictibilidad_maxima,target,Prótesis Dental_fija,0.003077927525912516,0.01323365098531843,0.00612464456373429,0.1943
+target_f_predictibilidad_maxima,target,Apertura Visual_encoded,0.00229976163968737,0.014945402790829,0.0060934539850298584,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_general,0.0002767754347228202,0.019534602938262244,0.006054123685784648,0.1943
+target_f_predictibilidad_maxima,target,Sistema Respiratorio_normal,0.003145963442430455,0.012457857637025683,0.005939531700809023,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_peribulbar,0.004004513386645092,0.01024279193866906,0.005875996952252282,0.1943
+target_f_predictibilidad_maxima,target,Antecedente gastrointestinales_gastritis,0.005165377087115175,0.007197019131176719,0.005774869700333638,0.1943
+target_f_predictibilidad_maxima,target,Antecedente endocrinológicos_obesidad,0.00238535287794428,0.013198550976084704,0.005629312307386407,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_raquidea,0.0,0.018664864922017483,0.005599459476605245,0.1943
+target_f_predictibilidad_maxima,target,Examen_Na (meq/L),0.0,0.018233028796280297,0.005469908638884089,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_gastrointestinal,0.0013015092585419996,0.014863852214462339,0.005370212145318101,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_M,0.0001735928953841004,0.01734070790285552,0.005323727397625526,0.1943
+target_f_predictibilidad_maxima,target,Arritmia_encoded,0.0025319853156151595,0.011712821377495583,0.005286236134179286,0.1943
+target_f_predictibilidad_maxima,target,Disnea_encoded,0.0006214441898373391,0.015976810702363325,0.005228054143595135,0.1943
+target_f_predictibilidad_maxima,target,Cuello Móvil_encoded,0.0037327451831195013,0.0086267651932173,0.00520095118614884,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _plavix,0.0019106114715385925,0.012799707132398,0.005177340169796414,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_valvulopatia,0.0,0.01717612716064437,0.005152838148193311,0.1943
+target_f_predictibilidad_maxima,target,Color de Piel_ictericia,0.0,0.016489810534341367,0.00494694316030241,0.1943
+target_f_predictibilidad_maxima,target,score_proc_ant_medium_severity,0.0026822773508703435,0.009618489558641755,0.004763141013201767,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_L,2.6548439601592477e-05,0.015665119757845944,0.004718119835074897,0.1943
+target_f_predictibilidad_maxima,target,Condición_testigo jehova,0.0,0.015704923809779996,0.004711477142933998,0.1943
+target_f_predictibilidad_maxima,target,Condición_farmacodependencia,0.0,0.015617977850200847,0.004685393355060254,0.1943
+target_f_predictibilidad_maxima,target,Respuesta Verbal_encoded,0.0,0.015607494846315205,0.004682248453894562,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_cardiopatias,0.0027134097172099025,0.009031059252229736,0.0046087045777158525,0.1943
+target_f_predictibilidad_maxima,target,Antecedente gastrointestinales_falla hepatica,0.0035747821720031325,0.006922955497149791,0.0045792341695471295,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_H,0.0033167487009597707,0.0071438246952993945,0.004464871499261658,0.1943
+target_f_predictibilidad_maxima,target,Antecedente endocrinológicos_tiroides,0.0012274928343254388,0.011994496285544415,0.004457593869691131,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_desconocido,0.0035420985524001747,0.006452012968127983,0.004415072877118517,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_negativo,0.002278833945347891,0.0090569386540119,0.004312265357947094,0.1943
+target_f_predictibilidad_maxima,target,Sistema Nervioso_par craneal anormal,0.0,0.014289482668259728,0.004286844800477918,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_J,0.0034225820827398223,0.006251265176080025,0.004271187010741882,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_infarto,0.0022642343858647607,0.008894760956689122,0.004253392357112069,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_local,0.0,0.014099587882954213,0.004229876364886264,0.1943
+target_f_predictibilidad_maxima,target,Examen_Leucocitos (ml),0.0,0.0140862474829443,0.00422587424488329,0.1943
+target_f_predictibilidad_maxima,target,Examen_K (meq/L),0.0,0.01381595698196796,0.004144787094590388,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_NO ENCONTRADO,0.0006659791110354973,0.01211432542654954,0.004100483005689709,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_urologico,0.0,0.013520380904837046,0.004056114271451114,0.1943
+target_f_predictibilidad_maxima,target,Sistema Nervioso_sedado,0.0,0.013520380904837039,0.004056114271451111,0.1943
+target_f_predictibilidad_maxima,target,predicted_label_dx_encoded,0.005300681862263623,0.0007480251767737294,0.003934884856616655,0.1943
+target_f_predictibilidad_maxima,target,Sistema Respiratorio_auscultacion anormal,0.0017008842460974893,0.00889896881977641,0.0038603096182011653,0.1943
+target_f_predictibilidad_maxima,target,Sistema cardiovascular_otro,0.000666599463982509,0.011258572031487928,0.003844191234234135,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_nan,0.003018132552404129,0.005127739322351092,0.0036510145833882177,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_otro,7.081946497700109e-05,0.01194984192983133,0.003634526204433299,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_B,0.003877792145774439,0.0023839458687139044,0.0034296382626562787,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_R,0.0008556760848270617,0.009247581570755701,0.0033732477306056535,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_peridural,0.0,0.011243719780481295,0.0033731159341443885,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_cardio_renal_hemostasia,0.00226505043490155,0.0059559303158800226,0.0033723143991950914,0.1943
+target_f_predictibilidad_maxima,target,Sistema cardiovascular_soplo,7.161311110825963e-05,0.011018324697113325,0.003355626586909779,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _anticoagulantes,0.0,0.011036112517344623,0.003310833755203387,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_K,0.0,0.011036034646732824,0.003310810394019847,0.1943
+target_f_predictibilidad_maxima,target,Examen_Glicemia (mg/dl),0.0,0.010607762680504057,0.0031823288041512173,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_V,0.0,0.010103325823557894,0.003030997747067368,0.1943
+target_f_predictibilidad_maxima,target,Examen_PTT,0.0,0.010045694561387842,0.0030137083684163525,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_convulsiones,0.0038492393687823423,0.0008987115635761573,0.0029640810272204866,0.1943
+target_f_predictibilidad_maxima,target,Antecedente respiratorios_neumonia,0.0,0.009699331832884144,0.002909799549865243,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_bag,0.0016056925771632535,0.0058478310679183415,0.00287833412438978,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_V,0.003598542402764693,0.0011144270435408062,0.002853307794997527,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_neuroaxial,0.00241268608170353,0.003867447372181991,0.002849114468847068,0.1943
+target_f_predictibilidad_maxima,target,Condición_vih,0.0031282798013863022,0.0021712723783473046,0.0028411775744746027,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_alimentos,0.0,0.009300168213888429,0.0027900504641665286,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_B,0.0,0.009281243992437002,0.0027843731977311007,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_alergias_respiratorio,0.0007834704667817327,0.007113841262626591,0.00268258170553519,0.1943
+target_f_predictibilidad_maxima,target,Condición_hipertermia maligna,0.0010757177951576935,0.006423671521028259,0.002680103912918863,0.1943
+target_f_predictibilidad_maxima,target,Condición_alcohol,7.699949389050609e-05,0.008687961627686232,0.0026602881340292237,0.1943
+target_f_predictibilidad_maxima,target,mes,0.001510999807544433,0.005272504363923815,0.0026394511744582475,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_contacto_hospitalario,0.0006735941479318885,0.007115445101329335,0.0026061494339511223,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_Y,0.00011302988056582919,0.008020797482200703,0.002485360161056291,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_topica,0.0021698370171654435,0.003211629743745162,0.0024823748351393586,0.1943
+target_f_predictibilidad_maxima,target,Apertura Oral_encoded,0.0,0.008184617372249594,0.002455385211674878,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_M,0.0011951134858223522,0.00471413140797772,0.0022508188624689625,0.1943
+target_f_predictibilidad_maxima,target,Tipo de anestesia propuesta_bloqueo iv,0.00012519040606284726,0.007182036668609,0.002242244284826693,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_G,0.001731973885500615,0.003398159274169276,0.0022318295021012133,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_E,0.0008920414307496127,0.00528272829902802,0.002209247491233135,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_T,0.0,0.007143824695299382,0.0021431474085898145,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_antiinfecciosos,0.0028948460817139754,9.336144155971341e-05,0.0020544006896676967,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_B,0.0,0.006830834190263348,0.002049250257079004,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_anestesia_y_relajantes,0.00031868786285005335,0.005998157345564365,0.002022528707664347,0.1943
+target_f_predictibilidad_maxima,target,Color de Piel_palidez,0.0007359096472068227,0.004870225106365897,0.001976204284954545,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_N,0.0,0.006404869789016439,0.0019214609367049316,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_J,0.0005408552777208531,0.005067130768138961,0.0018987379248462854,0.1943
+target_f_predictibilidad_maxima,target,Frecuencia Respiratoria,0.0,0.00600276379093406,0.001800829137280218,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_neuro_psiquiatria,0.0014856732790375915,0.00239572309440142,0.00175868822364674,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_X,0.0010701859611075282,0.0032116297437451793,0.0017126190958988235,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_onco_inmuno_vacunas,0.0,0.005651722983487545,0.0016955168950462637,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_H,0.0,0.0056164423309768225,0.0016849326992930467,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_icc,0.0,0.005615767813169668,0.0016847303439509003,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_regional,0.0009954537215017822,0.00323626092248254,0.0016676958817960095,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_P,0.0012628837352901545,0.0025539764983440938,0.0016502115642063361,0.1943
+target_f_predictibilidad_maxima,target,Grupo Sanguíneo_AB,0.0,0.00533394870170854,0.0016001846105125619,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes anestésicos,0.0,0.005008861422221439,0.0015026584266664316,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_S,0.001774708301794714,0.0008185011498559215,0.0014878461562130762,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_C,8.391502009819085e-05,0.004688242528614507,0.0014652132726530856,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_Q,0.0016798546498351108,0.0006864024728409625,0.0013818189967368662,0.1943
+target_f_predictibilidad_maxima,target,Angina_encoded,0.0,0.0045420274519320375,0.0013626082355796111,0.1943
+target_f_predictibilidad_maxima,target,Atención_encoded,0.0,0.004486808835028704,0.0013460426505086112,0.1943
+target_f_predictibilidad_maxima,target,Color de Piel_cianosis,0.001102225495258402,0.0018398271512648473,0.0013235059920603356,0.1943
+target_f_predictibilidad_maxima,target,Hora_decimal,0.001633462756655657,0.000546165428707059,0.0013072735582710774,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_epidural,0.0,0.004346172109205293,0.0013038516327615879,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_nan,0.001415440425778014,0.0009097175923912615,0.0012637235757619882,0.1943
+target_f_predictibilidad_maxima,target,Sistema cardiovascular_pulso anormal,0.0,0.0041153868107682914,0.0012346160432304873,0.1943
+target_f_predictibilidad_maxima,target,Antecedente respiratorios_negativoneumonia,0.0,0.003978718566763389,0.0011936155700290167,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_opioides,0.0012329317446282406,0.0008918734417940794,0.0011306142537779922,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_ambiental_animales,0.0,0.003421295285549458,0.0010263885856648374,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_K,0.0004927375548773316,0.0022512452526757846,0.0010202898642168675,0.1943
+target_f_predictibilidad_maxima,target,Sistema Respiratorio_otro,0.0,0.003187219369701127,0.0009561658109103382,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_arritmias,5.7526498494775424e-05,0.0029580694783304866,0.0009276893924454887,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_I,0.0,0.002978118623934282,0.0008934355871802846,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_W,0.0006598726613820105,0.0013826387812979,0.0008767024973567773,0.1943
+target_f_predictibilidad_maxima,target,Antecedente respiratorios_negativo,0.0,0.002776078686860733,0.0008328236060582199,0.1943
+target_f_predictibilidad_maxima,target,Sistema cardiovascular_ingurgitacion yugular,0.0,0.0025539764983440747,0.0007661929495032224,0.1943
+target_f_predictibilidad_maxima,target,Condición_hepatitis b,0.0,0.0024133743454167384,0.0007240123036250215,0.1943
+target_f_predictibilidad_maxima,target,Sistema Nervioso_agitado,0.0,0.002251245252675813,0.0006753735758027439,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_C,0.0,0.0021848588258169084,0.0006554576477450724,0.1943
+target_f_predictibilidad_maxima,target,Antecedente respiratorios_epoc,0.0,0.0019455640122262026,0.0005836692036678608,0.1943
+target_f_predictibilidad_maxima,target,Dx Preoperatorio Code_T,0.0,0.0016843297978698126,0.0005052989393609438,0.1943
+target_f_predictibilidad_maxima,target,Antecedente neurológicos_tce,0.0,0.0015753806413309492,0.00047261419239928476,0.1943
+target_f_predictibilidad_maxima,target,Temperatura,0.0,0.0015528815263293125,0.0004658644578987937,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes quirúrgicos Code_A,0.00019656196026796025,0.0009943327386876216,0.0004358931937938586,0.1943
+target_f_predictibilidad_maxima,target,Procedimiento propuesto Code_T,0.0,0.0011202882498529622,0.00033608647495588867,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_med_analgesia_no_opioide,0.0,0.0010479999060181455,0.0003143999718054436,0.1943
+target_f_predictibilidad_maxima,target,dia_semana,0.0,0.0008046590794370291,0.00024139772383110873,0.1943
+target_f_predictibilidad_maxima,target,Antecedentes cardiovasculares_angina,0.0,0.00078646444514364,0.000235939333543092,0.1943
+target_f_predictibilidad_maxima,target,Antecedente respiratorios_asma,0.0,0.0006801672165563612,0.00020405016496690838,0.1943
+target_f_predictibilidad_maxima,target,Alérgeno_suplementos,0.0,0.0005538976502479653,0.0001661692950743896,0.1943
+target_f_predictibilidad_maxima,target,Antecedente hematológicos _discrasias,0.0,0.00020921928601187365,6.27657858035621e-05,0.1943
+target_f_predictibilidad_maxima,target,Anestesia previa_bloqueo,0.0,0.00011741078976101359,3.5223236928304075e-05,0.1943
+target_f_predictibilidad_maxima,target,Condición_fumador,0.0,3.5061115110588774e-05,1.0518334533176632e-05,0.1943

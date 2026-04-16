@@ -1,0 +1,17 @@
+{
+  "Accuracy": 0.6429716729021914,
+  "Recall": 0.8583218707015131,
+  "Precision": 0.3360258481421648,
+  "F1": 0.48297213622291024,
+  "F2": 0.6547743966421826,
+  "ROC_AUC": 0.8481371227311403,
+  "PR_AUC": 0.6889010485412901,
+  "Balanced_Accuracy": 0.724683323410458,
+  "Specificity": 0.591044776119403,
+  "Brier": 0.09940379156586496,
+  "Predicted_Positive_Rate": 0.4962586851950828,
+  "FN_Rate": 0.14167812929848694,
+  "Threshold": 0.13,
+  "threshold": 0.13,
+  "model_name": "hist_gradient_boosting"
+}
