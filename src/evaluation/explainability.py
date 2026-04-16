@@ -132,3 +132,136 @@ def build_case_review_table(
 
     selected["reason"] = selected["case_index"].apply(reason_from_top_features)
     return selected[["case_index", "case_type", "y_true", "y_pred", "y_proba", "reason"]].copy()
+
+
+# ── SHAP ──────────────────────────────────────────────────────────────────────
+
+#: Modelos con TreeExplainer nativo (exacto y rápido).
+_TREE_MODELS = (
+    "RandomForestClassifier",
+    "ExtraTreesClassifier",
+    "XGBClassifier",
+    "LGBMClassifier",
+    "HistGradientBoostingClassifier",
+    "GradientBoostingClassifier",
+)
+
+#: Modelos con LinearExplainer nativo.
+_LINEAR_MODELS = (
+    "LogisticRegression",
+    "LinearSVC",
+    "SGDClassifier",
+    "Ridge",
+)
+
+
+def _unwrap_for_shap(model):
+    """
+    Devuelve (estimator_para_shap, es_unwrapped).
+    Para CalibratedClassifierCV extrae el estimador base del primer fold,
+    que es el que tiene feature_importances_ / coef_ y es compatible con
+    TreeExplainer / LinearExplainer.
+    """
+    from sklearn.calibration import CalibratedClassifierCV
+    if isinstance(model, CalibratedClassifierCV):
+        calibrated = getattr(model, "calibrated_classifiers_", None)
+        if calibrated:
+            base = getattr(calibrated[0], "estimator", None)
+            if base is not None:
+                return base, True
+    return model, False
+
+
+def compute_shap_values(
+    model,
+    X_background: pd.DataFrame,
+    X_explain: pd.DataFrame,
+    model_name: str = "",
+    background_sample_size: int = 200,
+    random_state: int = 42,
+) -> tuple[np.ndarray, float]:
+    """
+    Calcula SHAP values para la clase positiva (índice 1).
+
+    Estrategia por tipo de modelo:
+    - Árbol (RF, ET, XGB, LGBM, HistGB): TreeExplainer — exacto, rápido.
+    - Lineal (LR):                        LinearExplainer — exacto.
+    - Ensamble (Stacking, Voting) / MLP:  KernelExplainer sobre muestra de
+                                          X_background (≤ background_sample_size).
+
+    Parámetros
+    ----------
+    model            : modelo entrenado (puede ser CalibratedClassifierCV).
+    X_background     : datos de referencia (típicamente X_train) para el
+                       background de KernelExplainer.
+    X_explain        : datos a explicar (típicamente X_test o los FN).
+    model_name       : nombre del modelo (str) para elegir el explainer.
+    background_sample_size : máx filas del background para KernelExplainer.
+    random_state     : semilla para el muestreo del background.
+
+    Retorna
+    -------
+    shap_values      : array (n_samples, n_features) — contribución de cada
+                       feature a la predicción de la clase positiva.
+    expected_value   : valor base (probabilidad media del modelo sobre background).
+    """
+    import shap
+
+    inner, was_unwrapped = _unwrap_for_shap(model)
+    cls_name = type(inner).__name__
+
+    # ── TreeExplainer ──────────────────────────────────────────────────────
+    if cls_name in _TREE_MODELS:
+        explainer = shap.TreeExplainer(
+            inner,
+            feature_perturbation="interventional",
+            model_output="probability",
+            data=X_background,
+        )
+        sv = explainer.shap_values(X_explain, check_additivity=False)
+        # shap_values puede ser lista [neg, pos] (sklearn trees) o array (XGB/LGBM)
+        if isinstance(sv, list):
+            shap_vals = sv[1]
+        else:
+            shap_vals = sv
+        ev = explainer.expected_value
+        if isinstance(ev, (list, np.ndarray)):
+            ev = float(ev[1])
+        else:
+            ev = float(ev)
+        return shap_vals, ev
+
+    # ── LinearExplainer ────────────────────────────────────────────────────
+    if cls_name in _LINEAR_MODELS:
+        explainer = shap.LinearExplainer(inner, X_background)
+        sv = explainer.shap_values(X_explain)
+        if isinstance(sv, list):
+            shap_vals = sv[1]
+        else:
+            shap_vals = sv
+        ev = explainer.expected_value
+        if isinstance(ev, (list, np.ndarray)):
+            ev = float(ev[1])
+        else:
+            ev = float(ev)
+        return shap_vals, ev
+
+    # ── KernelExplainer (fallback) ─────────────────────────────────────────
+    # Para Stacking, Voting, MLP y cualquier modelo no reconocido.
+    # Se muestrea el background para mantener tiempos razonables.
+    logger.warning(
+        f"[SHAP] {cls_name} no tiene explainer nativo — usando KernelExplainer "
+        f"(más lento). Background sample = {background_sample_size} filas."
+    )
+    rng = np.random.default_rng(random_state)
+    n = min(background_sample_size, len(X_background))
+    idx = rng.choice(len(X_background), size=n, replace=False)
+    bg_sample = X_background.iloc[idx]
+
+    def _predict_proba_pos(X):
+        return model.predict_proba(X)[:, 1]
+
+    explainer = shap.KernelExplainer(_predict_proba_pos, bg_sample)
+    shap_vals = explainer.shap_values(X_explain, silent=True)
+    ev = float(explainer.expected_value)
+    return shap_vals, ev
