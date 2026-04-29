@@ -1,6 +1,6 @@
 # src/reports/shap_plots.py
 """
-Generación de plots SHAP: beeswarm global y waterfall por caso.
+Generación de plots SHAP: beeswarm global, waterfall por caso y comparación FN vs TP.
 """
 from __future__ import annotations
 
@@ -157,6 +157,103 @@ def save_shap_values(
     np.save(output_dir / f"shap_values_{model_key}.npy", shap_values)
     (output_dir / f"shap_expected_{model_key}.txt").write_text(str(expected_value))
     (output_dir / f"shap_features_{model_key}.txt").write_text(
-        "\n".join(X_explain.columns.tolist())
+        "\n".join(X_explain.columns.tolist()), encoding="utf-8"
     )
     logger.info(f"  SHAP values crudos guardados en {output_dir}")
+
+
+def plot_shap_group_comparison(
+    profiles_df,
+    model_key: str,
+    target_name: str,
+    output_dir: Path,
+    top_n: int = 15,
+) -> None:
+    """
+    Barras horizontales comparando SHAP medio de FN vs TP para las top_n features
+    con mayor diferencia absoluta entre ambos grupos.
+
+    Convención de colores:
+        Verde  (#2ca02c) = TP
+        Naranja (#ff7f0e) = FN
+    Una barra más larga hacia la derecha = esa feature empuja más hacia positivo en ese grupo.
+    Una barra hacia la izquierda = esa feature reduce la probabilidad en ese grupo.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    df = profiles_df.head(top_n).copy()
+    features = df["Feature"].tolist()
+    shap_tp  = df["SHAP_TP"].values
+    shap_fn  = df["SHAP_FN"].values
+    delta    = df["Delta_TP_FN"].values
+
+    n_tp = int(df["N_TP"].iloc[0]) if "N_TP" in df.columns else "?"
+    n_fn = int(df["N_FN"].iloc[0]) if "N_FN" in df.columns else "?"
+
+    y = np.arange(len(features))
+    bar_h = 0.35
+
+    fig, axes = plt.subplots(1, 2, figsize=(15, max(6, top_n * 0.55)),
+                             gridspec_kw={"width_ratios": [3, 1]})
+
+    # ── Panel izquierdo: barras TP vs FN ──────────────────────────────────
+    ax = axes[0]
+    bars_tp = ax.barh(y + bar_h / 2, shap_tp, bar_h,
+                      color="#2ca02c", alpha=0.8, label=f"TP (n={n_tp})")
+    bars_fn = ax.barh(y - bar_h / 2, shap_fn, bar_h,
+                      color="#ff7f0e", alpha=0.8, label=f"FN (n={n_fn})")
+
+    ax.axvline(0, color="black", lw=0.8, alpha=0.5)
+    ax.set_yticks(y)
+    ax.set_yticklabels(
+        [f[:45] + ("…" if len(f) > 45 else "") for f in features],
+        fontsize=9,
+    )
+    ax.invert_yaxis()
+    ax.set_xlabel("SHAP medio (impacto en probabilidad)", fontsize=11)
+    ax.set_title(
+        f"Perfil SHAP: TP vs FN\n{model_key} / {target_name}",
+        fontsize=12, pad=10,
+    )
+    ax.legend(fontsize=10, loc="lower right")
+    ax.grid(True, axis="x", alpha=0.3)
+
+    # Sombreado para destacar dirección opuesta entre grupos
+    for i, (tp, fn) in enumerate(zip(shap_tp, shap_fn)):
+        if np.sign(tp) != np.sign(fn):
+            ax.axhspan(i - 0.5, i + 0.5, alpha=0.06, color="purple")
+
+    # ── Panel derecho: delta TP - FN ──────────────────────────────────────
+    ax2 = axes[1]
+    colors_delta = ["#2ca02c" if d > 0 else "#ff7f0e" for d in delta]
+    ax2.barh(y, delta, 0.6, color=colors_delta, alpha=0.85)
+    ax2.axvline(0, color="black", lw=0.8, alpha=0.5)
+    ax2.set_yticks(y)
+    ax2.set_yticklabels([])
+    ax2.invert_yaxis()
+    ax2.set_xlabel("Delta (TP − FN)", fontsize=11)
+    ax2.set_title("Diferencia\nTP − FN", fontsize=11, pad=10)
+    ax2.grid(True, axis="x", alpha=0.3)
+
+    # Anotaciones de valor delta
+    for i, d in enumerate(delta):
+        ax2.text(d + (0.001 if d >= 0 else -0.001), i,
+                 f"{d:+.3f}", va="center",
+                 ha="left" if d >= 0 else "right",
+                 fontsize=8, color="black")
+
+    # Leyenda de sombreado
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor="purple", alpha=0.15, label="Dirección opuesta TP/FN"),
+        Patch(facecolor="#2ca02c", alpha=0.7, label="Delta positivo = TP tiene más señal"),
+        Patch(facecolor="#ff7f0e", alpha=0.7, label="Delta negativo = FN tiene más señal"),
+    ]
+    axes[0].legend(handles=legend_elements + list(axes[0].get_legend_handles_labels()[0]),
+                   fontsize=8, loc="lower right")
+
+    plt.tight_layout()
+    out_path = output_dir / f"shap_group_comparison_{model_key}.png"
+    plt.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.close("all")
+    logger.info(f"  Comparación SHAP FN vs TP guardada: {out_path}")
