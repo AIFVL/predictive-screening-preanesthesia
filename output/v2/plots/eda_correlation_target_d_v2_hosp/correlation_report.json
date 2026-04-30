@@ -1,0 +1,46 @@
+{
+  "target": "target_d_v2_hosp",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.0914956851222164
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.09000500732422267
+    },
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.08979221511143587
+    },
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.08881226061204783
+    },
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.08827754177399028
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.07478464640771554
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.07428532468445948
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.07301884311212659
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.07064224682539288
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.06863929692241122
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "target": "target_f_predictibilidad_maxima",
+  "n_features": 235,
+  "top_features": [
+    {
+      "feature": "score_proc_medium_severity",
+      "MI": 0.11625258248988146
+    },
+    {
+      "feature": "score_proc_low_severity",
+      "MI": 0.11590392026341578
+    },
+    {
+      "feature": "score_proc_high_severity",
+      "MI": 0.11531386308001412
+    },
+    {
+      "feature": "score_proc_moderate_severity",
+      "MI": 0.11507734571574257
+    },
+    {
+      "feature": "score_proc_critical",
+      "MI": 0.1104473816882181
+    },
+    {
+      "feature": "score_dx_low_severity",
+      "MI": 0.09763602645950353
+    },
+    {
+      "feature": "score_dx_medium_severity",
+      "MI": 0.09667815153354953
+    },
+    {
+      "feature": "score_dx_critical",
+      "MI": 0.09568050145633444
+    },
+    {
+      "feature": "score_dx_high_severity",
+      "MI": 0.0955709856183653
+    },
+    {
+      "feature": "score_dx_moderate_severity",
+      "MI": 0.09386544983550138
+    }
+  ]
+}

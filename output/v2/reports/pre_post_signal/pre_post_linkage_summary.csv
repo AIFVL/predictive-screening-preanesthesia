@@ -1,0 +1,2 @@
+Version,Post_Variable,Prevalencia,Max_MI,Max_Pearson,N_Features_Informativas,Top3_Features_PRE
+target_f_predictibilidad_maxima,target,0.1943,0.12972,0.30335,16,score_proc_moderate_severity | score_proc_high_severity | score_proc_low_severity
