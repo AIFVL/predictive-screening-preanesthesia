@@ -1,0 +1,60 @@
+# Datasets crudos / pesados (gigabytes de Excel y CSV)
+*.xlsx
+*.csv
+*.parquet
+data/
+notebooks/
+
+# Outputs del pipeline — los .joblib se montan, el resto no se necesita en runtime
+output/
+outputs/
+
+# Cachés de NLP / Hugging Face
+cache/
+hf_cache/
+
+# venvs locales
+.venv/
+.venv-linux/
+.venv-windows/
+venv/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Git / GitHub
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# IDE / editores
+.vscode/
+.idea/
+*.swp
+
+# Docs / artefactos del repo no necesarios en runtime
+docs/
+*.md
+*.pptx
+audit_*.log
+*.log
+
+# Dockerfiles secundarios y compose (el build context no necesita verlos)
+docker-compose.yaml
+Dockerfile
+
+# Secrets locales
+.env
+.env.local
+
+# Tests (la imagen runtime no los corre)
+tests/
+conftest.py
