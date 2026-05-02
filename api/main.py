@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.core.config import get_settings
 from api.core.logging import configure_logging, get_logger
+from api.core.sklearn_compat import apply_sklearn_compat_patches
 from api.domain.registry import ModelRegistry
 from api.routers import health, models, predict, targets
 
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level)
     logger.info(f"Booting API — models_dir={settings.models_dir}")
+
+    apply_sklearn_compat_patches()
 
     registry = ModelRegistry(settings)
     registry.discover()
