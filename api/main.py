@@ -47,10 +47,12 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    origins = settings.cors_origins
+    allow_credentials = "*" not in origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_credentials=True,
+        allow_origins=origins,
+        allow_credentials=allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
     )

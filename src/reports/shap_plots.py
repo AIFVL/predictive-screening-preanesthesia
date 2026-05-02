@@ -42,12 +42,17 @@ def plot_shap_beeswarm(
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / f"shap_beeswarm_{model_key}.png"
 
+    # Normalizar a 2D — CalibratedClassifierCV puede devolver (n, f, n_classes)
+    sv = np.asarray(shap_values)
+    if sv.ndim == 3:
+        sv = sv[:, :, 1]
+
     # Seleccionar top_n features por importancia media absoluta
-    mean_abs = np.abs(shap_values).mean(axis=0)
-    top_idx = np.argsort(mean_abs)[::-1][:top_n]
+    mean_abs = np.abs(sv).mean(axis=0)
+    top_idx = np.ravel(np.argsort(mean_abs)[::-1][:top_n])  # garantizar 1D
     feature_names = list(X_explain.columns)
 
-    sv_top = shap_values[:, top_idx]
+    sv_top = sv[:, top_idx]
     X_top = X_explain.iloc[:, top_idx]
 
     fig, ax = plt.subplots(figsize=(10, max(6, top_n * 0.4)))
@@ -87,6 +92,11 @@ def plot_shap_waterfall_fn(
     probabilidad final del modelo.
     """
     import shap
+
+    # Normalizar a 2D
+    shap_values = np.asarray(shap_values)
+    if shap_values.ndim == 3:
+        shap_values = shap_values[:, :, 1]
 
     fn_dir = output_dir / "fn_waterfall"
     fn_dir.mkdir(parents=True, exist_ok=True)
@@ -154,7 +164,11 @@ def save_shap_values(
     - shap_features_{model_key}.txt — nombres de features (uno por línea)
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    np.save(output_dir / f"shap_values_{model_key}.npy", shap_values)
+    # Guardar siempre en 2D — normalizar si viene 3D de CalibratedClassifierCV
+    sv = np.asarray(shap_values)
+    if sv.ndim == 3:
+        sv = sv[:, :, 1]
+    np.save(output_dir / f"shap_values_{model_key}.npy", sv)
     (output_dir / f"shap_expected_{model_key}.txt").write_text(str(expected_value))
     (output_dir / f"shap_features_{model_key}.txt").write_text(
         "\n".join(X_explain.columns.tolist()), encoding="utf-8"
