@@ -4,12 +4,12 @@ models:
     module: "sklearn.linear_model"
     class: "LogisticRegression"
     target_metric: "f2"
-    calibrate: false
+    calibrate: true
     params:
       C: 1.0
       class_weight: "balanced"
-      solver: "lbfgs"
-      max_iter: 1000
+      solver: "saga"
+      max_iter: 3000
     search_space:
       C: [0.01, 0.1, 1.0, 10.0, 100.0]
 
@@ -64,7 +64,7 @@ models:
     module: "sklearn.ensemble"
     class: "HistGradientBoostingClassifier"
     target_metric: "f2"
-    calibrate: true
+    calibrate: true   # isotónica
     params:
       max_iter: 300
       learning_rate: 0.05
@@ -107,7 +107,7 @@ models:
     module: "sklearn.ensemble"
     class: "StackingClassifier"
     target_metric: "f2"
-    calibrate: false
+    calibrate: true 
     estimators:
       - random_forest
       - xgboost
@@ -122,7 +122,7 @@ models:
     module: "sklearn.ensemble"
     class: "VotingClassifier"
     target_metric: "f2"
-    calibrate: false
+    calibrate: true
     estimators:
       - random_forest
       - xgboost
