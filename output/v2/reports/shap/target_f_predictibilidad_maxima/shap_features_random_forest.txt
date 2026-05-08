@@ -1,0 +1,60 @@
+Tipo de anestesia propuesta_raquidea
+score_proc_high_severity
+score_proc_low_severity
+score_proc_medium_severity
+score_proc_moderate_severity
+score_proc_critical
+score_dx_low_severity
+score_dx_critical
+score_dx_medium_severity
+score_dx_high_severity
+score_dx_moderate_severity
+Tipo de anestesia propuesta_sedacion
+Tipo de anestesia propuesta_peridural
+Tipo de anestesia propuesta_local
+Dx Preoperatorio Code_O
+Dx Preoperatorio Code_S
+Examen_Hemoglobina(g/dl)
+Tipo de anestesia propuesta_general
+Edad
+IMC
+Procedimiento propuesto Code_L
+Dx Preoperatorio Code_Z
+Tensión Arterial Media (mm/Hg)
+Dx Preoperatorio Code_A
+Antecedente renales_negativo
+Hora_decimal
+Dx Preoperatorio Code_H
+score_proc_ant_low_severity
+Peso (Kg)
+Tensión Arterial Sistólica (mm/Hg)
+score_proc_ant_moderate_severity
+score_proc_ant_critical
+RH_Sin Dato
+Grupo Sanguíneo_Sin Dato
+Talla (cm)
+score_proc_ant_medium_severity
+score_proc_ant_high_severity
+Procedimiento propuesto Code_NO ENCONTRADO
+Temperatura
+Tipo de anestesia propuesta_sin dato
+Frecuencia Respiratoria
+predicted_label_proc_encoded
+predicted_label_dx_encoded
+Sexo_encoded
+Tensión Arterial Diastólica (mm/Hg)
+Grupo Sanguíneo_O
+Sistema cardiovascular_normal
+Antecedente hematológicos _negativo
+anio
+mes
+Antecedentes anestésicos
+Procedimiento propuesto Code_C
+Dx Preoperatorio Code_K
+Procedimiento propuesto Code_S
+Antecedente renales_litiasis
+Procedimiento propuesto Code_A
+Antecedente endocrinológicos_negativo
+Grupo Sanguíneo_A
+Abdomen_distension
+Dx Preoperatorio Code_NO ENCONTRADO

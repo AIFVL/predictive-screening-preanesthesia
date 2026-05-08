@@ -298,6 +298,147 @@ def make_task_explainability(target_name: str, model_key: str):
     return _task
 
 
+def make_task_calibration(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import json
+        import pandas as pd
+        from src.utils.io import read_parquet, read_json
+        from src.models.trainer import load_model
+        from src.evaluation.calibration import compute_calibration_curve
+        from src.reports.calibration_plots import plot_calibration_curve
+
+        proc_dir   = cfg.output_path() / "data_processed"
+        models_dir = cfg.output_path() / "models" / target_name
+        cal_dir    = cfg.output_path() / "reports" / "calibration" / target_name
+        cal_dir.mkdir(parents=True, exist_ok=True)
+
+        X_test = read_parquet(proc_dir / target_name / "splits" / "X_test.parquet")
+        y_test = read_parquet(proc_dir / target_name / "splits" / "y_test.parquet")["target"]
+
+        model      = load_model(models_dir / f"{model_key}_model.joblib")
+        X_test_num = X_test.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        y_proba    = model.predict_proba(X_test_num)[:, 1]
+
+        cal_data = compute_calibration_curve(y_test.values, y_proba)
+        (cal_dir / f"calibration_{model_key}.json").write_text(json.dumps(cal_data, indent=2))
+        plot_calibration_curve(cal_data, model_key, target_name, cal_dir)
+
+        logger.info(
+            f"[{target_name}/{model_key}] Calibración: "
+            f"ECE={cal_data['ece']:.4f} | Brier={cal_data['brier']:.4f}"
+        )
+    _task.__name__ = f"task_calibration_{model_key}_{target_name}"
+    return _task
+
+
+def make_task_calibration_comparison(target_name: str):
+    def _task(**kwargs):
+        import json
+        from src.reports.calibration_plots import plot_calibration_comparison
+
+        cal_dir = cfg.output_path() / "reports" / "calibration" / target_name
+        if not cal_dir.exists():
+            return
+
+        all_calibrations = {}
+        for p in sorted(cal_dir.glob("calibration_*.json")):
+            model_key = p.stem.replace("calibration_", "")
+            all_calibrations[model_key] = json.loads(p.read_text())
+
+        if len(all_calibrations) >= 2:
+            plot_calibration_comparison(all_calibrations, target_name, cal_dir)
+            logger.info(f"[{target_name}] Comparación calibración: {len(all_calibrations)} modelos")
+    _task.__name__ = f"task_calibration_comparison_{target_name}"
+    return _task
+
+
+def make_task_shap_plots(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import pandas as pd
+        from src.utils.io import read_parquet, read_json
+        from src.models.trainer import load_model
+        from src.evaluation.explainability import compute_shap_values
+        from src.reports.shap_plots import plot_shap_beeswarm, plot_shap_waterfall_fn, save_shap_values
+
+        proc_dir   = cfg.output_path() / "data_processed"
+        models_dir = cfg.output_path() / "models" / target_name
+        shap_dir   = cfg.output_path() / "reports" / "shap" / target_name
+
+        X_train = read_parquet(proc_dir / target_name / "splits" / "X_train.parquet")
+        X_test  = read_parquet(proc_dir / target_name / "splits" / "X_test.parquet")
+        y_test  = read_parquet(proc_dir / target_name / "splits" / "y_test.parquet")["target"]
+
+        artifact  = read_json(models_dir / f"{model_key}_metrics.json")
+        threshold = artifact.get("Threshold", 0.5)
+
+        model      = load_model(models_dir / f"{model_key}_model.joblib")
+        X_train_num = X_train.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        X_test_num  = X_test.apply(pd.to_numeric, errors="coerce").fillna(-1)
+        y_proba = model.predict_proba(X_test_num)[:, 1]
+        y_pred  = (y_proba >= threshold).astype(int)
+
+        shap_values, expected_value = compute_shap_values(
+            model=model, X_background=X_train_num,
+            X_explain=X_test_num, model_name=model_key,
+        )
+        save_shap_values(shap_values, expected_value, X_test_num, shap_dir, model_key)
+        plot_shap_beeswarm(shap_values, X_test_num, model_key, target_name, shap_dir)
+        plot_shap_waterfall_fn(
+            shap_values, expected_value, X_test_num,
+            y_test, y_pred, y_proba, model_key, target_name, shap_dir,
+        )
+        fn_count = int(((y_test.values == 1) & (y_pred == 0)).sum())
+        logger.info(f"[{target_name}/{model_key}] SHAP: FN={fn_count} | EV={expected_value:.4f}")
+    _task.__name__ = f"task_shap_plots_{model_key}_{target_name}"
+    return _task
+
+
+def make_task_shap_group_analysis(target_name: str, model_key: str):
+    def _task(**kwargs):
+        import pandas as pd
+        from src.utils.io import read_parquet
+        from src.evaluation.shap_groups import (
+            load_shap_artifacts, compute_shap_group_profiles, build_fn_insight_table,
+        )
+        from src.reports.shap_plots import plot_shap_group_comparison
+
+        shap_dir   = cfg.output_path() / "reports" / "shap" / target_name
+        expl_dir   = cfg.output_path() / "reports" / "explainability" / target_name
+        proc_dir   = cfg.output_path() / "data_processed"
+
+        try:
+            shap_values, feature_names, _ = load_shap_artifacts(shap_dir, model_key)
+        except FileNotFoundError as e:
+            logger.warning(f"[{target_name}/{model_key}] SHAP artifacts no encontrados: {e}")
+            return
+
+        cases_path = expl_dir / f"explainability_cases_{model_key}.csv"
+        if not cases_path.exists():
+            logger.warning(f"[{target_name}/{model_key}] {cases_path} no encontrado.")
+            return
+
+        cases_df = pd.read_csv(cases_path)
+        X_test   = read_parquet(proc_dir / target_name / "splits" / "X_test.parquet")
+        idx_to_pos = {orig: pos for pos, orig in enumerate(X_test.index)}
+        cases_df["pos"] = cases_df["case_index"].map(idx_to_pos)
+        cases_df = cases_df.dropna(subset=["pos"])
+        cases_df["pos"] = cases_df["pos"].astype(int)
+
+        profiles_df = compute_shap_group_profiles(shap_values, feature_names, cases_df, top_n=20)
+        profiles_df.to_csv(shap_dir / f"shap_group_profiles_{model_key}.csv", index=False)
+        build_fn_insight_table(profiles_df).to_csv(
+            shap_dir / f"shap_fn_insight_{model_key}.csv", index=False
+        )
+        plot_shap_group_comparison(profiles_df, model_key, target_name, shap_dir)
+        logger.info(
+            f"[{target_name}/{model_key}] SHAP groups: "
+            f"top delta = {profiles_df['Feature'].iloc[0]} "
+            f"(D={profiles_df['Delta_TP_FN'].iloc[0]:+.4f})"
+        )
+    _task.__name__ = f"task_shap_group_analysis_{model_key}_{target_name}"
+    return _task
+
+
 def make_task_model_plots(target_name: str, model_key: str):
     def _task(**kwargs):
         import pandas as pd
@@ -380,7 +521,11 @@ with DAG(
     eda_correlation_tasks: dict = {}
     train_tasks: dict = {}
     evaluate_tasks: dict = {}
+    calibration_tasks: dict = {}
+    calibration_comparison_tasks: dict = {}
     explainability_tasks: dict = {}
+    shap_tasks: dict = {}
+    shap_group_tasks: dict = {}
     plot_tasks: dict = {}
 
     for target in ACTIVE_TARGETS:
@@ -405,6 +550,11 @@ with DAG(
             python_callable=make_task_eda_correlation(target),
         )
 
+        calibration_comparison_tasks[target] = PythonOperator(
+            task_id=f"calibration_comparison__{target}",
+            python_callable=make_task_calibration_comparison(target),
+        )
+
         for model in ENABLED_MODELS:
             key = f"{model}__{target}"
             train_tasks[key] = PythonOperator(
@@ -415,9 +565,21 @@ with DAG(
                 task_id=f"evaluate__{model}__{target}",
                 python_callable=make_task_evaluate_model(target, model),
             )
+            calibration_tasks[key] = PythonOperator(
+                task_id=f"calibration__{model}__{target}",
+                python_callable=make_task_calibration(target, model),
+            )
             explainability_tasks[key] = PythonOperator(
                 task_id=f"explainability__{model}__{target}",
                 python_callable=make_task_explainability(target, model),
+            )
+            shap_tasks[key] = PythonOperator(
+                task_id=f"shap_plots__{model}__{target}",
+                python_callable=make_task_shap_plots(target, model),
+            )
+            shap_group_tasks[key] = PythonOperator(
+                task_id=f"shap_group_analysis__{model}__{target}",
+                python_callable=make_task_shap_group_analysis(target, model),
             )
             plot_tasks[key] = PythonOperator(
                 task_id=f"model_plots__{model}__{target}",
@@ -449,8 +611,12 @@ with DAG(
             key = f"{model}__{target}"
             eda_correlation_tasks[target] >> train_tasks[key]
             train_tasks[key] >> evaluate_tasks[key]
+            evaluate_tasks[key] >> calibration_tasks[key]
             evaluate_tasks[key] >> explainability_tasks[key]
-            explainability_tasks[key] >> plot_tasks[key]
+            calibration_tasks[key] >> calibration_comparison_tasks[target]
+            explainability_tasks[key] >> shap_tasks[key]
+            shap_tasks[key] >> shap_group_tasks[key]
+            shap_group_tasks[key] >> plot_tasks[key]
             plot_tasks[key] >> comparison_report
 
     pre_post_task >> comparison_report

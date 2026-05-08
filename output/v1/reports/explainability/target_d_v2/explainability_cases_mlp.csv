@@ -1,41 +1,41 @@
 case_index,case_type,y_true,y_pred,y_proba,reason
-4051,FN,1,0,0.13960585674137158,Tensión Arterial Sistólica (mm/Hg)=125.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=55.0
-4107,FN,1,0,0.1392158878864793,Tensión Arterial Sistólica (mm/Hg)=140.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=67.0
-303,FN,1,0,0.1382986671988879,Tensión Arterial Sistólica (mm/Hg)=170.6425 | Tipo de anestesia propuesta_peridural=0.0 | Edad=30.0
-4567,FN,1,0,0.1382986671988879,Tensión Arterial Sistólica (mm/Hg)=135.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=79.0
-472,FN,1,0,0.1337018513551283,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=75.0
-1977,FN,1,0,0.12114106162111864,Tensión Arterial Sistólica (mm/Hg)=130.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=88.0
-4408,FN,1,0,0.11665485881089348,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=81.0
-2944,FN,1,0,0.11376744467653559,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=64.0
-2247,FN,1,0,0.11376744467653559,Tensión Arterial Sistólica (mm/Hg)=180.3267 | Tipo de anestesia propuesta_peridural=0.0 | Edad=49.0
-4296,FN,1,0,0.11376744467653559,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=72.0
-3190,FP,0,1,0.1405162523550557,Tensión Arterial Sistólica (mm/Hg)=82.379 | Tipo de anestesia propuesta_peridural=0.0 | Edad=78.0
-556,FP,0,1,0.1420865459867667,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=89.0
-3238,FP,0,1,0.14235676522337182,Tensión Arterial Sistólica (mm/Hg)=128.0625 | Tipo de anestesia propuesta_peridural=0.0 | Edad=24.0
-1645,FP,0,1,0.14278487000911305,Tensión Arterial Sistólica (mm/Hg)=114.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=34.0
-4645,FP,0,1,0.14278487000911305,Tensión Arterial Sistólica (mm/Hg)=107.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=50.0
-2138,FP,0,1,0.14278487000911305,Tensión Arterial Sistólica (mm/Hg)=121.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=69.0
-953,FP,0,1,0.14278487000911305,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=59.0
-538,FP,0,1,0.14339373552925036,Tensión Arterial Sistólica (mm/Hg)=90.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=54.0
-1161,FP,0,1,0.14406616693277355,Tensión Arterial Sistólica (mm/Hg)=142.3797 | Tipo de anestesia propuesta_peridural=0.0 | Edad=54.0
-855,FP,0,1,0.1440920595515967,Tensión Arterial Sistólica (mm/Hg)=103.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=67.0
-767,TP,1,1,0.2734015754665319,Tensión Arterial Sistólica (mm/Hg)=185.7751 | Tipo de anestesia propuesta_peridural=0.0 | Edad=50.0
-1086,TP,1,1,0.2734015754665319,Tensión Arterial Sistólica (mm/Hg)=239.6548 | Tipo de anestesia propuesta_peridural=0.0 | Edad=30.0
-3511,TP,1,1,0.2734015754665319,Tensión Arterial Sistólica (mm/Hg)=197.5519 | Tipo de anestesia propuesta_peridural=0.0 | Edad=60.0
-2814,TP,1,1,0.25118303721407936,Tensión Arterial Sistólica (mm/Hg)=90.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=24.0
-1251,TP,1,1,0.23323210210743114,Tensión Arterial Sistólica (mm/Hg)=109.5763 | Tipo de anestesia propuesta_peridural=0.0 | Edad=65.0
-476,TP,1,1,0.23323210210743114,Tensión Arterial Sistólica (mm/Hg)=184.7936 | Tipo de anestesia propuesta_peridural=0.0 | Edad=73.0
-3762,TP,1,1,0.21902709807191867,Tensión Arterial Sistólica (mm/Hg)=140.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=32.0
-56,TP,1,1,0.21902709807191867,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=51.0
-3826,TP,1,1,0.21902709807191867,Tensión Arterial Sistólica (mm/Hg)=150.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=64.0
-1179,TP,1,1,0.21902709807191867,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=29.0
-2401,TN,0,0,0.06304656831463308,Tensión Arterial Sistólica (mm/Hg)=68.1077 | Tipo de anestesia propuesta_peridural=0.0 | Edad=29.0
-2341,TN,0,0,0.06768156807585858,Tensión Arterial Sistólica (mm/Hg)=83.0494 | Tipo de anestesia propuesta_peridural=0.0 | Edad=61.0
-432,TN,0,0,0.09525005219305736,Tensión Arterial Sistólica (mm/Hg)=67.0816 | Tipo de anestesia propuesta_peridural=0.0 | Edad=74.0
-1942,TN,0,0,0.09525005219305736,Tensión Arterial Sistólica (mm/Hg)=73.1363 | Tipo de anestesia propuesta_peridural=0.0 | Edad=67.0
-3287,TN,0,0,0.09695945390245908,Tensión Arterial Sistólica (mm/Hg)=93.2964 | Tipo de anestesia propuesta_peridural=0.0 | Edad=48.0
-2540,TN,0,0,0.09922199013108103,Tensión Arterial Sistólica (mm/Hg)=154.8876 | Tipo de anestesia propuesta_peridural=0.0 | Edad=40.0
-969,TN,0,0,0.09922199013108103,Tensión Arterial Sistólica (mm/Hg)=103.8535 | Tipo de anestesia propuesta_peridural=0.0 | Edad=62.0
-3797,TN,0,0,0.09922199013108103,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=39.0
-3207,TN,0,0,0.09922199013108103,Tensión Arterial Sistólica (mm/Hg)=114.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=60.0
-4136,TN,0,0,0.09922199013108103,Tensión Arterial Sistólica (mm/Hg)=127.0 | Tipo de anestesia propuesta_peridural=0.0 | Edad=51.0
+1,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+301,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=111.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+1433,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+1318,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3016,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=90.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+4025,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3678,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+4375,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=105.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+4059,FN,1,0,0.13917192077349994,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+2439,FN,1,0,0.137994350680042,Tensión Arterial Sistólica (mm/Hg)=138.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+3326,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=187.9895 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+2995,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=103.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+679,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+1604,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+1979,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+2227,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=107.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+4286,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+1472,FP,0,1,0.1402504458521029,Tensión Arterial Sistólica (mm/Hg)=130.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+80,FP,0,1,0.14029548582507892,Tensión Arterial Sistólica (mm/Hg)=128.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+2094,FP,0,1,0.14029548582507892,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+3724,TP,1,1,0.3222880949335057,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+4262,TP,1,1,0.32049604061067793,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+4404,TP,1,1,0.3150787072374023,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+1565,TP,1,1,0.3147285408767923,Tensión Arterial Sistólica (mm/Hg)=110.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+360,TP,1,1,0.3120815746745505,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+3511,TP,1,1,0.2831234618456999,Tensión Arterial Sistólica (mm/Hg)=197.5519 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+767,TP,1,1,0.2831234618456999,Tensión Arterial Sistólica (mm/Hg)=185.7751 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3308,TP,1,1,0.2808005858347481,Tensión Arterial Sistólica (mm/Hg)=132.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3762,TP,1,1,0.2803317457579106,Tensión Arterial Sistólica (mm/Hg)=140.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+516,TP,1,1,0.27966622431625354,Tensión Arterial Sistólica (mm/Hg)=135.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0
+2341,TN,0,0,0.030468087233895002,Tensión Arterial Sistólica (mm/Hg)=83.0494 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+2401,TN,0,0,0.034125385957846685,Tensión Arterial Sistólica (mm/Hg)=68.1077 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3207,TN,0,0,0.05944184165404922,Tensión Arterial Sistólica (mm/Hg)=114.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+3797,TN,0,0,0.07744184165404921,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+4492,TN,0,0,0.08744184165404922,Tensión Arterial Sistólica (mm/Hg)=81.5256 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+4136,TN,0,0,0.090331077223472,Tensión Arterial Sistólica (mm/Hg)=127.0 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+969,TN,0,0,0.090331077223472,Tensión Arterial Sistólica (mm/Hg)=103.8535 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+2540,TN,0,0,0.090331077223472,Tensión Arterial Sistólica (mm/Hg)=154.8876 | Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0
+2338,TN,0,0,0.0972013869947638,Tensión Arterial Sistólica (mm/Hg)=100.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0
+4106,TN,0,0,0.0972013869947638,Tensión Arterial Sistólica (mm/Hg)=120.0 | Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0

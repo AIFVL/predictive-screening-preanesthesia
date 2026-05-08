@@ -1,0 +1,11 @@
+Feature,SHAP_TP,SHAP_FN,Delta_TP_FN,Interpretacion
+Tipo de anestesia propuesta_raquidea,0.9671692664146112,-0.08410167534040096,1.0512709417550121,"Protege al FN (baja riesgo −0.084), eleva al TP (+0.967)"
+Procedimiento propuesto Code_L,0.2846953788755179,-0.01498396730923778,0.29967934618475567,"Protege al FN (baja riesgo −0.015), eleva al TP (+0.285)"
+Puntaje Mallampati,0.24909340443638178,-0.029891208532365814,0.2789846129687476,"Protege al FN (baja riesgo −0.030), eleva al TP (+0.249)"
+Dx Preoperatorio Code_O,0.24591084101244523,0.0,0.24591084101244523,Señal débil en FN (+0.000) vs fuerte en TP (+0.246)
+Grupo Sanguíneo_Sin Dato,0.1771461210160756,-0.05904870700535851,0.2361948280214341,"Protege al FN (baja riesgo −0.059), eleva al TP (+0.177)"
+RH_Sin Dato,0.17787534573349825,-0.053131596777538426,0.23100694251103668,"Protege al FN (baja riesgo −0.053), eleva al TP (+0.178)"
+Tipo de anestesia propuesta_general,0.154529678754417,-0.007187426918810096,0.1617171056732271,"Protege al FN (baja riesgo −0.007), eleva al TP (+0.155)"
+Procedimiento propuesto Code_NO ENCONTRADO,0.0819429278254601,-0.03277717113018404,0.11472009895564414,"Protege al FN (baja riesgo −0.033), eleva al TP (+0.082)"
+Grupo Sanguíneo_O,0.08375208384873686,-0.026086714641409832,0.10983879849014669,"Protege al FN (baja riesgo −0.026), eleva al TP (+0.084)"
+Tipo de anestesia propuesta_sedacion,0.12435095355427994,0.020725158925713315,0.10362579462856662,Señal débil en FN (+0.021) vs fuerte en TP (+0.124)

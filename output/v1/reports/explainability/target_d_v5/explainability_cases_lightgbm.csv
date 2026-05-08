@@ -1,41 +1,41 @@
 case_index,case_type,y_true,y_pred,y_proba,reason
-3386,FN,1,0,0.15940208158097507,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-406,FN,1,0,0.1588367940298508,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-676,FN,1,0,0.15834628360650424,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-987,FN,1,0,0.15769747454772495,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-23,FN,1,0,0.15735381972660475,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1702,FN,1,0,0.1541214565159325,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4220,FN,1,0,0.15322321593898564,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1644,FN,1,0,0.15283461661882752,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3631,FN,1,0,0.15245633101205786,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4102,FN,1,0,0.15190951544723127,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3284,FP,0,1,0.1601148295620997,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-847,FP,0,1,0.1601465411404738,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-853,FP,0,1,0.16019711438147852,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1933,FP,0,1,0.16019831435356696,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2108,FP,0,1,0.16033656621748577,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-674,FP,0,1,0.16049690055753663,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2101,FP,0,1,0.16059108929134383,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3373,FP,0,1,0.16059108929134383,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2389,FP,0,1,0.16059108929134383,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4438,FP,0,1,0.16059108929134383,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2007,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-2167,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-4361,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-700,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-3092,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=1.0
-1926,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-1088,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-3613,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-906,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-2650,TP,1,1,0.9874096754439682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-680,TN,0,0,0.007272727272727273,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-293,TN,0,0,0.007272727272727273,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-494,TN,0,0,0.013333333333333332,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2648,TN,0,0,0.013724340175953078,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1979,TN,0,0,0.013724340175953078,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3950,TN,0,0,0.013724340175953078,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-627,TN,0,0,0.015529608006672227,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1256,TN,0,0,0.01705045611043757,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1066,TN,0,0,0.019784946236559138,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3254,TN,0,0,0.019784946236559138,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
+564,FN,1,0,0.2790692466356341,score_proc_critical=0.2105 | score_dx_low_severity=0.0088 | score_proc_high_severity=0.5634
+2291,FN,1,0,0.2789386716320538,score_proc_critical=0.4206 | score_dx_low_severity=0.1368 | score_proc_high_severity=0.1564
+1068,FN,1,0,0.2784872422620142,score_proc_critical=0.4777 | score_dx_low_severity=0.0595 | score_proc_high_severity=0.1876
+676,FN,1,0,0.2765658741869696,score_proc_critical=0.4369 | score_dx_low_severity=0.1257 | score_proc_high_severity=0.1742
+2377,FN,1,0,0.2765043597653611,score_proc_critical=0.3593 | score_dx_low_severity=0.0939 | score_proc_high_severity=0.1728
+987,FN,1,0,0.2758066658633294,score_proc_critical=0.4209 | score_dx_low_severity=0.0771 | score_proc_high_severity=0.2279
+4,FN,1,0,0.27494345946472387,score_proc_critical=0.3689 | score_dx_low_severity=0.0905 | score_proc_high_severity=0.1255
+1375,FN,1,0,0.27363541786978146,score_proc_critical=0.43 | score_dx_low_severity=0.0417 | score_proc_high_severity=0.2923
+1996,FN,1,0,0.2730334671411335,score_proc_critical=0.2998 | score_dx_low_severity=0.5734 | score_proc_high_severity=0.3484
+4229,FN,1,0,0.27274312278898166,score_proc_critical=0.2328 | score_dx_low_severity=0.1185 | score_proc_high_severity=0.3771
+496,FP,0,1,0.28023158481692656,score_proc_critical=0.246 | score_dx_low_severity=0.0918 | score_proc_high_severity=0.4291
+2127,FP,0,1,0.280282187412938,score_proc_critical=0.3076 | score_dx_low_severity=0.1232 | score_proc_high_severity=0.1163
+1650,FP,0,1,0.2803325082447353,score_proc_critical=0.4181 | score_dx_low_severity=0.0298 | score_proc_high_severity=0.1011
+4170,FP,0,1,0.2803348898406702,score_proc_critical=0.2254 | score_dx_low_severity=0.0675 | score_proc_high_severity=0.3777
+1903,FP,0,1,0.28042686431883285,score_proc_critical=0.4904 | score_dx_low_severity=0.1961 | score_proc_high_severity=0.0847
+248,FP,0,1,0.2805043104500892,score_proc_critical=0.1913 | score_dx_low_severity=0.0 | score_proc_high_severity=0.2852
+3047,FP,0,1,0.28057893949446466,score_proc_critical=0.4675 | score_dx_low_severity=0.0908 | score_proc_high_severity=0.0968
+322,FP,0,1,0.2813501360633731,score_proc_critical=0.3281 | score_dx_low_severity=0.0856 | score_proc_high_severity=0.3249
+853,FP,0,1,0.28147534325462215,score_proc_critical=0.0418 | score_dx_low_severity=0.0983 | score_proc_high_severity=0.013
+4411,FP,0,1,0.28181798486183707,score_proc_critical=0.2326 | score_dx_low_severity=0.0629 | score_proc_high_severity=0.2756
+1116,TP,1,1,0.9928075524499578,score_proc_critical=0.2036 | score_dx_low_severity=0.0294 | score_proc_high_severity=0.47
+906,TP,1,1,0.9927422391183369,score_proc_critical=0.1226 | score_dx_low_severity=0.0288 | score_proc_high_severity=0.5605
+1389,TP,1,1,0.9926210765488244,score_proc_critical=0.1226 | score_dx_low_severity=0.0294 | score_proc_high_severity=0.5605
+4254,TP,1,1,0.9924269421028983,score_proc_critical=0.1226 | score_dx_low_severity=0.0294 | score_proc_high_severity=0.5605
+4361,TP,1,1,0.9917823025087321,score_proc_critical=0.1226 | score_dx_low_severity=0.1202 | score_proc_high_severity=0.5605
+3007,TP,1,1,0.9914181064642961,score_proc_critical=0.2036 | score_dx_low_severity=0.0294 | score_proc_high_severity=0.47
+2818,TP,1,1,0.9911625394916083,score_proc_critical=0.1226 | score_dx_low_severity=0.0288 | score_proc_high_severity=0.5605
+2110,TP,1,1,0.9908775382787459,score_proc_critical=0.1226 | score_dx_low_severity=0.083 | score_proc_high_severity=0.5605
+700,TP,1,1,0.9908759398700288,score_proc_critical=0.0587 | score_dx_low_severity=0.1202 | score_proc_high_severity=0.2661
+4452,TP,1,1,0.9907258070072197,score_proc_critical=0.144 | score_dx_low_severity=0.0946 | score_proc_high_severity=0.426
+1740,TN,0,0,0.022092414747133925,score_proc_critical=0.1153 | score_dx_low_severity=0.0809 | score_proc_high_severity=0.3054
+627,TN,0,0,0.023618989970752263,score_proc_critical=0.3408 | score_dx_low_severity=0.1127 | score_proc_high_severity=0.2128
+1107,TN,0,0,0.02438562657814738,score_proc_critical=0.1153 | score_dx_low_severity=0.0902 | score_proc_high_severity=0.3054
+3416,TN,0,0,0.024919826110185766,score_proc_critical=0.3693 | score_dx_low_severity=0.0809 | score_proc_high_severity=0.1744
+2648,TN,0,0,0.025440943998290003,score_proc_critical=0.1595 | score_dx_low_severity=0.1657 | score_proc_high_severity=0.0854
+1011,TN,0,0,0.026164398767739204,score_proc_critical=0.415 | score_dx_low_severity=0.72 | score_proc_high_severity=0.1228
+680,TN,0,0,0.027234222411028863,score_proc_critical=0.3235 | score_dx_low_severity=0.0902 | score_proc_high_severity=0.1955
+1981,TN,0,0,0.02760387342861097,score_proc_critical=0.2116 | score_dx_low_severity=0.1148 | score_proc_high_severity=0.6161
+493,TN,0,0,0.02990857141185668,score_proc_critical=0.1037 | score_dx_low_severity=0.1153 | score_proc_high_severity=0.1208
+752,TN,0,0,0.03218882917374737,score_proc_critical=0.2351 | score_dx_low_severity=0.0902 | score_proc_high_severity=0.5264

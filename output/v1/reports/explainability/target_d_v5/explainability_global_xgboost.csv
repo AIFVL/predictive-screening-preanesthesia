@@ -1,26 +1,26 @@
 Feature,Importance,Source
-Tipo de anestesia propuesta_sedacion,0.06360896224481402,permutation_importance
-Tipo de anestesia propuesta_raquidea,0.031765236959706546,permutation_importance
-Tipo de anestesia propuesta_peridural,0.01783255232575003,permutation_importance
-score_proc_medium_severity,0.012647576151535712,permutation_importance
-Examen_Hemoglobina(g/dl),0.010012679436562167,permutation_importance
-score_dx_low_severity,0.007295770332707519,permutation_importance
-score_proc_moderate_severity,0.007040911020753415,permutation_importance
-score_proc_low_severity,0.006240756824996208,permutation_importance
-Dx Preoperatorio Code_Z,0.005746357089276999,permutation_importance
-Dx Preoperatorio Code_S,0.005617740758862766,permutation_importance
-Edad,0.004893413860980767,permutation_importance
-score_proc_critical,0.004179539287434353,permutation_importance
-score_proc_high_severity,0.003847654016557356,permutation_importance
-Dx Preoperatorio Code_A,0.0038155778469218583,permutation_importance
-score_dx_medium_severity,0.0037253186700328287,permutation_importance
-score_dx_critical,0.0029142566587418983,permutation_importance
-Sexo_encoded,0.002832507975291265,permutation_importance
-Tipo de anestesia propuesta_general,0.002559788613726921,permutation_importance
-anio,0.002076488479309102,permutation_importance
-score_dx_high_severity,0.002059227760222737,permutation_importance
-Dx Preoperatorio Code_E,0.0019828970247075307,permutation_importance
-Antecedente hematológicos _negativo,0.0019216454451719488,permutation_importance
-score_dx_moderate_severity,0.0017796041110238249,permutation_importance
-Hora_decimal,0.0017651482587889955,permutation_importance
-Examen_PT (INR),0.001674625376469474,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.13383518,native_feature_importance
+Tipo de anestesia propuesta_sedacion,0.09259496,native_feature_importance
+Tipo de anestesia propuesta_peridural,0.08324128,native_feature_importance
+Dx Preoperatorio Code_O,0.05969069,native_feature_importance
+Tipo de anestesia propuesta_general,0.03741727,native_feature_importance
+Dx Preoperatorio Code_A,0.034079384,native_feature_importance
+Dx Preoperatorio Code_Z,0.026417065,native_feature_importance
+Dx Preoperatorio Code_S,0.019797483,native_feature_importance
+Antecedente renales_litiasis,0.01574961,native_feature_importance
+Dx Preoperatorio Code_E,0.014151505,native_feature_importance
+Examen_PT (INR),0.013763533,native_feature_importance
+Tipo de anestesia propuesta_local,0.013652863,native_feature_importance
+Procedimiento propuesto Code_L,0.01326285,native_feature_importance
+Antecedente renales_negativo,0.013112186,native_feature_importance
+Antecedente hematológicos _negativo,0.013089426,native_feature_importance
+Sexo_encoded,0.012466597,native_feature_importance
+Dx Preoperatorio Code_H,0.012121345,native_feature_importance
+Examen_Hemoglobina(g/dl),0.010539226,native_feature_importance
+RH_Sin Dato,0.01011504,native_feature_importance
+Procedimiento propuesto Code_NO ENCONTRADO,0.010110135,native_feature_importance
+Dx Preoperatorio Code_M,0.009757725,native_feature_importance
+score_proc_critical,0.00931336,native_feature_importance
+score_dx_low_severity,0.008993878,native_feature_importance
+Estado Nutricional_encoded,0.008952035,native_feature_importance
+Edad,0.008560318,native_feature_importance

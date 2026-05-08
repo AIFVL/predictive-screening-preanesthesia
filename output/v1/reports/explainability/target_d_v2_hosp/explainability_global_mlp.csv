@@ -1,26 +1,26 @@
 Feature,Importance,Source
-Tipo de anestesia propuesta_raquidea,0.03196194463117306,permutation_importance
-Tipo de anestesia propuesta_sedacion,0.023898689449975197,permutation_importance
-Tipo de anestesia propuesta_peridural,0.01718876006194949,permutation_importance
-Talla (cm),0.014535178732636567,permutation_importance
-Tensión Arterial Media (mm/Hg),0.012509492728233474,permutation_importance
-Examen_Hemoglobina(g/dl),0.010146530974198664,permutation_importance
-Dx Preoperatorio Code_S,0.009138104786937084,permutation_importance
-Peso (Kg),0.008887772955168672,permutation_importance
-Tipo de anestesia propuesta_local,0.006269115278869841,permutation_importance
-Dx Preoperatorio Code_O,0.00580017963996673,permutation_importance
-Dx Preoperatorio Code_A,0.005303213774984328,permutation_importance
-Dx Preoperatorio Code_H,0.003266982196926005,permutation_importance
-Dx Preoperatorio Code_Z,0.0031422385605063274,permutation_importance
-Edad,0.003108342073757253,permutation_importance
-Sexo_encoded,0.002865588446433809,permutation_importance
-Antecedentes anestésicos,0.0023017198187164968,permutation_importance
-Grupo Sanguíneo_A,0.002139062334155373,permutation_importance
-Examen_PT (INR),0.00193223670019409,permutation_importance
-Dx Preoperatorio Code_G,0.0017692824787119087,permutation_importance
-Grupo Sanguíneo_O,0.0017075611991366868,permutation_importance
-anio,0.0016412062584098886,permutation_importance
-Puntaje Mallampati,0.0016264607160261456,permutation_importance
-Prótesis Dental_movil,0.001495074737758717,permutation_importance
-Tensión Arterial Sistólica (mm/Hg),0.0013476649657554018,permutation_importance
-Procedimiento propuesto Code_L,0.0012357723206082305,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.031006657178693997,permutation_importance
+Tipo de anestesia propuesta_sedacion,0.02224333112302377,permutation_importance
+Tipo de anestesia propuesta_peridural,0.01699814082906026,permutation_importance
+Talla (cm),0.014081376676706347,permutation_importance
+Tensión Arterial Media (mm/Hg),0.0108668256111355,permutation_importance
+Examen_Hemoglobina(g/dl),0.009340182630162008,permutation_importance
+Peso (Kg),0.008796058420652054,permutation_importance
+Dx Preoperatorio Code_S,0.008383457144911599,permutation_importance
+Tipo de anestesia propuesta_local,0.006017413892081436,permutation_importance
+Dx Preoperatorio Code_A,0.0055984213595801965,permutation_importance
+Dx Preoperatorio Code_O,0.00556858788605763,permutation_importance
+Dx Preoperatorio Code_Z,0.002860909133448408,permutation_importance
+Dx Preoperatorio Code_H,0.002752782764606709,permutation_importance
+Sexo_encoded,0.0023948723860046208,permutation_importance
+Grupo Sanguíneo_O,0.002136414527783237,permutation_importance
+Edad,0.001686196140822327,permutation_importance
+Grupo Sanguíneo_A,0.0016022652440034423,permutation_importance
+Dx Preoperatorio Code_G,0.0014427349100717413,permutation_importance
+Examen_PT (INR),0.0013211640761153554,permutation_importance
+anio,0.0013001414065559214,permutation_importance
+Procedimiento propuesto Code_L,0.001256931945669848,permutation_importance
+Tipo de anestesia propuesta_sin dato,0.0010541008471840474,permutation_importance
+Antecedente renales_litiasis,0.0009753057816907163,permutation_importance
+Antecedente gastrointestinales_gastritis,0.0009498092323987795,permutation_importance
+Grupo Sanguíneo_Sin Dato,0.000933283268488827,permutation_importance

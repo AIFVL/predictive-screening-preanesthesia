@@ -1,0 +1,11 @@
+Feature,SHAP_TP,SHAP_FN,Delta_TP_FN,Interpretacion
+Tipo de anestesia propuesta_raquidea,1.3634597246495233,-0.22195855982666662,1.58541828447619,"Protege al FN (baja riesgo −0.222), eleva al TP (+1.363)"
+Grupo Sanguíneo_Sin Dato,0.2416145095460704,-0.10855144631779975,0.3501659558638701,"Protege al FN (baja riesgo −0.109), eleva al TP (+0.242)"
+RH_Sin Dato,0.23911113780106424,-0.09766511262296994,0.3367762504240342,"Protege al FN (baja riesgo −0.098), eleva al TP (+0.239)"
+Procedimiento propuesto Code_L,0.27408844407362565,-0.03536625084820976,0.3094546949218354,"Protege al FN (baja riesgo −0.035), eleva al TP (+0.274)"
+Examen_Hemoglobina(g/dl),0.1643236042001933,-0.14363495417643163,0.3079585583766249,"Protege al FN (baja riesgo −0.144), eleva al TP (+0.164)"
+Dx Preoperatorio Code_O,0.2895594597749103,-0.009984808957755527,0.2995442687326659,"Protege al FN (baja riesgo −0.010), eleva al TP (+0.290)"
+Tipo de anestesia propuesta_general,0.21445263034708145,-0.0536131575867704,0.26806578793385183,"Protege al FN (baja riesgo −0.054), eleva al TP (+0.214)"
+IMC,0.27587747235998517,0.03475758536939634,0.24111988699058884,Señal débil en FN (+0.035) vs fuerte en TP (+0.276)
+Procedimiento propuesto Code_NO ENCONTRADO,0.12031068309660006,-0.08020712206440005,0.2005178051610001,"Protege al FN (baja riesgo −0.080), eleva al TP (+0.120)"
+Grupo Sanguíneo_O,0.12946644341599384,-0.037587031959482084,0.16705347537547593,"Protege al FN (baja riesgo −0.038), eleva al TP (+0.129)"

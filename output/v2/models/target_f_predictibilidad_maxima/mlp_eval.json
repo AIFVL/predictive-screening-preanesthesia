@@ -15,17 +15,17 @@
     "Threshold": 0.13
   },
   "cv": {
-    "ROC_AUC_mean": 0.7747,
-    "ROC_AUC_std": 0.0196,
-    "F2_mean": 0.6033,
-    "F2_std": 0.0153,
-    "Recall_mean": 0.8661,
-    "Recall_std": 0.0127,
-    "Precision_mean": 0.2733,
-    "Precision_std": 0.0167,
-    "Specificity_mean": 0.4414,
-    "Specificity_std": 0.0487,
-    "Balanced_Accuracy_mean": 0.6537,
-    "Balanced_Accuracy_std": 0.0222
+    "ROC_AUC_mean": 0.777,
+    "ROC_AUC_std": 0.0164,
+    "F2_mean": 0.6062,
+    "F2_std": 0.0173,
+    "Recall_mean": 0.8688,
+    "Recall_std": 0.0115,
+    "Precision_mean": 0.2751,
+    "Precision_std": 0.0171,
+    "Specificity_mean": 0.4447,
+    "Specificity_std": 0.0473,
+    "Balanced_Accuracy_mean": 0.6568,
+    "Balanced_Accuracy_std": 0.0237
   }
 }

@@ -1,0 +1,11 @@
+Feature,SHAP_TP,SHAP_FN,Delta_TP_FN,Interpretacion
+Tipo de anestesia propuesta_sedacion,0.030861906539890765,-0.20032455185759193,0.2311864583974827,"Protege al FN (baja riesgo −0.200), eleva al TP (+0.031)"
+Tipo de anestesia propuesta_raquidea,0.16156437600018428,-0.048254576767947456,0.20981895276813173,"Protege al FN (baja riesgo −0.048), eleva al TP (+0.162)"
+Dx Preoperatorio Code_O,0.06997586977548537,-0.002003929476732529,0.0719797992522179,"Protege al FN (baja riesgo −0.002), eleva al TP (+0.070)"
+Tipo de anestesia propuesta_general,0.05857813253713081,-0.0028887095530838913,0.061466842090214704,"Protege al FN (baja riesgo −0.003), eleva al TP (+0.059)"
+Tipo de anestesia propuesta_peridural,0.026382669863007358,-0.01386828350982785,0.040250953372835206,"Protege al FN (baja riesgo −0.014), eleva al TP (+0.026)"
+Tipo de anestesia propuesta_local,0.009760478837810534,-0.027123258467232424,0.036883737305042956,"Protege al FN (baja riesgo −0.027), eleva al TP (+0.010)"
+score_proc_moderate_severity,0.036660132787245114,0.004852395529872558,0.031807737257372556,Señal débil en FN (+0.005) vs fuerte en TP (+0.037)
+score_proc_critical,0.02995043405465054,0.00010954179313210333,0.029840892261518436,Señal débil en FN (+0.000) vs fuerte en TP (+0.030)
+Examen_Hemoglobina(g/dl),0.015185964266158031,-0.014049137856673286,0.029235102122831317,"Protege al FN (baja riesgo −0.014), eleva al TP (+0.015)"
+score_proc_low_severity,0.011062235278860313,-0.0069310013876084774,0.017993236666468793,"Protege al FN (baja riesgo −0.007), eleva al TP (+0.011)"

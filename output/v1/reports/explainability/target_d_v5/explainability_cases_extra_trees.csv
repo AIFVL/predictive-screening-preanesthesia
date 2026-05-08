@@ -1,41 +1,41 @@
 case_index,case_type,y_true,y_pred,y_proba,reason
-3256,FN,1,0,0.15988962177129543,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3517,FN,1,0,0.15809750707595494,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4408,FN,1,0,0.1580684163317682,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-694,FN,1,0,0.157775074485829,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-512,FN,1,0,0.157775074485829,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-385,FN,1,0,0.1576761936423518,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-538,FN,1,0,0.15731577702858268,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2782,FN,1,0,0.15729093321385576,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2523,FN,1,0,0.1530811493878415,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2509,FN,1,0,0.1530811493878415,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1677,FP,0,1,0.16010236267858508,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3004,FP,0,1,0.1601428117349916,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1864,FP,0,1,0.16015941991649316,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-3563,FP,0,1,0.16016027036462224,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-583,FP,0,1,0.16024385578294778,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-188,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-1132,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-2559,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-359,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4339,FP,0,1,0.16055146080997693,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2023,TP,1,1,1.0,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-906,TP,1,1,1.0,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-4361,TP,1,1,1.0,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-2818,TP,1,1,1.0,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-149,TP,1,1,1.0,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-2650,TP,1,1,0.9957446808510639,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-1389,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-3557,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-1840,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-4555,TP,1,1,0.9902652287962693,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_peridural=0.0
-690,TN,0,0,0.0,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2353,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-33,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4676,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-2843,TN,0,0,0.00891089108910891,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1017,TN,0,0,0.012781244091510682,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1066,TN,0,0,0.01540280857354028,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1256,TN,0,0,0.016953610712577716,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-4390,TN,0,0,0.020053971364237956,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
-1307,TN,0,0,0.020053971364237956,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_peridural=0.0
+3256,FN,1,0,0.15988962177129543,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=61.0
+3517,FN,1,0,0.15809750707595494,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=53.0
+4408,FN,1,0,0.1580684163317682,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=41.0
+694,FN,1,0,0.157775074485829,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=35.0
+512,FN,1,0,0.157775074485829,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=47.0
+385,FN,1,0,0.1576761936423518,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=45.0
+538,FN,1,0,0.15731577702858268,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=21.0
+2782,FN,1,0,0.15729093321385576,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=59.0
+2509,FN,1,0,0.1530811493878415,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=47.0
+2523,FN,1,0,0.1530811493878415,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=28.0
+1677,FP,0,1,0.16010236267858508,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=47.0
+3004,FP,0,1,0.1601428117349916,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=26.0
+1864,FP,0,1,0.16015941991649316,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=28.0
+3563,FP,0,1,0.16016027036462224,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=31.0
+583,FP,0,1,0.16024385578294778,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=39.0
+359,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=22.0
+1132,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=54.0
+2559,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=18.0
+188,FP,0,1,0.16043786452898776,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=24.0
+4339,FP,0,1,0.16055146080997693,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=39.0
+149,TP,1,1,1.0,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=32.0
+4361,TP,1,1,1.0,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=29.0
+2818,TP,1,1,1.0,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=40.0
+906,TP,1,1,1.0,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=35.0
+2023,TP,1,1,1.0,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=29.0
+2650,TP,1,1,0.9957446808510639,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=24.0
+3557,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=29.0
+1840,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=30.0
+1389,TP,1,1,0.9945205479452055,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=27.0
+4328,TP,1,1,0.9902652287962693,Tipo de anestesia propuesta_raquidea=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Edad=34.0
+690,TN,0,0,0.0,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=75.0
+33,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=42.0
+2353,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=60.0
+4676,TN,0,0,0.008130081300813007,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=39.0
+2843,TN,0,0,0.00891089108910891,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=59.0
+1017,TN,0,0,0.012781244091510682,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=20.0
+1066,TN,0,0,0.01540280857354028,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=60.0
+1256,TN,0,0,0.016953610712577716,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=60.0
+4390,TN,0,0,0.020053971364237956,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=46.0
+1259,TN,0,0,0.020053971364237956,Tipo de anestesia propuesta_raquidea=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Edad=42.0

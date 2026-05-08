@@ -1,7 +1,6 @@
 # src/evaluation/explainability.py
 """
-Explicabilidad global y revisión de casos.
-Migrado fielmente desde utils/modeling.py y utils/multi_version/modeling_pipeline.py.
+Explicabilidad global, revisión de casos y SHAP.
 """
 from __future__ import annotations
 
@@ -14,6 +13,46 @@ from src.utils.logger import get_logger
 logger = get_logger("evaluation.explainability")
 
 
+def _unwrap_model(model):
+    """
+    Extrae el estimador base si el modelo está envuelto en CalibratedClassifierCV.
+    Permite acceder a feature_importances_ / coef_ del modelo subyacente.
+    """
+    from sklearn.calibration import CalibratedClassifierCV
+    if isinstance(model, CalibratedClassifierCV):
+        calibrated = getattr(model, "calibrated_classifiers_", None)
+        if calibrated:
+            return getattr(calibrated[0], "estimator", model)
+    return model
+
+
+def _try_get_feature_importances(candidate) -> np.ndarray | None:
+    """
+    Intenta obtener feature_importances_ de un estimador de forma robusta.
+    Usa try/except para cubrir casos donde el atributo existe pero el acceso
+    falla (ej. XGBClassifier desserializado de joblib en sklearn>=1.8).
+    """
+    try:
+        val = candidate.feature_importances_
+        if val is not None:
+            return np.asarray(val)
+    except Exception:
+        pass
+    return None
+
+
+def _try_get_coef(candidate) -> np.ndarray | None:
+    """Intenta obtener coef_ de forma robusta."""
+    try:
+        val = candidate.coef_
+        if val is not None:
+            coef = np.asarray(val)
+            return coef[0] if coef.ndim > 1 else coef
+    except Exception:
+        pass
+    return None
+
+
 def compute_global_explainability(
     model,
     X: pd.DataFrame,
@@ -24,51 +63,49 @@ def compute_global_explainability(
     """
     Retorna importancia global de features para explicabilidad.
     Prioridad:
-    1) feature_importances_ (árboles/boosting)
+    1) feature_importances_ (árboles/boosting) — busca también dentro de CalibratedClassifierCV
     2) coef_ (modelos lineales)
-    3) permutation importance (fallback genérico, scoring='roc_auc', n_repeats=5)
+    3) permutation importance (fallback; n_jobs=1 para evitar WinError 1450 en Windows)
 
     Retorna DataFrame con columnas: Feature, Importance, Source.
     """
     feature_names = list(X.columns)
+    df_imp = None
 
-    if hasattr(model, "feature_importances_"):
-        importances = np.asarray(model.feature_importances_)
-        df_imp = pd.DataFrame(
-            {
-                "Feature": feature_names,
+    for candidate in [model, _unwrap_model(model)]:
+        importances = _try_get_feature_importances(candidate)
+        if importances is not None:
+            df_imp = pd.DataFrame({
+                "Feature":    feature_names,
                 "Importance": importances,
-                "Source": "native_feature_importance",
-            }
-        )
-    elif hasattr(model, "coef_"):
-        coef = np.asarray(model.coef_)
-        if coef.ndim > 1:
-            coef = coef[0]
-        df_imp = pd.DataFrame(
-            {
-                "Feature": feature_names,
+                "Source":     "native_feature_importance",
+            })
+            break
+
+        coef = _try_get_coef(candidate)
+        if coef is not None:
+            df_imp = pd.DataFrame({
+                "Feature":    feature_names,
                 "Importance": np.abs(coef),
-                "Source": "abs_coef",
-            }
-        )
-    else:
+                "Source":     "abs_coef",
+            })
+            break
+
+    if df_imp is None:
+        # Fallback: permutation importance — n_jobs=1 evita WinError 1450
+        # (joblib no puede serializar modelos grandes via IPC pipe en Windows)
         perm = permutation_importance(
-            model,
-            X,
-            y,
+            model, X, y,
             scoring="roc_auc",
             n_repeats=5,
             random_state=random_state,
-            n_jobs=-1,
+            n_jobs=1,
         )
-        df_imp = pd.DataFrame(
-            {
-                "Feature": feature_names,
-                "Importance": perm.importances_mean,
-                "Source": "permutation_importance",
-            }
-        )
+        df_imp = pd.DataFrame({
+            "Feature":    feature_names,
+            "Importance": perm.importances_mean,
+            "Source":     "permutation_importance",
+        })
 
     df_imp = df_imp.sort_values("Importance", ascending=False).reset_index(drop=True)
     return df_imp.head(top_n).copy()
@@ -219,14 +256,20 @@ def compute_shap_values(
             data=X_background,
         )
         sv = explainer.shap_values(X_explain, check_additivity=False)
-        # shap_values puede ser lista [neg, pos] (sklearn trees) o array (XGB/LGBM)
+        # shap_values puede ser:
+        # - lista [neg, pos] (sklearn trees binarios)
+        # - array 2D (n_samples, n_features) — XGB/LGBM con model_output="probability"
+        # - array 3D (n_samples, n_features, n_classes) — CalibratedClassifierCV + RF/ET
         if isinstance(sv, list):
-            shap_vals = sv[1]
+            shap_vals = np.asarray(sv[1])
         else:
-            shap_vals = sv
+            shap_vals = np.asarray(sv)
+        if shap_vals.ndim == 3:
+            shap_vals = shap_vals[:, :, 1]  # clase positiva
+
         ev = explainer.expected_value
         if isinstance(ev, (list, np.ndarray)):
-            ev = float(ev[1])
+            ev = float(np.asarray(ev).ravel()[1])
         else:
             ev = float(ev)
         return shap_vals, ev

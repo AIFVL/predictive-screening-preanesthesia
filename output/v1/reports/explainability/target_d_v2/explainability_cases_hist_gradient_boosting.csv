@@ -9,15 +9,15 @@ case_index,case_type,y_true,y_pred,y_proba,reason
 4311,FN,1,0,0.10551745398053991,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1049
 3471,FN,1,0,0.10508734641557851,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1367
 4059,FN,1,0,0.10458192031440845,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1548
-1201,FP,0,1,0.11010130783045766,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0933
 1362,FP,0,1,0.11010130783045766,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0796
+1201,FP,0,1,0.11010130783045766,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0933
 2511,FP,0,1,0.11027435442027334,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.359
 3807,FP,0,1,0.11029218999198698,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0
 4210,FP,0,1,0.110310859818431,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1767
 1066,FP,0,1,0.11033552359029679,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0507
 1584,FP,0,1,0.11033552359029679,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1731
-3030,FP,0,1,0.11033552359029679,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1912
 2288,FP,0,1,0.11033552359029679,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.0386
+3030,FP,0,1,0.11033552359029679,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1912
 3517,FP,0,1,0.11034567446722002,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | score_proc_moderate_severity=0.1177
 4043,TP,1,1,0.8548618671072763,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | score_proc_moderate_severity=0.1117
 516,TP,1,1,0.8510214932142478,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | score_proc_moderate_severity=0.1092
