@@ -1,41 +1,41 @@
 case_index,case_type,y_true,y_pred,y_proba,reason
-712,FN,1,0,0.10990828424692153,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-66,FN,1,0,0.10964763462543488,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1744,FN,1,0,0.10964763462543488,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3433,FN,1,0,0.10961086004972458,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3258,FN,1,0,0.10933640450239182,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-942,FN,1,0,0.10903124660253524,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-593,FN,1,0,0.10892474353313446,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-960,FN,1,0,0.10875509083271026,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3825,FN,1,0,0.10872545689344407,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2463,FN,1,0,0.10832111686468124,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1857,FP,0,1,0.11006933897733688,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-103,FP,0,1,0.1100984588265419,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3218,FP,0,1,0.11017633974552155,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2165,FP,0,1,0.11022934019565582,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-487,FP,0,1,0.11022934019565582,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-844,FP,0,1,0.1102722242474556,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2004,FP,0,1,0.1102722242474556,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1722,FP,0,1,0.11028770208358765,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2167,FP,0,1,0.11028770208358765,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-4278,FP,0,1,0.11028770208358765,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4043,TP,1,1,0.954285717010498,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-3830,TP,1,1,0.954285717010498,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-1565,TP,1,1,0.9128613114356995,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-925,TP,1,1,0.8352347373962402,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-2751,TP,1,1,0.8331998586654663,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=1.0
-3946,TP,1,1,0.8329533576965332,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-1392,TP,1,1,0.8019136548042297,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3399,TP,1,1,0.79803546667099,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-270,TP,1,1,0.7954582810401917,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2188,TP,1,1,0.792060136795044,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-2530,TN,0,0,0.01815718151628971,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1586,TN,0,0,0.025672221556305885,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3551,TN,0,0,0.028321878239512443,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1324,TN,0,0,0.030533332750201224,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4286,TN,0,0,0.03336239838972688,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1874,TN,0,0,0.03442142084240914,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1344,TN,0,0,0.035477443039417265,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4364,TN,0,0,0.037579403072595594,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-345,TN,0,0,0.038255221024155614,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3187,TN,0,0,0.04313495866954327,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
+3768,FN,1,0,0.07980087,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+2343,FN,1,0,0.07966894,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+1998,FN,1,0,0.07901806,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+2628,FN,1,0,0.07858453,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=1.0
+1441,FN,1,0,0.07849291,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+3096,FN,1,0,0.07819046,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+472,FN,1,0,0.07733252,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+207,FN,1,0,0.07716675,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+4593,FN,1,0,0.07709765,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+3992,FN,1,0,0.07703374,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+4407,FP,0,1,0.08009442,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1393,FP,0,1,0.08010554,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2595,FP,0,1,0.080215946,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2912,FP,0,1,0.08028477,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+3472,FP,0,1,0.08029603,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+1243,FP,0,1,0.08030968,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2945,FP,0,1,0.080329314,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+4136,FP,0,1,0.080348164,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1603,FP,0,1,0.08035712,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1013,FP,0,1,0.08036961,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+3830,TP,1,1,0.8915232,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+4043,TP,1,1,0.8750007,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+270,TP,1,1,0.8400747,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+3399,TP,1,1,0.78028274,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+925,TP,1,1,0.7786912,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1565,TP,1,1,0.7771911,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1392,TP,1,1,0.7716958,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+3946,TP,1,1,0.76633346,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+820,TP,1,1,0.7444363,Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+4194,TP,1,1,0.74388254,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+1344,TN,0,0,0.015195476,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2530,TN,0,0,0.01535327,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+1262,TN,0,0,0.01790032,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+1324,TN,0,0,0.018692821,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+694,TN,0,0,0.019487036,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=0.0 | Dx Preoperatorio Code_O=0.0
+3339,TN,0,0,0.02208305,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2216,TN,0,0,0.022832975,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+4503,TN,0,0,0.023029495,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+988,TN,0,0,0.023170194,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0
+2091,TN,0,0,0.023891166,Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_sedacion=1.0 | Dx Preoperatorio Code_O=0.0

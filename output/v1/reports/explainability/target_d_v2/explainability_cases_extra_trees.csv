@@ -1,41 +1,41 @@
 case_index,case_type,y_true,y_pred,y_proba,reason
-1975,FN,1,0,0.11998564350211653,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1307,FN,1,0,0.11998564350211653,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-3445,FN,1,0,0.11965799556755478,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4248,FN,1,0,0.11965799556755478,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1401,FN,1,0,0.11939785810382095,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-416,FN,1,0,0.118809206003111,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-66,FN,1,0,0.118809206003111,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-667,FN,1,0,0.118809206003111,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3254,FN,1,0,0.11876739998304413,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2237,FN,1,0,0.11876739998304413,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3832,FP,0,1,0.12002977562050847,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4389,FP,0,1,0.12002977562050847,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2189,FP,0,1,0.12005875038821223,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3876,FP,0,1,0.12007158164057534,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3177,FP,0,1,0.12007158164057534,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-390,FP,0,1,0.12010130392312046,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1717,FP,0,1,0.12010130392312046,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-3968,FP,0,1,0.12010130392312046,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2067,FP,0,1,0.1201872420615793,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-846,FP,0,1,0.1201967111011121,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4043,TP,1,1,0.8581746031746033,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-3830,TP,1,1,0.7851169590643275,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-2188,TP,1,1,0.7592911332385017,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-925,TP,1,1,0.7592911332385017,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-516,TP,1,1,0.7592911332385017,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-393,TP,1,1,0.7442535392535393,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=1.0 | Tipo de anestesia propuesta_raquidea=0.0
-1623,TP,1,1,0.7442535392535393,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-1308,TP,1,1,0.7362280701754387,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-59,TP,1,1,0.7180276923782867,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=1.0
-322,TP,1,1,0.7103508771929825,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3606,TN,0,0,0.03470949906437247,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-865,TN,0,0,0.043684747734277635,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3502,TN,0,0,0.044233308588181995,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-4472,TN,0,0,0.047426262070152825,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2145,TN,0,0,0.047426262070152825,Tipo de anestesia propuesta_sedacion=0.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2870,TN,0,0,0.04887955292908283,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-1107,TN,0,0,0.04942811378298719,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2091,TN,0,0,0.04942811378298719,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-2181,TN,0,0,0.04942811378298719,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
-3440,TN,0,0,0.05262106726495801,Tipo de anestesia propuesta_sedacion=1.0 | Tipo de anestesia propuesta_peridural=0.0 | Tipo de anestesia propuesta_raquidea=0.0
+1307,FN,1,0,0.11998564350211653,Hora_decimal=9.25 | Frecuencia Respiratoria=29.9767 | mes=7.0
+1975,FN,1,0,0.11998564350211653,Hora_decimal=14.4333 | Frecuencia Respiratoria=37.9523 | mes=6.0
+3445,FN,1,0,0.11965799556755478,Hora_decimal=15.0667 | Frecuencia Respiratoria=12.1259 | mes=1.0
+4248,FN,1,0,0.11965799556755478,Hora_decimal=11.7167 | Frecuencia Respiratoria=38.465 | mes=2.0
+1401,FN,1,0,0.11939785810382095,Hora_decimal=10.95 | Frecuencia Respiratoria=28.6513 | mes=1.0
+416,FN,1,0,0.118809206003111,Hora_decimal=15.4833 | Frecuencia Respiratoria=35.9251 | mes=2.0
+667,FN,1,0,0.118809206003111,Hora_decimal=9.9667 | Frecuencia Respiratoria=31.8489 | mes=2.0
+66,FN,1,0,0.118809206003111,Hora_decimal=14.9833 | Frecuencia Respiratoria=30.3479 | mes=8.0
+3254,FN,1,0,0.11876739998304413,Hora_decimal=16.65 | Frecuencia Respiratoria=50.4195 | mes=8.0
+2237,FN,1,0,0.11876739998304413,Hora_decimal=15.2833 | Frecuencia Respiratoria=15.4181 | mes=7.0
+3832,FP,0,1,0.12002977562050847,Hora_decimal=14.2833 | Frecuencia Respiratoria=49.6502 | mes=1.0
+4389,FP,0,1,0.12002977562050847,Hora_decimal=8.8667 | Frecuencia Respiratoria=12.0 | mes=6.0
+2189,FP,0,1,0.12005875038821223,Hora_decimal=7.1333 | Frecuencia Respiratoria=26.7703 | mes=7.0
+3177,FP,0,1,0.12007158164057534,Hora_decimal=8.9667 | Frecuencia Respiratoria=38.5322 | mes=7.0
+3876,FP,0,1,0.12007158164057534,Hora_decimal=11.5167 | Frecuencia Respiratoria=21.6402 | mes=1.0
+1717,FP,0,1,0.12010130392312046,Hora_decimal=9.6167 | Frecuencia Respiratoria=10.0 | mes=2.0
+3968,FP,0,1,0.12010130392312046,Hora_decimal=10.6667 | Frecuencia Respiratoria=28.3534 | mes=10.0
+390,FP,0,1,0.12010130392312046,Hora_decimal=8.5 | Frecuencia Respiratoria=52.7342 | mes=3.0
+2067,FP,0,1,0.1201872420615793,Hora_decimal=17.15 | Frecuencia Respiratoria=57.6585 | mes=3.0
+846,FP,0,1,0.1201967111011121,Hora_decimal=9.9833 | Frecuencia Respiratoria=12.0 | mes=2.0
+4043,TP,1,1,0.8581746031746033,Hora_decimal=14.8167 | Frecuencia Respiratoria=30.7447 | mes=2.0
+3830,TP,1,1,0.7851169590643275,Hora_decimal=11.0167 | Frecuencia Respiratoria=47.659 | mes=4.0
+516,TP,1,1,0.7592911332385017,Hora_decimal=16.7333 | Frecuencia Respiratoria=11.4415 | mes=11.0
+925,TP,1,1,0.7592911332385017,Hora_decimal=11.1167 | Frecuencia Respiratoria=14.4686 | mes=2.0
+2188,TP,1,1,0.7592911332385017,Hora_decimal=7.7167 | Frecuencia Respiratoria=16.0 | mes=8.0
+393,TP,1,1,0.7442535392535393,Hora_decimal=9.4333 | Frecuencia Respiratoria=42.5068 | mes=3.0
+1623,TP,1,1,0.7442535392535393,Hora_decimal=15.6667 | Frecuencia Respiratoria=40.217 | mes=10.0
+1308,TP,1,1,0.7362280701754387,Hora_decimal=8.6167 | Frecuencia Respiratoria=41.5849 | mes=5.0
+59,TP,1,1,0.7180276923782867,Hora_decimal=15.1833 | Frecuencia Respiratoria=30.8922 | mes=4.0
+322,TP,1,1,0.7103508771929825,Hora_decimal=11.7833 | Frecuencia Respiratoria=41.1996 | mes=12.0
+3606,TN,0,0,0.03470949906437247,Hora_decimal=8.0 | Frecuencia Respiratoria=40.8676 | mes=6.0
+865,TN,0,0,0.043684747734277635,Hora_decimal=14.2833 | Frecuencia Respiratoria=32.31 | mes=4.0
+3502,TN,0,0,0.044233308588181995,Hora_decimal=15.7 | Frecuencia Respiratoria=28.8252 | mes=2.0
+2145,TN,0,0,0.047426262070152825,Hora_decimal=11.9833 | Frecuencia Respiratoria=25.0651 | mes=3.0
+4472,TN,0,0,0.047426262070152825,Hora_decimal=11.2667 | Frecuencia Respiratoria=57.4038 | mes=3.0
+2870,TN,0,0,0.04887955292908283,Hora_decimal=8.05 | Frecuencia Respiratoria=38.927 | mes=11.0
+2181,TN,0,0,0.04942811378298719,Hora_decimal=9.9667 | Frecuencia Respiratoria=16.0 | mes=4.0
+2091,TN,0,0,0.04942811378298719,Hora_decimal=15.9333 | Frecuencia Respiratoria=16.0 | mes=3.0
+1107,TN,0,0,0.04942811378298719,Hora_decimal=14.6333 | Frecuencia Respiratoria=37.4177 | mes=10.0
+4265,TN,0,0,0.05262106726495801,Hora_decimal=16.8667 | Frecuencia Respiratoria=16.0 | mes=2.0

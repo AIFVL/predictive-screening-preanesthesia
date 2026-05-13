@@ -1,0 +1,164 @@
+[
+  {
+    "target": "target_d_v2_hosp",
+    "model": "lightgbm",
+    "F2": 0.6766687078995713,
+    "ROC_AUC": 0.7613836119933681,
+    "Recall": 0.8532818532818532,
+    "Precision": 0.37018425460636517,
+    "Threshold": 0.18000000000000005
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "stacking",
+    "F2": 0.676145817576766,
+    "ROC_AUC": 0.760763654056337,
+    "Recall": 0.862934362934363,
+    "Precision": 0.36238346169436564,
+    "Threshold": 0.34
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "xgboost",
+    "F2": 0.6759398496240602,
+    "ROC_AUC": 0.7590992560504756,
+    "Recall": 0.8677606177606177,
+    "Precision": 0.3587390263367917,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "hist_gradient_boosting",
+    "F2": 0.6750037667620913,
+    "ROC_AUC": 0.7560524374548765,
+    "Recall": 0.8648648648648649,
+    "Precision": 0.3594063377456879,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "voting",
+    "F2": 0.6746273197444478,
+    "ROC_AUC": 0.7601593912569522,
+    "Recall": 0.8561776061776062,
+    "Precision": 0.36502057613168726,
+    "Threshold": 0.19
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "extra_trees",
+    "F2": 0.6714520711828922,
+    "ROC_AUC": 0.7462551044868118,
+    "Recall": 0.8667953667953668,
+    "Precision": 0.353126228863547,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "random_forest",
+    "F2": 0.6686177397568662,
+    "ROC_AUC": 0.7592768964720183,
+    "Recall": 0.86003861003861,
+    "Precision": 0.3537117903930131,
+    "Threshold": 0.17000000000000004
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "mlp",
+    "F2": 0.6590574374079529,
+    "ROC_AUC": 0.7063084822231164,
+    "Recall": 0.8638996138996139,
+    "Precision": 0.3382464096749811,
+    "Threshold": 0.19
+  },
+  {
+    "target": "target_d_v2_hosp",
+    "model": "logistic_regression",
+    "F2": 0.6538009979454065,
+    "ROC_AUC": 0.7051368758685832,
+    "Recall": 0.86003861003861,
+    "Precision": 0.33370786516853934,
+    "Threshold": 0.38000000000000006
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "xgboost",
+    "F2": 0.6768558951965066,
+    "ROC_AUC": 0.860802133304135,
+    "Recall": 0.8528198074277854,
+    "Precision": 0.3708133971291866,
+    "Threshold": 0.14
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "stacking",
+    "F2": 0.6706135629709364,
+    "ROC_AUC": 0.8588255421653768,
+    "Recall": 0.8569463548830811,
+    "Precision": 0.358664363845711,
+    "Threshold": 0.34
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "extra_trees",
+    "F2": 0.670266836086404,
+    "ROC_AUC": 0.8509465510594665,
+    "Recall": 0.8707015130674003,
+    "Precision": 0.34895259095920617,
+    "Threshold": 0.14
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "random_forest",
+    "F2": 0.6699621371476652,
+    "ROC_AUC": 0.8576537304308354,
+    "Recall": 0.8762035763411279,
+    "Precision": 0.34507042253521125,
+    "Threshold": 0.13
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "voting",
+    "F2": 0.6685177274668945,
+    "ROC_AUC": 0.8568861332950105,
+    "Recall": 0.8610729023383769,
+    "Precision": 0.3528748590755355,
+    "Threshold": 0.14
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "lightgbm",
+    "F2": 0.6613478899853034,
+    "ROC_AUC": 0.8542788122660426,
+    "Recall": 0.8665749656121046,
+    "Precision": 0.33962264150943394,
+    "Threshold": 0.13
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "hist_gradient_boosting",
+    "F2": 0.6547743966421826,
+    "ROC_AUC": 0.8481371227311403,
+    "Recall": 0.8583218707015131,
+    "Precision": 0.3360258481421648,
+    "Threshold": 0.13
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "logistic_regression",
+    "F2": 0.6150635930047694,
+    "ROC_AUC": 0.7875852283744049,
+    "Recall": 0.8514442916093535,
+    "Precision": 0.2914312617702448,
+    "Threshold": 0.38000000000000006
+  },
+  {
+    "target": "target_f_predictibilidad_maxima",
+    "model": "mlp",
+    "F2": 0.6104876160990712,
+    "ROC_AUC": 0.7837727912477958,
+    "Recall": 0.8679504814305364,
+    "Precision": 0.27920353982300883,
+    "Threshold": 0.13
+  }
+]

@@ -1,26 +1,26 @@
 Feature,Importance,Source
-Tensión Arterial Sistólica (mm/Hg),0.03037574665855678,permutation_importance
-Tipo de anestesia propuesta_peridural,0.009686221452819544,permutation_importance
-Edad,0.006815485009643551,permutation_importance
-Tipo de anestesia propuesta_sedacion,0.005260108808101594,permutation_importance
-Tipo de anestesia propuesta_raquidea,0.005184598169029497,permutation_importance
-Examen_Hemoglobina(g/dl),0.0034060042005229717,permutation_importance
-anio,0.002940138648450552,permutation_importance
-Talla (cm),0.002721339748488538,permutation_importance
-Dx Preoperatorio Code_O,0.0022224301689046655,permutation_importance
-Tipo de anestesia propuesta_sin dato,0.002178111532203153,permutation_importance
-Procedimiento propuesto Code_L,0.002037097688152789,permutation_importance
-IMC,0.0017459723326939346,permutation_importance
-Temperatura,0.0015902397625249475,permutation_importance
-Dx Preoperatorio Code_Z,0.0014266117167558213,permutation_importance
-score_dx_high_severity,0.0012724712383745506,permutation_importance
-Grupo Sanguíneo_O,0.0012589222123447375,permutation_importance
-Tipo de anestesia propuesta_local,0.0011733716475095912,permutation_importance
-Estado Nutricional_encoded,0.0011583929880378597,permutation_importance
-Antecedentes anestésicos,0.0010463292211877028,permutation_importance
-Sistema Nervioso_Sin dato,0.0010113681851972923,permutation_importance
-Antecedentes cardiovasculares_hta,0.0009978841425059004,permutation_importance
-Puntaje Mallampati,0.0008681449076456849,permutation_importance
-Dx Preoperatorio Code_M,0.0008025442276600403,permutation_importance
-recalculado_flag,0.0007673557499856765,permutation_importance
-Grupo Sanguíneo_Sin Dato,0.0007345391641583543,permutation_importance
+Tensión Arterial Sistólica (mm/Hg),0.02917108553366914,permutation_importance
+Tipo de anestesia propuesta_sedacion,0.01862679159063616,permutation_importance
+Tipo de anestesia propuesta_peridural,0.01568626304215599,permutation_importance
+Tipo de anestesia propuesta_raquidea,0.009064493363901449,permutation_importance
+Temperatura,0.006664983598205376,permutation_importance
+Examen_Hemoglobina(g/dl),0.006317322738449827,permutation_importance
+Talla (cm),0.005794629257058426,permutation_importance
+Edad,0.005565335547965455,permutation_importance
+Tipo de anestesia propuesta_local,0.0035920839896650624,permutation_importance
+Examen_PT (INR),0.002860241634045013,permutation_importance
+Puntaje Mallampati,0.002708408064172341,permutation_importance
+Hora_decimal,0.002654569368413928,permutation_importance
+Antecedentes anestésicos,0.0026447568843348313,permutation_importance
+Dx Preoperatorio Code_H,0.0023816068560021052,permutation_importance
+Tipo de anestesia propuesta_sin dato,0.0023060312335916764,permutation_importance
+Dx Preoperatorio Code_S,0.0020046710023549517,permutation_importance
+anio,0.001905149019791308,permutation_importance
+Sistema Nervioso_Sin dato,0.0015726292778531548,permutation_importance
+Dx Preoperatorio Code_Z,0.001392105564133339,permutation_importance
+recalculado_flag,0.0013774193296838487,permutation_importance
+Procedimiento propuesto Code_nan,0.0012204520760876747,permutation_importance
+RH_Positivo,0.0011985201994208384,permutation_importance
+RH_Sin Dato,0.0011122548178646551,permutation_importance
+Dx Preoperatorio Code_G,0.0010769038818446708,permutation_importance
+Grupo Sanguíneo_O,0.0010685860145458691,permutation_importance

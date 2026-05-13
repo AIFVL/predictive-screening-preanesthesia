@@ -11,8 +11,6 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__PARALLELISM: "20"
     AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "20"
     PYTHONPATH: /opt/airflow/project
-    # HuggingFace: cache models in the named volume so bart-large-mnli
-    # (≈1.6 GB) is only downloaded once across container restarts
     HF_HOME: /opt/airflow/hf_cache
     TRANSFORMERS_CACHE: /opt/airflow/hf_cache
   volumes:
@@ -20,13 +18,9 @@ x-airflow-common: &airflow-common
     - airflow_logs:/opt/airflow/logs
     - ./config:/opt/airflow/project/config
     - ./src:/opt/airflow/project/src
-    # Raw data: the actual Excel files live in data/
     - ./data:/opt/airflow/project/data_raw
-    # API CSV caches (RxNorm, ClinicalTables, Google Translate, severity)
     - ./cache:/opt/airflow/project/cache
-    # Pipeline outputs (parquets, models, plots, reports)
     - ./output:/opt/airflow/project/output
-    # HuggingFace model weights — persisted in a named volume
     - hf_cache:/opt/airflow/hf_cache
   depends_on:
     postgres:
@@ -67,17 +61,29 @@ services:
     command: scheduler
     restart: unless-stopped
 
-  # api service is future work — not yet implemented
-  # api:
-  #   build:
-  #     context: ./api
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./output:/app/output:ro
-  #     - ./config:/app/config:ro
-  #   restart: unless-stopped
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: preanesthesia-api:latest
+    container_name: preanesthesia-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      MODELS_DIR: /app/output/v2/models
+      LOG_LEVEL: "${API_LOG_LEVEL:-INFO}"
+      CORS_ORIGINS: "${API_CORS_ORIGINS:-*}"
+      MAX_BATCH_SIZE: "${API_MAX_BATCH_SIZE:-100}"
+      MODEL_CACHE_SIZE: "${API_MODEL_CACHE_SIZE:-8}"
+    volumes:
+      - ./output:/app/output:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

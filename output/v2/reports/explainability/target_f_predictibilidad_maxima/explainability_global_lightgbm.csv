@@ -1,0 +1,26 @@
+Feature,Importance,Source
+score_proc_low_severity,437,native_feature_importance
+score_proc_medium_severity,424,native_feature_importance
+score_dx_low_severity,423,native_feature_importance
+score_proc_high_severity,414,native_feature_importance
+Edad,400,native_feature_importance
+score_dx_critical,370,native_feature_importance
+Hora_decimal,370,native_feature_importance
+score_proc_critical,369,native_feature_importance
+score_dx_medium_severity,349,native_feature_importance
+score_dx_high_severity,347,native_feature_importance
+IMC,340,native_feature_importance
+score_proc_moderate_severity,307,native_feature_importance
+score_dx_moderate_severity,303,native_feature_importance
+Frecuencia Respiratoria,287,native_feature_importance
+Peso (Kg),251,native_feature_importance
+Temperatura,251,native_feature_importance
+Talla (cm),250,native_feature_importance
+score_proc_ant_low_severity,208,native_feature_importance
+Tensión Arterial Media (mm/Hg),194,native_feature_importance
+score_proc_ant_critical,173,native_feature_importance
+Examen_Hemoglobina(g/dl),172,native_feature_importance
+mes,158,native_feature_importance
+score_proc_ant_high_severity,155,native_feature_importance
+Tensión Arterial Sistólica (mm/Hg),145,native_feature_importance
+score_proc_ant_moderate_severity,144,native_feature_importance

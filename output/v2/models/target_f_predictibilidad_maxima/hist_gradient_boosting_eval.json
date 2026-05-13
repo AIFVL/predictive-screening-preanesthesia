@@ -1,0 +1,31 @@
+{
+  "test": {
+    "Accuracy": 0.6517742625053442,
+    "Recall": 0.8525852585258525,
+    "Precision": 0.34140969162995594,
+    "F1": 0.4875747090279962,
+    "F2": 0.656112428039282,
+    "ROC_AUC": 0.8404123909339727,
+    "PR_AUC": 0.6838577671182948,
+    "Balanced_Accuracy": 0.727964160172982,
+    "Specificity": 0.6033430618201114,
+    "Brier": 0.10077175493697056,
+    "Predicted_Positive_Rate": 0.48525010688328346,
+    "FN_Rate": 0.1474147414741474,
+    "Threshold": 0.13
+  },
+  "cv": {
+    "ROC_AUC_mean": 0.8443,
+    "ROC_AUC_std": 0.0126,
+    "F2_mean": 0.6614,
+    "F2_std": 0.0137,
+    "Recall_mean": 0.8622,
+    "Recall_std": 0.0067,
+    "Precision_mean": 0.3432,
+    "Precision_std": 0.0195,
+    "Specificity_mean": 0.5999,
+    "Specificity_std": 0.0362,
+    "Balanced_Accuracy_mean": 0.731,
+    "Balanced_Accuracy_std": 0.0168
+  }
+}

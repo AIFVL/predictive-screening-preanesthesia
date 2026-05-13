@@ -1,7 +1,6 @@
 active_targets:
-  - target_d_v2
   - target_d_v2_hosp
-  - target_d_v5
+  - target_f_predictibilidad_maxima
 
 targets:
   target_a_sensible:
@@ -123,3 +122,14 @@ targets:
       - flag_tecnica
       - flag_tiempos
       - flag_fisiologicas
+
+  target_f_predictibilidad_maxima:
+    threshold: 1
+    apply_cancel_non_medico_rule: true
+    description: "Target F - Predictibilidad Máxima: OR de flags con mejor ROC-AUC individual (buena_senal)"
+    flags:
+      - flag_fisiologicas
+      - flag_estancia
+      - flag_seguimiento
+    subflag_logic:
+      _target_flags: "flag_interconsultas OR flag_hospitalizacion_no_anticipada OR flag_uci_no_planeada OR flag_estancia_uci OR flag_estancia_prolongada"

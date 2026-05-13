@@ -11,11 +11,6 @@ from typing import Dict, List, Tuple, Set
 
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from transformers import pipeline
-import torch
-
-# Detectar GPU (si no hay, seguirá en CPU)
-DEVICE = 0 if torch.cuda.is_available() else -1
 
 # Modelos zero-shot (ajusta según tus necesidades; distilados son más rápidos)
 ZERO_SHOT_MODELS: Dict[str, str] = {
@@ -30,7 +25,7 @@ MAX_WORKERS = min(4, os.cpu_count() or 1)  # Ajusta según tu CPU
 DEFAULT_BATCH_SIZE = 32
 
 # Caché global de pipelines por modelo (compartido entre hilos)
-MODEL_PIPELINES: Dict[str, pipeline] = {}
+MODEL_PIPELINES: Dict[str, object] = {}
 MODEL_LOCK = threading.Lock()
 
 
@@ -39,12 +34,18 @@ def _get_pipeline(model_name: str, model_id: str):
     if model_name in MODEL_PIPELINES:
         return MODEL_PIPELINES[model_name]
 
+    # Lazy imports: only load torch/transformers when actually needed (cache miss).
+    import torch
+    from transformers import pipeline as hf_pipeline
+
+    device = 0 if torch.cuda.is_available() else -1
+
     with MODEL_LOCK:
         if model_name not in MODEL_PIPELINES:
-            MODEL_PIPELINES[model_name] = pipeline(
+            MODEL_PIPELINES[model_name] = hf_pipeline(
                 "zero-shot-classification",
                 model=model_id,
-                device=DEVICE,
+                device=device,
                 framework="pt",
             )
     return MODEL_PIPELINES[model_name]

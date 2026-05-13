@@ -1,0 +1,11 @@
+Feature,SHAP_TP,SHAP_FN,Delta_TP_FN,Interpretacion
+Tipo de anestesia propuesta_raquidea,0.17893229577152062,-0.007982027687571707,0.1869143234590923,"Protege al FN (baja riesgo −0.008), eleva al TP (+0.179)"
+Dx Preoperatorio Code_O,0.08053820183678322,0.0,0.08053820183678322,Señal débil en FN (+0.000) vs fuerte en TP (+0.081)
+Tipo de anestesia propuesta_general,0.07526833117324624,-0.0007845220470196247,0.07605285322026586,"Protege al FN (baja riesgo −0.001), eleva al TP (+0.075)"
+score_proc_critical,0.0649937436265667,-0.00441231072866142,0.06940605435522812,"Protege al FN (baja riesgo −0.004), eleva al TP (+0.065)"
+score_proc_high_severity,0.044078617658746,-0.0024715163650243744,0.046550134023770375,"Protege al FN (baja riesgo −0.002), eleva al TP (+0.044)"
+Procedimiento propuesto Code_L,0.04554679714039625,-0.000781041226499834,0.046327838366896086,"Protege al FN (baja riesgo −0.001), eleva al TP (+0.046)"
+score_proc_medium_severity,0.031643983642279126,-0.0026975297841654736,0.0343415134264446,"Protege al FN (baja riesgo −0.003), eleva al TP (+0.032)"
+Tipo de anestesia propuesta_sedacion,0.018019682422294413,-0.0064978883308670615,0.024517570753161473,"Protege al FN (baja riesgo −0.006), eleva al TP (+0.018)"
+Edad,0.01892647656753983,-0.0025052366291908627,0.021431713196730692,"Protege al FN (baja riesgo −0.003), eleva al TP (+0.019)"
+Dx Preoperatorio Code_S,0.015611576377178457,-0.00271138125799147,0.018322957635169928,"Protege al FN (baja riesgo −0.003), eleva al TP (+0.016)"
