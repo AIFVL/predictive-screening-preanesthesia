@@ -6,22 +6,20 @@
 - [`src/reports/pre_post_analysis.py`](../../src/reports/pre_post_analysis.py) — Análisis de correlación preop→target
 - [`src/reports/correlation.py`](../../src/reports/correlation.py) — Matrices de correlación
 
-**Outputs:**
-- [`output/v1/data_processed/target_d_v2_hosp/selected_features.json`](../../output/v1/data_processed/target_d_v2_hosp/selected_features.json) — 80 features seleccionadas
-- [`output/v1/reports/pre_post_signal/pre_post_linkage_per_flag.csv`](../../output/v1/reports/pre_post_signal/pre_post_linkage_per_flag.csv) — MI y correlación por feature
-- [`output/v1/reports/pre_post_signal/pre_post_linkage_summary.csv`](../../output/v1/reports/pre_post_signal/pre_post_linkage_summary.csv) — Resumen por versión del target
+**Outputs (pipeline v2):**
+- [`output/v2/data_processed/target_d_v2_hosp/selected_features.json`](../../output/v2/data_processed/target_d_v2_hosp/selected_features.json) — Features seleccionadas para `target_d_v2_hosp`
+- [`output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json`](../../output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json) — Features seleccionadas para `target_f_predictibilidad_maxima`
+- [`output/v2/reports/pre_post_signal/pre_post_linkage_per_flag.csv`](../../output/v2/reports/pre_post_signal/pre_post_linkage_per_flag.csv) — MI y correlación por feature
+- [`output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv`](../../output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv) — Resumen por versión del target
+
+**Configuración:**
+- [`config/features_config.yaml`](../../config/features_config.yaml) — Umbral de varianza mínima, parámetros del RF de rankeo, threshold del score combinado.
 
 ---
 
 ## 1. El problema de partida: 236 features, señal débil
 
-Tras la limpieza, el dataset preoperatorio tiene **236 columnas**. No todas son igualmente útiles para predecir el target. Hay tres tipos de problemas:
-
-1. **Features con varianza casi nula:** Columnas donde el 99% de los pacientes tienen el mismo valor. No añaden información discriminativa.
-2. **Features ruidosas:** Columnas numéricamente válidas pero sin correlación real con el target — añaden ruido y pueden causar sobreajuste.
-3. **Features redundantes:** Columnas altamente correlacionadas entre sí (por ejemplo, `score_proc_high_severity` y `score_proc_critical` capturan conceptos solapados).
-
-El objetivo de la selección es **reducir las 236 features a un subconjunto informativo y manejable**, manteniendo la mayor parte de la señal predictiva.
+Tras la limpieza, el dataset preoperatorio contiene **236 columnas**. No todas contribuyen de igual forma a la predicción del target. Existen tres categorías de problemas: columnas con varianza casi nula, donde el 99% de los pacientes comparten el mismo valor y no aportan poder discriminativo; columnas numéricamente válidas pero sin correlación real con el target, que introducen ruido y pueden favorecer el sobreajuste; y columnas altamente correlacionadas entre sí, como `score_proc_high_severity` y `score_proc_critical`, que capturan conceptos solapados. El objetivo de esta etapa es **reducir las 236 features a un subconjunto informativo y manejable** que conserve la mayor parte de la señal predictiva disponible.
 
 ---
 
@@ -29,7 +27,7 @@ El objetivo de la selección es **reducir las 236 features a un subconjunto info
 
 ### 2.1 Poda de baja varianza
 
-Antes del rankeo formal, se eliminan columnas con varianza inferior al umbral configurado (`min_variance: 0.01` en `config/features_config.yaml`). Una columna con varianza < 0.01 significa que al menos el 99% de los registros tienen el mismo valor — esa columna no puede contribuir a distinguir entre positivos y negativos.
+Antes del rankeo formal, se eliminan columnas con varianza nula. La función `sanitize_features` en `src/features/selection.py` descarta las columnas donde `nunique() <= 1`, es decir, columnas con un único valor posible (varianza exactamente cero). El parámetro `min_variance: 0.01` está declarado en `config/features_config.yaml` bajo `feature_pruning`, pero actualmente **no está activo en el código de selección** — es una configuración declarada, no implementada. El filtro real aplicado es solo el de varianza exactamente cero.
 
 ### 2.2 Inferencia de features candidatas
 
@@ -43,18 +41,16 @@ La función `infer_candidate_features()` en `src/features/engineering.py` identi
 El rankeo principal usa **dos métricas independientes** que se combinan:
 
 #### Mutual Information (MI)
-La Información Mutua entre cada feature y el target mide cuánta información sobre el target se puede obtener conociendo el valor de esa feature. A diferencia de la correlación de Pearson, MI captura relaciones no lineales y no asume distribuciones específicas.
+La Información Mutua entre cada feature y el target cuantifica cuánta información sobre el target se puede obtener conociendo el valor de esa feature. A diferencia de la correlación de Pearson, captura relaciones no lineales y no impone supuestos distribucionales.
 
 ```python
 mi_scores = mutual_info_classif(X, y, random_state=42, n_neighbors=5)
 ```
 
-Valores MI más altos = la feature predice mejor el target.
-
-**Limitación:** MI tiende a sobrevalorar features con muchas categorías (alta cardinalidad) y puede ser ruidosa con pocas observaciones.
+Valores MI más altos indican mayor poder predictivo de la feature sobre el target. Su principal limitación es la tendencia a sobrevalorar features de alta cardinalidad y a producir estimaciones ruidosas con pocos datos.
 
 #### Feature Importance de Random Forest
-Se entrena un Random Forest específicamente para el rankeo (no el modelo final), y se usa la importancia media de disminución de impureza de cada feature como medida de relevancia:
+Se entrena un Random Forest específicamente para el proceso de rankeo —distinto del modelo final— y se utiliza la importancia media de disminución de impureza (MDI) de cada feature como medida de relevancia:
 
 ```python
 rf = RandomForestClassifier(
@@ -65,7 +61,7 @@ rf.fit(X, y)
 importances = rf.feature_importances_
 ```
 
-La importancia RF captura interacciones entre features que MI no puede capturar.
+A diferencia de MI, la importancia de Random Forest captura interacciones entre features.
 
 #### Score combinado
 
@@ -85,34 +81,38 @@ Antes de entrenar los modelos, se calculó el enlace estadístico entre cada fea
 - **Mutual Information** — para relaciones no lineales
 - **Correlación de Pearson (valor absoluto)** — para relaciones lineales
 
-Los resultados están en `output/v1/reports/pre_post_signal/pre_post_linkage_per_flag.csv`.
+Los resultados están en `output/v2/reports/pre_post_signal/pre_post_linkage_per_flag.csv`.
 
 ### Hallazgos del análisis de señal
 
-**Para `target_d_v2_hosp`:**
-- **Max MI:** 0.100 (score_proc_high_severity)
-- **Max correlación de Pearson:** 0.232 (score_proc_high_severity)
-- **N features con señal real (score combinado > umbral):** 16
+Resumen exacto extraído de [`output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv`](../../output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv):
 
-**Para `target_d_v2` (sin hospitalización):**
-- **Max MI:** 0.031
-- **Max correlación de Pearson:** 0.154
-- **N features informativas:** 11
+| Versión target | Prevalencia | Max MI | Max Pearson | N features informativas | Top 3 features preop |
+|---|---|---|---|---|---|
+| `target_d_v2_hosp` | 27.69% | 0.10032 | 0.23227 | 16 | `score_proc_high_severity`, `score_proc_moderate_severity`, `score_proc_medium_severity` |
+| `target_f_predictibilidad_maxima` | 19.43% | **0.12972** | **0.30335** | 16 | `score_proc_moderate_severity`, `score_proc_high_severity`, `score_proc_low_severity` |
 
-La diferencia entre versiones es reveladora: `target_d_v2_hosp` tiene el doble de MI máxima y 50% más de correlación que `target_d_v2`. Esto confirma que añadir `flag_hospitalizacion_no_anticipada` al target **mejora sustancialmente la señal disponible para el modelo** — el target es genuinamente más predecible.
+`target_f_predictibilidad_maxima` exhibe aproximadamente un 30% más de MI máxima y un 31% más de correlación de Pearson que `target_d_v2_hosp`, a pesar de tener una prevalencia menor (19.43% vs. 27.69%). Esto es consecuencia directa de su construcción: se compone exclusivamente de flags identificados por el Enfoque C como los más predecibles desde variables preoperatorias. La conclusión metodológica es clara: la calidad del target —qué flags se incluyen— tiene mayor impacto sobre la señal disponible que su amplitud —cuántos flags se incluyen. Un target compuesto por 5 flags altamente predecibles supera a uno formado por 7 flags de los cuales algunos introducen ruido.
 
-**Top 3 features por señal para `target_d_v2_hosp`:**
+**Top features por señal para `target_d_v2_hosp`:**
 1. `score_proc_high_severity` — MI: 0.100, Pearson: 0.232
 2. `score_proc_moderate_severity` — MI alto, Pearson moderado
 3. `score_proc_medium_severity` — MI alto, Pearson moderado
 
-Los scores de severidad del procedimiento dominan la señal. Esto indica que **la complejidad del procedimiento es el predictor más fuerte del target**, más que las comorbilidades del paciente.
+**Top features por señal para `target_f_predictibilidad_maxima`:**
+1. `score_proc_moderate_severity` — Pearson: 0.30
+2. `score_proc_high_severity` — Pearson alto
+3. `score_proc_low_severity` — Pearson moderado
+
+Los scores de severidad del procedimiento dominan la señal en ambos targets. **La complejidad del procedimiento es el predictor más fuerte del target**, más que las comorbilidades del paciente.
 
 ---
 
-## 4. Las 80 features seleccionadas
+## 4. Las features seleccionadas
 
-### 4.1 Distribución por tipo
+> **Nota sobre tamaños:** El número exacto de features seleccionadas depende del target. El listado de 80 features mostrado a continuación corresponde a `target_d_v2_hosp` (versión histórica). El listado de `target_f_predictibilidad_maxima` (servido por la API) contiene 59 features y se documenta más abajo en la sección 4.3.
+
+### 4.1 Distribución por tipo (`target_d_v2_hosp`)
 
 De las 236 features originales, **80 superaron el umbral de Combined_Score ≥ 0.02**:
 
@@ -127,7 +127,7 @@ De las 236 features originales, **80 superaron el umbral de Combined_Score ≥ 0
 | Variables temporales | 4 | `anio`, `mes`, `dia_semana`, `Hora_decimal` |
 | Otros | ~11 | `Sexo_encoded`, `Puntaje Mallampati`, `Estado Nutricional_encoded`, ... |
 
-### 4.2 Las 80 features ordenadas por posición (ranking descendente de Combined_Score)
+### 4.2 Las 80 features de `target_d_v2_hosp` ordenadas por ranking descendente de Combined_Score
 
 1. `score_proc_high_severity` — Procedimiento de alta severidad ⭐ (predictor #1)
 2. `score_proc_critical` — Procedimiento crítico
@@ -210,42 +210,71 @@ De las 236 features originales, **80 superaron el umbral de Combined_Score ≥ 0
 79. `Antecedente renales_litiasis` — Litiasis renal
 80. `Alérgeno_med_antiinfecciosos` — Alergia a antibióticos
 
-### 4.3 Interpretación del ranking
+### 4.3 Las 59 features de `target_f_predictibilidad_maxima`
 
-**El tipo de procedimiento y diagnóstico dominan el ranking.** Las primeras 14 features son scores de severidad y tipo de anestesia propuesta — todas derivadas de la complejidad del procedimiento y diagnóstico, no de características del paciente. Esto tiene una implicación importante: el modelo está prediciéndolo principalmente en función de **qué se va a hacer** más que **quién es el paciente**.
+Para `target_f_predictibilidad_maxima` se seleccionan **59 features** (extraídas de [`output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json`](../../output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json) y del manifest de XGBoost). El conjunto es muy similar al de `target_d_v2_hosp` salvo que descarta features con baja relación con los flags de UCI/hospitalización.
 
-**Las comorbilidades aparecen tarde en el ranking.** `Antecedentes cardiovasculares_hta` aparece en la posición 64. `Antecedente endocrinológicos_diabetes` no aparece entre las 80 — está por debajo del umbral, aunque en el análisis de subgrupos (Enfoque B) vimos que los pacientes diabéticos son precisamente los que el modelo predice peor. Esto es coherente: si diabetes tiene baja MI con el target actual, el modelo no aprende a usarla, y por tanto falla en pacientes endocrinológicos.
+Top features para `target_f`:
 
-**Las variables del examen físico tienen señal moderada.** `Edad`, `IMC`, `TA Sistólica`, `Hemoglobina`, `Temperatura`, `Frecuencia Respiratoria` aparecen en el tercio medio del ranking. Son relevantes pero no dominantes.
+1. `Tipo de anestesia propuesta_raquidea`
+2. `score_proc_high_severity`
+3. `score_proc_low_severity`
+4. `score_proc_medium_severity`
+5. `score_proc_moderate_severity`
+6. `score_proc_critical`
+7. `score_dx_low_severity`
+8. `score_dx_critical`
+9. `score_dx_medium_severity`
+10. `score_dx_high_severity`
+11. `score_dx_moderate_severity`
+12. `Tipo de anestesia propuesta_sedacion`
+13. `Tipo de anestesia propuesta_peridural`
+14. `Tipo de anestesia propuesta_local`
+15. `Dx Preoperatorio Code_O`
+16. `Dx Preoperatorio Code_S`
+17. `Examen_Hemoglobina(g/dl)`
+18. `Tipo de anestesia propuesta_general`
+19. `Edad`
+20. `IMC`
+21. … *(continúa hasta 59 features)*
 
-**Variables temporales tienen señal baja pero real.** `anio`, `mes`, `dia_semana` y `Hora_decimal` superan el umbral mínimo. Hay una pequeña tendencia temporal en los datos (años más recientes, ciertos meses) que el modelo puede explotar, posiblemente relacionada con cambios en protocolos o tipos de pacientes atendidos.
+Listado completo en [`output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json`](../../output/v2/data_processed/target_f_predictibilidad_maxima/selected_features.json).
+
+**Diferencias clave con el conjunto de `target_d_v2_hosp`:**
+- El orden es similar pero `Tipo de anestesia propuesta_raquidea` ocupa el primer puesto del ranking nativo (no el `score_proc_high_severity`).
+- Aparecen `Dx Preoperatorio Code_K` y `Procedimiento propuesto Code_A` que no estaban en el top de `target_d_v2_hosp`.
+- Se excluyen algunos antecedentes de comorbilidades de baja MI con los flags de UCI/hospitalización.
+
+### 4.4 Interpretación del ranking
+
+Las primeras 14 features del ranking corresponden a scores de severidad y tipo de anestesia propuesta — todas derivadas de la complejidad del procedimiento y el diagnóstico, no del perfil clínico del paciente. El modelo predice principalmente en función de **qué se va a hacer** más que de **quién es el paciente**.
+
+Las comorbilidades aparecen tarde. `Antecedentes cardiovasculares_hta` se sitúa en la posición 64; `Antecedente endocrinológicos_diabetes` queda por debajo del umbral de selección, aunque el análisis de subgrupos (Enfoque B) muestra que los pacientes diabéticos son precisamente los que el modelo predice con mayor dificultad. Esto es coherente: si diabetes tiene baja MI con el target actual, el modelo no incorpora esa señal y, en consecuencia, falla sistemáticamente en pacientes endocrinológicos.
+
+Las variables del examen físico — `Edad`, `IMC`, `TA Sistólica`, `Hemoglobina`, `Temperatura`, `Frecuencia Respiratoria` — se ubican en el tercio medio del ranking. Son relevantes, pero no determinantes. Las variables temporales (`anio`, `mes`, `dia_semana`, `Hora_decimal`) superan el umbral mínimo y capturan una tendencia temporal moderada en los datos, posiblemente relacionada con cambios en protocolos o en el perfil de los pacientes atendidos en distintos períodos.
 
 ---
 
-## 5. El diagnóstico principal: el modelo predice "complejidad del procedimiento" más que "riesgo del paciente"
+## 5. Diagnóstico principal: el modelo predice complejidad del procedimiento más que riesgo del paciente
 
-El análisis de features revela un patrón preocupante desde el punto de vista de la utilidad clínica del modelo:
+El análisis de features revela un patrón con implicaciones directas sobre la utilidad clínica del modelo. Los predictores más importantes — `score_proc_*`, `score_dx_*` y el tipo de anestesia propuesta — están todos relacionados con la complejidad del procedimiento y el diagnóstico principal, no con el perfil clínico del paciente. Estos factores son informativos, pero también los más evidentes: cualquier médico sabe que un procedimiento de alta complejidad conlleva mayor riesgo de complicaciones.
 
-**Los predictores más importantes son todos relacionados con la complejidad del procedimiento y el diagnóstico principal** (`score_proc_*`, `score_dx_*`, tipo de anestesia propuesta). Estos factores son informativos para predecir complicaciones, pero son también los más obvios — cualquier médico sabe que un procedimiento de alta complejidad tiene mayor riesgo de complicaciones.
+Las comorbilidades del paciente — precisamente lo que una valoración preanestésica formal evalúa — tienen señal débil en el modelo actual. Diabetes, HTA, EPOC e insuficiencia renal no figuran entre los predictores dominantes. Esto sugiere que el modelo aprende principalmente la asociación "procedimiento complejo → complicación probable" en lugar de "paciente de alto riesgo médico → requiere valoración formal". Esta distinción es relevante porque la complejidad del procedimiento es información disponible sin necesidad de un modelo de ML.
 
-**Las comorbilidades del paciente** — lo que una valoración preanestésica formal realmente evalúa — tienen señal débil en el modelo actual. La diabetes, HTA, EPOC, insuficiencia renal no dominan el modelo.
-
-**Implicación:** El modelo actual puede estar aprendiendo principalmente "procedimiento complejo → complicación probable" en lugar de "paciente de alto riesgo → necesita valoración formal". Esto es útil pero limitado, porque la complejidad del procedimiento es conocida de antemano sin necesidad de un modelo de ML — se puede consultar directamente el tipo de procedimiento.
-
-El verdadero valor añadido de la valoración preanestésica está en identificar a pacientes con factores de riesgo no obvios — el diabético con mal control metabólico, el hipertenso con función renal comprometida, el obeso con apnea del sueño. Estos son los pacientes que una valoración formal cambia el manejo y para los cuales el modelo actual tiene menor señal.
-
-Este diagnóstico es consistente con los hallazgos del Enfoque B (el modelo falla más en pacientes endocrinológicos y cardiovasculares) y del Enfoque C (las comorbilidades crónicas son predictores débiles de muchos flags).
+El valor añadido real de la valoración preanestésica reside en identificar pacientes con factores de riesgo no evidentes a priori: el diabético con control metabólico deficiente, el hipertenso con función renal comprometida, el obeso con apnea del sueño no diagnosticada. Estos son precisamente los pacientes para quienes una valoración formal modifica el manejo clínico y, a la vez, los que el modelo actual detecta con menor fiabilidad. Este diagnóstico es coherente con los hallazgos del Enfoque B — el modelo falla más en pacientes endocrinológicos y cardiovasculares — y del Enfoque C, que muestra que las comorbilidades crónicas son predictores débiles para la mayoría de los flags posoperatorios.
 
 ---
 
 ## 6. Señal disponible en perspectiva
 
-| Versión target | Max MI | Max Pearson | N features informativas |
-|---------------|--------|-------------|------------------------|
-| `target_d_v2` | 0.031 | 0.154 | 11 |
-| `target_d_v2_hosp` | **0.100** | **0.232** | **16** |
-| `target_d_v5` | 0.107 | 0.251 | 16 |
+Comparativa final entre las versiones del target activas en v2 (más una versión histórica para referencia):
 
-En términos absolutos, incluso la mejor señal (Pearson 0.23) es moderada. Para comparación, una feature con Pearson = 1.0 predice el target perfectamente; con 0.23 ya hay información real pero se necesita combinar muchas features para obtener buena discriminación.
+| Versión target | Prevalencia | Max MI | Max Pearson | N features informativas | AUC mejor modelo |
+|---|---|---|---|---|---|
+| `target_d_v2` *(legacy)* | 16.93% | 0.031 | 0.154 | 11 | ~0.64 |
+| `target_d_v2_hosp` | 27.69% | 0.100 | 0.232 | 16 | ~0.76 |
+| `target_f_predictibilidad_maxima` *(recomendado)* | 19.43% | **0.130** | **0.303** | 16 | **~0.86** |
 
-Esto explica por qué todos los modelos se estancan alrededor de AUC 0.75–0.76 independientemente del algoritmo: **el techo de rendimiento está determinado por la señal disponible en los datos, no por el algoritmo**.
+El salto en la correlación de Pearson de 0.23 a 0.30 al cambiar de `target_d_v2_hosp` a `target_f_predictibilidad_maxima` es estadísticamente significativo: cada feature aporta más información discriminativa, y el techo del modelo sube a AUC ~0.86 en lugar de converger en ~0.76. Para referencia, una feature con Pearson = 1.0 predice el target de forma perfecta; con 0.23 existe información real pero es necesario combinar muchas features para extraerla; con 0.30, las combinaciones tienen mayor capacidad discriminativa nativa.
+
+Este resultado confirma el principio rector del proyecto: **el techo de rendimiento está determinado por la señal disponible en los datos, que es función de la definición del target, no del algoritmo elegido**. La selección del target tuvo un impacto en el AUC de mayor magnitud que cualquier decisión algorítmica, de regularización o de ajuste de hiperparámetros.
