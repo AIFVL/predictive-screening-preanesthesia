@@ -7,32 +7,30 @@
 - [`src/target/specific/`](../../src/target/specific/) — Módulos de cálculo de cada flag individual
 - [`config/target_config.yaml`](../../config/target_config.yaml) — Configuración de todas las versiones del target
 
-**Outputs:**
-- `output/v1/data_processed/{target}/merged.parquet` — Dataset con columna `target` añadida
+**Outputs (pipeline v2):**
+- `output/v2/data_processed/{target}/target_extracted.parquet` — Dataset posoperatorio con la columna `target` añadida
+- `output/v2/data_processed/{target}/merged.parquet` — Tras el join con preop, dataset listo para selección de features
 
 ---
 
 ## 1. El problema de definir el target
 
-La pregunta del proyecto es: *"¿Este paciente necesita valoración preanestésica formal?"*
-
-La respuesta debería ser: "sí, si presentó complicaciones o eventos adversos en la cirugía". Pero ¿qué cuenta como complicación? El dataset posoperatorio registra docenas de eventos distintos, con naturaleza y severidad muy diferentes. Definir el target implica tomar decisiones clínicas y estadísticas sobre cuáles eventos son relevantes.
-
-Esta es la decisión más crítica del proyecto, porque afecta directamente qué señal tiene el modelo para aprender. Un target mal definido hace que el modelo intente aprender patrones imposibles o ruidosos.
+La pregunta central del proyecto es: *"¿Este paciente necesita valoración preanestésica formal?"*. La respuesta esperada sería afirmativa para aquellos pacientes que presentaron complicaciones o eventos adversos durante o después de la cirugía. Sin embargo, el dataset posoperatorio registra decenas de eventos de naturaleza y severidad muy distintas, lo que convierte la definición del target en una decisión clínica y estadística de primer orden. Un target mal definido obliga al modelo a aprender patrones imposibles o ruidosos, comprometiendo directamente su capacidad predictiva.
 
 ### El problema del target compuesto
 
-Un target que combina muchos flags distintos con OR lógico tiene dos efectos opuestos:
-1. **Aumenta la prevalencia** (más positivos), lo que ayuda al aprendizaje.
-2. **Reduce la señal** si incluye flags que no son predecibles desde variables preoperatorias — añade ruido al target.
-
-El análisis del Enfoque C ([ver](../analisis-posoperatorio/enfoque-C-flag-predictability.md)) demostró empíricamente que algunos flags son muy predecibles desde preop (AUC individual > 0.80) mientras que otros son casi aleatorios (AUC ~ 0.55). El análisis del Enfoque A ([ver](../analisis-posoperatorio/enfoque-A-posop-clustering.md)) mostró que hay fenotipos de complicación clínicamente distintos que el modelo actual trata como uno solo.
+Un target construido como la unión lógica (OR) de múltiples flags tiene dos efectos contrapuestos. Por un lado, incrementa la prevalencia al incorporar más casos positivos, lo que favorece el aprendizaje. Por otro lado, si incluye flags con escasa predictibilidad desde variables preoperatorias, introduce ruido que deteriora la señal del target. El análisis del Enfoque C ([ver](../analisis-posoperatorio/enfoque-C-flag-predictability.md)) demostró empíricamente que algunos flags son altamente predecibles desde preop (AUC individual > 0.80) mientras que otros son casi informativamente nulos (AUC ~ 0.55). El análisis del Enfoque A ([ver](../analisis-posoperatorio/enfoque-A-posop-clustering.md)) reveló además la existencia de fenotipos de complicación clínicamente distintos que el modelo actual trata de forma indiferenciada.
 
 ---
 
 ## 2. Versiones del target evaluadas
 
-Se evaluaron múltiples definiciones del target. Las tres versiones activas en el pipeline son:
+A lo largo del proyecto se han evaluado **9 versiones** distintas del target (a, b, c, d, d_v2, d_v2_hosp, d_v5, e, f). Las **dos versiones activas** en el pipeline v2 (campo `active_targets` en [`config/target_config.yaml`](../../config/target_config.yaml)) son:
+
+- `target_d_v2_hosp` — versión histórica, conservada como referencia comparativa.
+- `target_f_predictibilidad_maxima` — **versión recomendada** y servida por defecto en la API.
+
+Las versiones c, e y antiguas iteraciones de d siguen documentadas en `target_config.yaml` pero no se entrenan en cada corrida del pipeline.
 
 ### `target_d_v2` — Target refinado sin hospitalización
 
@@ -63,13 +61,13 @@ target = flag_via_aerea_r OR flag_estancia_r OR flag_desenlace_r
 | `flag_liquidos` | Líquidos elevados | 986 | 3.3% |
 | `flag_seguimiento` | Requirió seguimiento | 2,339 | 7.8% |
 
-**¿Por qué este target?** Se diseñó para incluir eventos clínicamente relevantes pero excluir los que son solo decisiones intraoperatorias sin consecuencia clínica para el paciente. La lógica de `flag_desenlace_r` es especialmente cuidadosa: salir intubado solo cuenta si además hubo UCI no planificada — evita contar las intubaciones planificadas de procedimientos de alta complejidad.
+Este target fue diseñado para incluir eventos clínicamente relevantes y excluir aquellos que representan decisiones intraoperatorias sin consecuencia directa para el paciente. La lógica de `flag_desenlace_r` es especialmente cuidadosa: salir intubado solo se computa como evento si se combina con UCI no planificada, evitando así contabilizar las intubaciones propias de procedimientos de alta complejidad previamente planificados.
 
-**Problema:** La prevalencia del 16.93% resulta en un dataset muy desbalanceado. Además, los modelos logran AUC ~0.64, notablemente inferior a otras versiones. Esto sugiere que la señal contenida en esos flags es insuficiente para el aprendizaje.
+Su principal limitación es la prevalencia de 16.93%, que genera un dataset muy desbalanceado. Además, los modelos entrenados sobre este target alcanzan AUC ~0.64, notablemente inferior al de otras versiones, lo que sugiere que la señal disponible en esos flags es insuficiente para el aprendizaje.
 
 ---
 
-### `target_d_v2_hosp` — Target refinado + hospitalización no anticipada *(versión seleccionada)*
+### `target_d_v2_hosp` — Target refinado + hospitalización no anticipada
 
 **Prevalencia:** 27.69% (6,475 positivos de 23,387)
 
@@ -89,17 +87,51 @@ target = flag_via_aerea_r OR flag_estancia_r OR flag_desenlace_r
 - Es el flag individual más prevalente y también el **segundo más predecible** desde preop (AUC 0.814)
 - Representa un evento de alto impacto clínico y administrativo: pacientes que llegarían ambulatorios pero terminan hospitalizados
 
-**¿Por qué se añadió?** Dos razones principales:
-1. **Mejora de prevalencia:** 16.93% → 27.69%. Con más positivos, el modelo tiene más señal para aprender.
-2. **Mejora de AUC:** Los modelos mejoran de ~0.64 a ~0.75. La hospitalización no anticipada es el flag con mayor señal individual desde preop, y añadirla al target mejora la señal total.
-
-**¿Por qué es la versión seleccionada?** Mejor balance entre prevalencia manejable, interpretabilidad clínica y rendimiento del modelo. Los resultados del Enfoque C apoyan incluir `flag_hospitalizacion_no_anticipada` como componente central de cualquier target redefinido.
+La adición de este flag responde a dos motivaciones concretas. Primero, eleva la prevalencia de 16.93% a 27.69%, lo que le entrega al modelo más señal positiva para aprender. Segundo, mejora el AUC de ~0.64 a ~0.75, dado que la hospitalización no anticipada es el flag individual con mayor predictibilidad desde variables preoperatorias. Esta versión fue relevante en el proceso de selección por su mejor balance entre prevalencia manejable, interpretabilidad clínica y rendimiento del modelo respecto a iteraciones anteriores. Los resultados del Enfoque C respaldan incluir `flag_hospitalizacion_no_anticipada` como componente central de cualquier redefinición del target.
 
 ---
 
-### `target_d_v5` — Target de alta severidad
+### `target_f_predictibilidad_maxima` — Target de máxima predictibilidad *(versión recomendada en v2)*
 
-**Prevalencia:** 25.63% (5,997 positivos de 23,387)
+**Prevalencia:** 19.43% (~4,544 positivos de 23,387)
+
+**Lógica de construcción:**
+```
+target = flag_interconsultas
+       OR flag_hospitalizacion_no_anticipada
+       OR flag_uci_no_planeada
+       OR flag_estancia_uci
+       OR flag_estancia_prolongada
+```
+
+**Motivación:** Después de `target_d_v2_hosp` se invirtió el enfoque de diseño. En lugar de seleccionar primero los eventos clínicamente relevantes y aceptar el rendimiento resultante, este target se construye seleccionando los flags con mayor predictibilidad desde variables preoperatorias — mayor AUC individual y mayor información mutua con las features preop — bajo la premisa de que esos son, por construcción, los eventos que un modelo de screening puede detectar de forma confiable.
+
+Los cinco flags incluidos son los que el [análisis del Enfoque C](../analisis-posoperatorio/enfoque-C-flag-predictability.md) identificó como los más predecibles individualmente. Todos son eventos clínicamente relevantes:
+
+| Flag | Naturaleza clínica |
+|------|---------------------|
+| `flag_interconsultas` | Necesidad de interconsulta especializada — indica complejidad imprevista |
+| `flag_hospitalizacion_no_anticipada` | Paciente ambulatorio que termina hospitalizado |
+| `flag_uci_no_planeada` | Ingreso a UCI no planificado |
+| `flag_estancia_uci` | Estancia en UCI (planeada o no) |
+| `flag_estancia_prolongada` | Estancia hospitalaria > 3 días sobre lo esperado |
+
+**Rendimiento:** AUC en test ~0.86 con XGBoost, vs. ~0.76 para `target_d_v2_hosp`. Es la versión con mayor señal disponible en el pipeline.
+
+**Análisis comparativo de señal preop→target** (de [`output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv`](../../output/v2/reports/pre_post_signal/pre_post_linkage_summary.csv)):
+
+| Versión target | Prevalencia | Max MI | Max Pearson | N features informativas |
+|---|---|---|---|---|
+| `target_d_v2_hosp` | 27.69% | 0.100 | 0.232 | 16 |
+| `target_f_predictibilidad_maxima` | 19.43% | **0.130** | **0.303** | 16 |
+
+A pesar de la menor prevalencia (19.43% vs. 27.69%), la señal disponible es genuinamente superior: todos los modelos incrementan su AUC de ~0.76 a ~0.86 al cambiar al target F. Por esta razón es el target servido por defecto en la API, donde el `TargetAlias` con `slug="hospitalization_risk"` en [`api/core/config.py`](../../api/core/config.py) mapea a `target_f_predictibilidad_maxima` con `recommended=True`.
+
+---
+
+### `target_d_v5` — Target de alta severidad *(legacy, solo en v1)*
+
+**Prevalencia (v1):** 25.63% (5,997 positivos de 23,387)
 
 **Lógica de construcción:**
 ```
@@ -108,12 +140,7 @@ target = flag_destino_uci OR flag_uci_no_planeada OR flag_complicaciones_medicas
        OR flag_urgencias_30_dias OR flag_hospitalizacion_no_anticipada
 ```
 
-**Diferencia con `target_d_v2_hosp`:** Esta versión intenta capturar solo los eventos de mayor severidad:
-- Incluye `flag_urgencias_30_dias` (visitas a urgencias posoperatorias) y `flag_aferesis` (procedimiento hematológico grave)
-- Excluye `flag_seguimiento`, `flag_liquidos`, `flag_tipo_intubacion_complejo` (eventos de severidad moderada)
-- Excluye `flag_estancia_uci` (redundante con `flag_uci_no_planeada`)
-
-**Rendimiento:** AUC ~0.76, similar a `target_d_v2_hosp`. Las métricas entre ambas versiones son muy cercanas, lo que indica que la diferencia en composición del target no se traduce en diferencias grandes de rendimiento del modelo.
+A diferencia de `target_d_v2_hosp`, esta versión priorizaba eventos de mayor severidad: incluye `flag_urgencias_30_dias` y `flag_aferesis`, mientras excluye `flag_seguimiento`, `flag_liquidos` y `flag_tipo_intubacion_complejo` por considerarlos de severidad moderada, y omite `flag_estancia_uci` por ser redundante con `flag_uci_no_planeada`. Su AUC (~0.76) es similar al de `target_d_v2_hosp`, por lo que fue desactivado en v2 al quedar superado por `target_f_predictibilidad_maxima` (~0.86) con una composición más simple.
 
 ---
 
@@ -143,11 +170,15 @@ Mismo conjunto que B pero con threshold ≥ 2 flags (el paciente debe tener al m
 
 Primera iteración de D, sin la subflag_logic refinada. Precedente directo de `target_d_v2`.
 
+### `target_e_alta_senal`
+
+Intento de definir el target solo con los flags con MI > 0.01 desde preop (`flag_estancia`, `flag_tecnica`, `flag_tiempos`, `flag_fisiologicas`). Sirvió de antecesor metodológico de `target_f_predictibilidad_maxima`, pero con peor selección de flags.
+
 ---
 
 ## 4. Regla de exclusión de cancelaciones no-médicas
 
-Una regla especial se aplica en todas las versiones del target:
+Una regla especial se aplica uniformemente en todas las versiones del target:
 
 ```python
 if apply_cancel_non_medico_rule:
@@ -155,25 +186,35 @@ if apply_cancel_non_medico_rule:
     df.loc[mask, "target"] = 0
 ```
 
-**¿Por qué?** Un procedimiento cancelado por razones no-médicas (el paciente no llegó, cancelación administrativa, falta de sala) no indica que el paciente necesite valoración preanestésica — la cancelación no fue por un hallazgo clínico. Si se mantienen estos casos como positivos, el modelo aprendería a predecir cancelaciones administrativas, que no es el objetivo. Solo las cancelaciones por razón médica (hallazgo clínico que contraindica proceder) son relevantes para el target.
+Un procedimiento cancelado por razones no-médicas — el paciente no se presentó, cancelación administrativa, indisponibilidad de sala — no constituye evidencia de que el paciente requiera valoración preanestésica, puesto que la cancelación no se origina en un hallazgo clínico. Mantener estos casos como positivos llevaría al modelo a aprender patrones de cancelación administrativa en lugar de riesgo perioperatorio real. Solo las cancelaciones motivadas por un hallazgo clínico que contraindica el procedimiento son relevantes para el target.
 
 ---
 
-## 5. Distribución del target en la versión seleccionada
+## 5. Distribución del target en las versiones activas
 
-Para `target_d_v2_hosp`:
-
+### `target_d_v2_hosp`
 ```
 Total pacientes en merged: 23,387
 ├── Negativos (target=0): 16,912 (72.3%)
 └── Positivos (target=1):  6,475 (27.7%)
 
-División train/test (80/20 estratificado):
+División train/test (80/20 estratificado, random_state=42):
 ├── Train: 18,709 | 5,180 positivos (27.7%)
 └── Test:   4,678 | 1,295 positivos (27.7%)
 ```
 
-La estratificación garantiza que el desbalance de clases (72.3% / 27.7%) sea idéntico en train y test, evitando que una partición aleatoria desfavorable sesgie la evaluación.
+### `target_f_predictibilidad_maxima` *(recomendado)*
+```
+Total pacientes en merged: 23,387
+├── Negativos (target=0): ~18,843 (80.57%)
+└── Positivos (target=1):  ~4,544 (19.43%)
+
+División train/test (80/20 estratificado, random_state=42):
+├── Train: 18,709 registros (mismo split que d_v2_hosp)
+└── Test:   4,678 registros
+```
+
+La estratificación garantiza que el desbalance de clases sea idéntico en los conjuntos de entrenamiento y prueba, evitando que una partición aleatoria desfavorable sesgue la evaluación. Ambos targets se entrenan sobre el mismo split de pacientes; la única diferencia entre ellos es el contenido de la columna `target`.
 
 ---
 
@@ -197,19 +238,14 @@ Adicionalmente, `flag_intubado_salida` está en el target v2 solo cuando se comb
 
 ## 7. Implicaciones del análisis posoperatorio sobre el target
 
-Los tres enfoques del [análisis posoperatorio](../analisis-posoperatorio/README.md) aportan evidencia sobre cómo mejorar el target:
+Los tres enfoques del [análisis posoperatorio](../analisis-posoperatorio/README.md) aportan evidencia convergente sobre cómo mejorar la definición del target. El Enfoque C identifica `flag_hospitalizacion_no_anticipada` (AUC 0.814), `flag_interconsultas` (0.836) y `flag_glucometria_anormal` (0.775) como los flags más predecibles individualmente desde variables preoperatorias; el target actual incorpora el primero pero no los otros dos. El Enfoque A, basado en clustering, muestra que los pacientes del Cluster C2 — definidos por `flag_intubado_salida` — tienen perfiles preoperatorios casi indistinguibles de los negativos, confirmando que este flag no debe incluirse en el target salvo cuando coincide con UCI no planificada.
 
-1. **Enfoque C** muestra que `flag_hospitalizacion_no_anticipada` (AUC 0.814), `flag_interconsultas` (0.836) y `flag_glucometria_anormal` (0.775) son los flags más predecibles individualmente. El target actual incluye el primero pero no los otros dos.
-
-2. **Enfoque A** (clustering) muestra que los pacientes del Cluster C2 (definidos por `flag_intubado_salida`) tienen perfiles preop casi idénticos a los negativos — confirma que `flag_intubado_salida` no debe estar en el target (excepto si coincide con UCI no planificada).
-
-3. **La propuesta de target redefinido** basada en estos análisis sería:
+La convergencia de estos análisis se materializó en `target_f_predictibilidad_maxima`:
    ```
-   target_propuesto = flag_hospitalizacion_no_anticipada
-                   OR flag_uci_no_planeada
-                   OR flag_estancia_uci
-                   OR flag_interconsultas
-                   OR flag_glucometria_anormal
-                   OR flag_estancia_prolongada
+   target_f = flag_interconsultas
+            OR flag_hospitalizacion_no_anticipada
+            OR flag_uci_no_planeada
+            OR flag_estancia_uci
+            OR flag_estancia_prolongada
    ```
-   Todos con AUC individual ≥ 0.76 en el Enfoque C, representando eventos predecibles y de alto impacto clínico.
+Esta composición recoge cinco de los seis flags propuestos por el Enfoque C con mayor AUC individual, descartando `flag_glucometria_anormal` por dudas sobre la calidad de su registro. El resultado es un AUC ~0.86 en test, frente al ~0.76 de `target_d_v2_hosp`.

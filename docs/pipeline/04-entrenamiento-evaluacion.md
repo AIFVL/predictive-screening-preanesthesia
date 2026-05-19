@@ -9,12 +9,19 @@
 - [`src/evaluation/subgroups.py`](../../src/evaluation/subgroups.py) — Evaluación por subgrupos
 - [`config/models_config.yaml`](../../config/models_config.yaml) — Configuración de todos los modelos
 
-**Outputs:**
-- `output/v1/models/{target}/{modelo}_model.joblib` — Modelo entrenado serializado
-- `output/v1/models/{target}/{modelo}_metrics.json` — Métricas en test
-- `output/v1/plots/{target}/{modelo}_roc_pr.png` — Curvas ROC y PR
-- `output/v1/plots/{target}/{modelo}_confusion.png` — Matriz de confusión
-- `output/v1/plots/{target}/{modelo}_threshold.png` — Análisis de umbral
+**Outputs (pipeline v2):**
+- `output/v2/models/{target}/{modelo}_model.joblib` — Modelo entrenado serializado (calibrado cuando aplica)
+- `output/v2/models/{target}/{modelo}_metrics.json` — Métricas finales en test (con threshold óptimo aplicado)
+- `output/v2/models/{target}/{modelo}_eval.json` — Evaluación completa: bloque `test` + bloque `cv` (10-fold cross-validation, según `n_folds: 10` en `config/pipeline_config.yaml`)
+- `output/v2/models/{target}/{modelo}_manifest.json` — Contrato del modelo: feature_names, dtypes, threshold, calibration, prevalence — consumido por la API
+- `output/v2/plots/{target}/{modelo}_roc_pr.png` — Curvas ROC y PR
+- `output/v2/plots/{target}/{modelo}_confusion.png` — Matriz de confusión
+- `output/v2/plots/{target}/{modelo}_threshold.png` — Análisis de umbral
+- `output/v2/reports/comparison_table.json` — Tabla agregada con métricas de todos los (target, modelo)
+
+**Configuración:**
+- [`config/models_config.yaml`](../../config/models_config.yaml) — Lista de modelos, hiperparámetros base, espacios de búsqueda, flag `calibrate`.
+- [`config/pipeline_config.yaml`](../../config/pipeline_config.yaml) — Configuración global del pipeline (random_state, fracciones de split, etc.).
 
 ---
 
@@ -23,24 +30,34 @@
 ### 1.1 División del dataset
 
 El dataset (`merged.parquet`, 23,387 registros) se divide en:
-- **Train:** 80% → 18,709 registros (5,180 positivos, 27.7%)
-- **Test:** 20% → 4,678 registros (1,295 positivos, 27.7%)
+- **Train:** 80% → 18,709 registros
+- **Test:** 20% → 4,678 registros
 
-La división es **estratificada** por el target, garantizando que ambos conjuntos tengan la misma proporción de positivos (27.7%). Esto es crítico para que las métricas del test sean representativas.
+Las cifras de positivos dependen del target: para `target_d_v2_hosp` hay 5,180 positivos en train (27.7%); para `target_f_predictibilidad_maxima` la prevalencia es ~19.43%. El número de filas (18,709 / 4,678) aplica a ambos targets — comparten el mismo split.
 
-Los splits están fijos (`random_state=42`) y guardados en `output/v1/data_processed/target_d_v2_hosp/splits/` para reproducibilidad. Todos los modelos se entrenan sobre exactamente el mismo split, haciendo la comparación justa.
+La división es **estratificada** por el target, lo que garantiza que ambos conjuntos mantengan la misma proporción de positivos del target correspondiente. Esto es esencial para que las métricas de evaluación sobre el conjunto de prueba sean representativas del comportamiento real del modelo.
+
+Los splits están fijados con `random_state=42` y almacenados en `output/v2/data_processed/{target}/splits/` para garantizar la reproducibilidad. Todos los modelos se entrenan sobre exactamente el mismo split por target, lo que hace que la comparación entre algoritmos sea directamente válida.
 
 ### 1.2 Preprocesamiento de features para el modelo
 
-Antes de entrenar, las 80 features seleccionadas se procesan:
+Antes de entrenar, las features seleccionadas se procesan:
 1. **Conversión a numérico:** `pd.to_numeric(..., errors="coerce")` convierte valores no numéricos a NaN.
 2. **Imputación de faltantes:** Se imputan con `-1` (valor centinela). El valor -1 fue elegido porque todos los valores válidos son ≥ 0 en este dataset — el modelo puede aprender que -1 significa "dato ausente".
 
+La estrategia exacta se serializa en cada `<modelo>_manifest.json` bajo el campo `imputation`:
+```json
+{
+  "strategy": "fill_constant",
+  "value": -1
+}
+```
+
+La API consume ese campo para imputar los inputs en producción exactamente igual que en entrenamiento — ver [08-api-inferencia.md](08-api-inferencia.md).
+
 ### 1.3 Desbalance de clases
 
-El dataset tiene 72.3% negativos y 27.7% positivos — un desbalance de aproximadamente 2.6:1. No es extremo, pero es suficiente para sesgar a los modelos hacia predecir siempre negativo.
-
-**Estrategia adoptada:** `class_weight="balanced"` en los modelos de sklearn que lo soportan. Esto ajusta los pesos de las muestras durante el entrenamiento de modo que el modelo penaliza más los errores en la clase minoritaria (positivos). El peso de cada clase es inversamente proporcional a su frecuencia:
+El dataset presenta un desbalance de aproximadamente 2.6:1 (72.3% negativos, 27.7% positivos). Aunque no es extremo, es suficiente para sesgar a los modelos hacia predecir siempre la clase mayoritaria sin ajuste. La estrategia adoptada es `class_weight="balanced"` en los modelos de sklearn que lo soportan, ajustando los pesos de las muestras durante el entrenamiento de forma que los errores sobre la clase minoritaria (positivos) se penalicen proporcionalmente más. El peso asignado a cada clase es inversamente proporcional a su frecuencia:
 
 ```
 peso_positivo = n_total / (2 × n_positivos) = 23387 / (2 × 6475) ≈ 1.81
@@ -51,30 +68,25 @@ XGBoost usa un enfoque equivalente: `scale_pos_weight = n_negativos / n_positivo
 
 ### 1.4 Calibración de probabilidades
 
-Los modelos de árbol (Random Forest, Extra Trees, XGBoost, HGB) producen scores que no son probabilidades bien calibradas — tienden a concentrarse en los extremos (0 o 1) o en rangos específicos que no corresponden a probabilidades reales.
+Los modelos de árbol (Random Forest, Extra Trees, XGBoost, HGB, LightGBM) producen scores que no constituyen probabilidades bien calibradas: tienden a concentrarse en los extremos o en rangos que no corresponden a frecuencias reales de positivos. Para que el umbral de decisión tenga un significado probabilístico consistente — esto es, que threshold=0.17 corresponda efectivamente a "probabilidad de evento adverso ≥ 17%" — se aplica **calibración con `CalibratedClassifierCV`** (método isotónico) sobre el conjunto de entrenamiento.
 
-Para que el threshold tenga un significado probabilístico consistente (threshold=0.17 significa "probabilidad de complicación ≥ 17%"), se aplica **calibración con `CalibratedClassifierCV`** (método isotónico) sobre el training set.
-
-Los modelos logística, stacking y voting no necesitan calibración adicional porque ya producen probabilidades razonablemente calibradas.
+En `models_config.yaml`, cada modelo lleva un campo `calibrate: true|false`; en v2 todos los modelos están configurados con `calibrate: true`. La calidad resultante de la calibración se evalúa con las métricas ECE, MCE y Brier — ver [06-calibracion.md](06-calibracion.md).
 
 ---
 
 ## 2. Modelos entrenados
 
-Se entrenaron **8 modelos** para cada versión del target, cubriendo un amplio espectro de familias algorítmicas:
+En la versión v2 se entrenan **9 modelos** para cada versión del target, cubriendo un amplio espectro de familias algorítmicas. La configuración exacta vive en [`config/models_config.yaml`](../../config/models_config.yaml).
 
 ### 2.1 Regresión Logística
 ```yaml
 C: 1.0
 class_weight: balanced
-solver: lbfgs
-max_iter: 1000
+solver: saga
+max_iter: 3000
 ```
 
-El modelo lineal más simple. Asume que la relación entre features y target es lineal en el espacio log-odds. Sirve como **baseline** y como **meta-aprendiz** en el stacking.
-
-**Ventajas:** Coeficientes directamente interpretables, entrenamiento rápido, bajo riesgo de sobreajuste.
-**Desventajas:** No captura interacciones ni relaciones no lineales entre features.
+El modelo lineal más simple del conjunto, asume que la relación entre features y target es lineal en el espacio log-odds. Cumple una doble función: actúa como **baseline** de referencia y como **meta-aprendiz** en el modelo de stacking. Sus coeficientes son directamente interpretables, su entrenamiento es rápido y presenta bajo riesgo de sobreajuste; en contrapartida, no captura interacciones ni relaciones no lineales entre features.
 
 ### 2.2 Random Forest
 ```yaml
@@ -84,12 +96,7 @@ class_weight: balanced
 calibrate: true
 ```
 
-Ensemble de 300 árboles de decisión entrenados sobre subconjuntos aleatorios de datos y features. El resultado final es el promedio de las probabilidades de cada árbol.
-
-**Ventajas:** Captura interacciones complejas, robusto a outliers, produce importancias de features naturalmente, bajo riesgo de sobreajuste por el promediado.
-**Desventajas:** Modelos grandes (300 árboles × profundidad ilimitada), lento de entrenar, menos interpretable que regresión logística.
-
-**Nota:** `max_depth: null` permite que los árboles crezcan sin restricción hasta haber separado correctamente todos los nodos de entrenamiento — con `class_weight=balanced` y `min_samples_leaf` implícito, esto no causa sobreajuste severo en la práctica.
+Ensemble de 300 árboles de decisión entrenados sobre subconjuntos aleatorios de datos y features, cuya predicción final es el promedio de probabilidades de todos los árboles. Captura interacciones complejas, es robusto frente a outliers y produce importancias de features de forma natural; su principal desventaja es el tamaño del modelo resultante y la mayor lentitud de entrenamiento respecto a modelos lineales. La configuración `max_depth: null` permite que los árboles crezcan sin restricción de profundidad; con `class_weight=balanced` y el valor implícito de `min_samples_leaf`, esto no produce sobreajuste severo en la práctica.
 
 ### 2.3 Extra Trees (Extremely Randomized Trees)
 ```yaml
@@ -99,9 +106,7 @@ class_weight: balanced
 calibrate: true
 ```
 
-Variante de Random Forest donde la selección de splits también es aleatoria (no se busca el split óptimo). Esto hace los árboles más ruidosos individualmente pero el ensemble generalmente más robusto.
-
-**Vs. Random Forest:** Extra Trees tiende a ser más rápido de entrenar pero con mayor varianza. En la práctica, las métricas son muy similares a RF.
+Variante de Random Forest donde la selección de splits se realiza de forma completamente aleatoria, sin buscar el corte óptimo en cada nodo. Esto genera árboles individualmente más ruidosos pero típicamente produce un ensemble más robusto. Respecto a Random Forest, Extra Trees suele ser más rápido de entrenar aunque con mayor varianza; en la práctica, las métricas de ambos son muy similares sobre este dataset.
 
 ### 2.4 XGBoost
 ```yaml
@@ -127,11 +132,24 @@ learning_rate: 0.05
 max_depth: null
 ```
 
-Implementación de sklearn del Gradient Boosting basada en histogramas (similar a LightGBM). Es más eficiente en memoria y tiempo que XGBoost para datasets medianos, maneja NaN nativamente sin necesidad de imputación previa.
+Implementación de sklearn del Gradient Boosting basada en histogramas. Es más eficiente en memoria y tiempo que XGBoost para datasets medianos, maneja NaN nativamente sin necesidad de imputación previa.
 
 **Ventaja sobre XGBoost:** No requiere imputación explícita de faltantes — los maneja internamente como una categoría especial.
 
-### 2.6 MLP (Red Neuronal)
+### 2.6 LightGBM *(añadido en v2)*
+```yaml
+n_estimators: 300
+learning_rate: 0.05
+max_depth: -1            # sin límite — controlado por num_leaves
+num_leaves: 31
+class_weight: balanced
+```
+
+Gradient Boosting basado en histogramas, similar a `HistGradientBoosting` pero con la implementación de Microsoft. En la práctica es el modelo con mejor F2 sobre `target_d_v2_hosp` (F2=0.677, AUC=0.761) y compite codo a codo con XGBoost en `target_f_predictibilidad_maxima`.
+
+**Vs. HistGradientBoosting:** LightGBM permite `num_leaves` como hiperparámetro principal en lugar de `max_depth`, lo que da control más fino sobre la capacidad del árbol. En este dataset las dos implementaciones convergen en métricas casi idénticas.
+
+### 2.7 MLP (Red Neuronal)
 ```yaml
 hidden_layer_sizes: [128, 64]
 activation: relu
@@ -140,11 +158,9 @@ early_stopping: true
 validation_fraction: 0.1
 ```
 
-Red neuronal feedforward de dos capas ocultas (128 y 64 neuronas). El `early_stopping` detiene el entrenamiento cuando la pérdida en el 10% de validación no mejora, evitando sobreajuste.
+Red neuronal feedforward de dos capas ocultas (128 y 64 neuronas). El mecanismo de `early_stopping` detiene el entrenamiento cuando la pérdida sobre el 10% de validación deja de mejorar, previniendo el sobreajuste. Con 18,709 muestras y 80 features, las redes neuronales no tienen ventaja estructural sobre los métodos de árbol para datos tabulares; su inclusión en el conjunto responde a su uso como referencia comparativa.
 
-**Limitaciones en este contexto:** Con 18,709 muestras y 80 features, una red neuronal no tiene ventaja sobre los métodos de árbol. Las redes neuronales brillan con datos de alta dimensionalidad (imágenes, texto) o volúmenes enormes. Aquí sirve de referencia.
-
-### 2.7 Stacking (meta-aprendizaje)
+### 2.8 Stacking (meta-aprendizaje)
 ```yaml
 estimadores base: [random_forest, xgboost, hist_gradient_boosting]
 meta-estimador: logistic_regression
@@ -152,13 +168,11 @@ cv: 5
 passthrough: false
 ```
 
-El stacking usa 3 modelos base (RF, XGBoost, HGB) para generar predicciones, y luego un meta-estimador (regresión logística) aprende cómo combinar esas predicciones para producir la predicción final.
+El stacking emplea tres modelos base (RF, XGBoost, HGB) para generar predicciones, y un meta-estimador (regresión logística) aprende cómo combinarlas para producir la predicción final. Cada modelo base comete errores en distintos subconjuntos de datos — RF puede fallar donde XGBoost no, y viceversa —, y el meta-estimador aprende a compensar esos errores sistemáticos. La validación cruzada interna de 5 folds garantiza que el meta-estimador nunca accede a las predicciones generadas sobre los mismos datos que se usaron para entrenar cada estimador base, evitando fuga de datos. Con `passthrough: false`, el meta-estimador solo recibe las predicciones de los modelos base, no las features originales.
 
-**¿Por qué funciona?** Cada modelo base comete errores en distintos ejemplos — RF puede fallar donde XGBoost no, y viceversa. El meta-estimador aprende a "corregir" los errores sistemáticos de los modelos base. El CV interno (5-fold) asegura que el meta-estimador no ve las predicciones del training set en el mismo fold que se usó para entrenarlos (previene fuga de datos).
+> **Nota:** El ensemble completo de stacking también se calibra con `CalibratedClassifierCV` (método isotónico), de forma independiente a la calibración que ya tienen los modelos base individualmente.
 
-`passthrough: false` significa que el meta-estimador solo ve las predicciones de los modelos base, no las features originales.
-
-### 2.8 Voting (ensemble por voto)
+### 2.9 Voting (ensemble por voto)
 ```yaml
 estimadores: [random_forest, xgboost, hist_gradient_boosting]
 voting: soft
@@ -174,21 +188,17 @@ Una vez entrenados, los modelos producen probabilidades para cada paciente. Para
 
 ### 3.1 Criterio de optimización
 
-El umbral se optimiza para maximizar el **F2-score** en el training set (con validación cruzada implícita). F2 da el doble de peso al Recall que a la Precisión:
+El umbral se selecciona mediante la estrategia `optimize_for: "recall_constraint"` (configurada en `config/pipeline_config.yaml`): se maximiza la **Precisión** sujeto a la restricción **Recall ≥ 0.85**. Es decir, el threshold elegido es el más alto posible que mantiene el Recall por encima de 0.85, maximizando así la Precisión sin sacrificar la detección de positivos.
 
-```
-F2 = (1 + 2²) × (Precision × Recall) / (2² × Precision + Recall)
-   = 5 × (Precision × Recall) / (4 × Precision + Recall)
-```
+### 3.2 Thresholds resultantes (v2)
 
-Un F2 alto requiere Recall alto — el modelo debe detectar la mayoría de los positivos, aunque eso implique muchos falsos positivos.
-
-### 3.2 Thresholds resultantes
+Para `target_d_v2_hosp` (extraído de [`output/v2/reports/comparison_table.json`](../../output/v2/reports/comparison_table.json)):
 
 | Modelo | Threshold | Interpretación |
 |--------|-----------|----------------|
 | `extra_trees` | 0.17 | Clasifica como positivo si probabilidad ≥ 17% |
 | `hist_gradient_boosting` | 0.17 | — |
+| `lightgbm` | 0.18 | — |
 | `logistic_regression` | 0.38 | Umbral más alto — modelo más conservador |
 | `mlp` | 0.19 | — |
 | `random_forest` | 0.17 | — |
@@ -196,86 +206,107 @@ Un F2 alto requiere Recall alto — el modelo debe detectar la mayoría de los p
 | `voting` | 0.19 | — |
 | `xgboost` | 0.17 | — |
 
-**¿Por qué 0.17?** Los modelos de árbol (calibrados) asignan probabilidades más bajas en general que los lineales. Un threshold de 0.17 no significa que el modelo sea "poco seguro" — significa que los modelos calibrados asignan probabilidades más distribuidas y el threshold óptimo para F2 cae en ese rango.
+Para `target_f_predictibilidad_maxima`:
 
-La regresión logística necesita 0.38 porque sus probabilidades están distribuidas de manera diferente — con `class_weight=balanced`, el modelo logístico tiende a asignar probabilidades más cercanas a 0.5 para los casos ambiguos.
+| Modelo | Threshold |
+|--------|-----------|
+| `extra_trees` | 0.14 |
+| `hist_gradient_boosting` | 0.13 |
+| `lightgbm` | 0.13 |
+| `logistic_regression` | 0.38 |
+| `mlp` | 0.13 |
+| `random_forest` | 0.13 |
+| `stacking` | 0.34 |
+| `voting` | 0.14 |
+| `xgboost` | 0.14 |
+
+Los umbrales bajos son consecuencia directa de la calibración isotónica: los modelos de árbol calibrados asignan probabilidades que reflejan la prevalencia real del dataset (19–28%), por lo que raramente superan 0.5 y el umbral que satisface Recall ≥ 0.85 cae en rangos bajos. La regresión logística opera con un umbral mayor (0.38) porque con `class_weight=balanced` sus probabilidades se concentran más cerca de 0.5, y el stacking requiere 0.34 porque su meta-estimador es también una regresión logística. El umbral de `target_f_predictibilidad_maxima` es aún más bajo (0.13–0.14) que el de `target_d_v2_hosp` (0.17–0.18) porque su menor prevalencia (19% vs. 28%) lleva a los modelos calibrados a producir probabilidades más bajas en promedio.
 
 ---
 
 ## 4. Resultados por modelo
 
-### 4.1 Target seleccionado: `target_d_v2_hosp`
+### 4.1 Target `target_d_v2_hosp` (versión histórica)
 
-Esta es la versión de mejor rendimiento. Los valores corresponden a evaluación en el **test set** (4,678 registros, nunca vistos durante el entrenamiento).
+Valores en el **test set** (4,678 registros, nunca vistos durante el entrenamiento). Datos exactos de [`output/v2/reports/comparison_table.json`](../../output/v2/reports/comparison_table.json):
 
-| Modelo | ROC AUC | Recall | Precision | F1 | F2 | Threshold |
-|--------|---------|--------|-----------|----|----|-----------|
-| stacking | **0.7608** | 0.8629 | 0.348 | 0.496 | 0.674 | 0.34 |
-| voting | **0.7602** | 0.8562 | 0.352 | 0.498 | 0.671 | 0.19 |
-| random_forest | **0.7593** | 0.8600 | 0.354 | 0.501 | 0.669 | 0.17 |
-| xgboost | 0.7591 | 0.8678 | 0.347 | 0.494 | 0.676 | 0.17 |
-| hist_gradient_boosting | 0.7561 | 0.8649 | 0.352 | 0.499 | 0.675 | 0.17 |
-| extra_trees | 0.7463 | 0.8668 | 0.344 | 0.491 | 0.672 | 0.17 |
-| mlp | 0.7063 | 0.8639 | 0.342 | 0.488 | 0.659 | 0.19 |
-| logistic_regression | 0.7051 | 0.8600 | 0.317 | 0.462 | 0.654 | 0.38 |
+| Modelo | ROC AUC | Recall | Precision | F2 | Threshold |
+|--------|---------|--------|-----------|----|-----------|
+| **lightgbm** | **0.7614** | 0.8533 | 0.3702 | **0.6767** | 0.18 |
+| stacking | 0.7608 | 0.8629 | 0.3624 | 0.6761 | 0.34 |
+| voting | 0.7602 | 0.8562 | 0.3650 | 0.6746 | 0.19 |
+| random_forest | 0.7593 | 0.8600 | 0.3537 | 0.6686 | 0.17 |
+| xgboost | 0.7591 | 0.8678 | 0.3587 | 0.6759 | 0.17 |
+| hist_gradient_boosting | 0.7561 | 0.8649 | 0.3594 | 0.6750 | 0.17 |
+| extra_trees | 0.7463 | 0.8668 | 0.3531 | 0.6715 | 0.17 |
+| mlp | 0.7063 | 0.8639 | 0.3382 | 0.6591 | 0.19 |
+| logistic_regression | 0.7051 | 0.8600 | 0.3337 | 0.6538 | 0.38 |
 
-**Observaciones:**
-- La diferencia entre el mejor (stacking, 0.7608) y el peor (logística, 0.7051) es de apenas 0.055 en AUC. No hay una diferencia dramática entre algoritmos.
-- Los 5 modelos basados en árboles (RF, XGBoost, HGB, ET, stacking, voting) tienen AUC casi idéntico (0.746–0.761). Todos convergen al mismo "techo de señal" disponible en los datos.
-- El Recall de todos los modelos está en 0.85–0.87, que era la meta principal del diseño.
-- La Precisión es baja (~0.35): de cada 3 pacientes que el modelo dice "sí necesitan valoración", solo 1 realmente la necesita. Esto es un tradeoff aceptable dada la prioridad de no perder verdaderos positivos.
+El mejor modelo es **LightGBM** (AUC 0.761, F2 0.677), seguido de cerca por stacking, voting y XGBoost (todos en AUC ~0.76). Los seis modelos basados en árboles presentan AUC casi idéntico (0.746–0.761), convergiendo al mismo techo de señal disponible en los datos. El Recall de todos los modelos se sitúa entre 0.85 y 0.87, cumpliendo la restricción de diseño. La Precisión baja (~0.35) es el tradeoff deliberado de priorizar Recall: de cada tres pacientes que el modelo marca como "necesitan valoración", aproximadamente uno la requiere efectivamente.
 
-### 4.2 Comparación entre versiones del target
+### 4.2 Target `target_f_predictibilidad_maxima` *(recomendado y servido por la API)*
 
-Los modelos de árbol convergieron al mismo rendimiento independientemente del algoritmo. La diferencia real es entre versiones del target:
+| Modelo | ROC AUC | Recall | Precision | F2 | Threshold |
+|--------|---------|--------|-----------|----|-----------|
+| **xgboost** | **0.8608** | 0.8528 | 0.3708 | **0.6769** | 0.14 |
+| stacking | 0.8588 | 0.8569 | 0.3587 | 0.6706 | 0.34 |
+| random_forest | 0.8577 | 0.8762 | 0.3451 | 0.6700 | 0.13 |
+| voting | 0.8569 | 0.8611 | 0.3529 | 0.6685 | 0.14 |
+| lightgbm | 0.8543 | 0.8666 | 0.3396 | 0.6613 | 0.13 |
+| extra_trees | 0.8509 | 0.8707 | 0.3490 | 0.6703 | 0.14 |
+| hist_gradient_boosting | 0.8481 | 0.8583 | 0.3360 | 0.6548 | 0.13 |
+| logistic_regression | 0.7876 | 0.8514 | 0.2914 | 0.6151 | 0.38 |
+| mlp | 0.7838 | 0.8680 | 0.2792 | 0.6105 | 0.13 |
 
-| Target | AUC promedio modelos árbol | Prevalencia | N positivos |
-|--------|---------------------------|-------------|-------------|
-| `target_d_v2` | ~0.636 | 16.93% | 3,961 |
-| `target_d_v2_hosp` | ~0.757 | 27.69% | 6,475 |
-| `target_d_v5` | ~0.759 | 25.63% | 5,997 |
+El AUC promedio de los modelos de árbol pasa de ~0.76 a ~0.85 al cambiar al target F, efecto directo de redefinir el target hacia los flags más predecibles. XGBoost lidera con AUC 0.861, seguido por stacking, random forest y voting (todos AUC > 0.85). Los modelos lineales (regresión logística y MLP) quedan sustancialmente por debajo: la mayor señal disponible en el target F es aprovechada con mayor eficiencia por los métodos basados en árboles. El Brier Score de XGBoost es 0.097 en target F frente a 0.155 de RF en target D, lo que indica una mejora sustancial tanto en discriminación como en calibración.
 
-El salto de 0.636 a 0.757 al pasar de `target_d_v2` a `target_d_v2_hosp` confirma que añadir `flag_hospitalizacion_no_anticipada` al target fue la decisión más impactante del proyecto — más que cualquier elección algorítmica.
+### 4.3 Métricas completas — XGBoost / target_f_predictibilidad_maxima (modelo recomendado)
 
-### 4.3 Métricas completas del modelo seleccionado (Random Forest, target_d_v2_hosp)
+Datos de [`output/v2/models/target_f_predictibilidad_maxima/xgboost_metrics.json`](../../output/v2/models/target_f_predictibilidad_maxima/xgboost_metrics.json) y `xgboost_eval.json`:
 
 ```json
 {
-  "ROC_AUC": 0.7593,
-  "PR_AUC": 0.6229,
-  "Recall": 0.8600,
-  "Precision": 0.3537,
-  "F1": 0.5013,
-  "F2": 0.6686,
-  "Balanced_Accuracy": 0.6292,
-  "Specificity": 0.3984,
-  "Accuracy": 0.5262,
-  "Brier": 0.1559,
-  "FN_Rate": 0.1400,
-  "Predicted_Positive_Rate": 0.6731,
-  "Threshold": 0.17
+  "test": {
+    "ROC_AUC": 0.8608,
+    "PR_AUC": 0.7039,
+    "Recall": 0.8528,
+    "Precision": 0.3708,
+    "F1": 0.5169,
+    "F2": 0.6769,
+    "Balanced_Accuracy": 0.7519,
+    "Specificity": 0.6511,
+    "Accuracy": 0.6903,
+    "Brier": 0.0967,
+    "FN_Rate": 0.1472,
+    "Predicted_Positive_Rate": 0.4468,
+    "Threshold": 0.14
+  },
+  "cv": {
+    "ROC_AUC_mean": 0.8535, "ROC_AUC_std": 0.0135,
+    "F2_mean": 0.6741, "F2_std": 0.0193,
+    "Recall_mean": 0.863, "Recall_std": 0.0097,
+    "Precision_mean": 0.3604, "Precision_std": 0.0252
+  }
 }
 ```
 
-**Interpretación de cada métrica:**
+**Interpretación de las métricas principales:**
 
-- **ROC AUC = 0.759:** Si tomamos un paciente positivo y un paciente negativo al azar, el modelo asigna mayor probabilidad al positivo el 75.9% de las veces. Discriminación moderada-buena.
+- **ROC AUC = 0.861 (test) / 0.854 (cv):** Dado un paciente positivo y uno negativo elegidos al azar, el modelo asigna mayor probabilidad al positivo el 86.1% de las veces. La consistencia entre test y validación cruzada (diferencia ± 0.014) indica que el modelo no está sobreajustado al split.
 
-- **PR AUC = 0.623:** El área bajo la curva Precision-Recall. Esta métrica es más informativa que ROC AUC cuando el dataset está desbalanceado — el baseline aleatorio tendría PR AUC ≈ 0.277 (prevalencia del target). PR AUC 0.623 representa una mejora sustancial sobre el azar.
+- **PR AUC = 0.704:** El área bajo la curva Precisión-Recall. Con una prevalencia de 0.194, el baseline aleatorio correspondería a PR AUC ≈ 0.194; el valor observado (0.704) representa una mejora sustancial.
 
-- **Recall = 0.860:** El modelo detecta el 86% de los pacientes que sí necesitarían valoración formal. Solo el 14% de los verdaderos positivos son "perdidos" por el modelo (FN rate = 0.14).
+- **Recall = 0.853:** El modelo detecta el 85.3% de los pacientes que necesitarían valoración formal, con una tasa de falsos negativos de 14.7%.
 
-- **Precision = 0.354:** De los pacientes que el modelo marca como "necesitan valoración", solo el 35.4% realmente la necesitan. El resto (64.6%) son falsos positivos — pacientes enviados a valoración innecesariamente.
+- **Precision = 0.371:** De los pacientes marcados como "requieren valoración", el 37.1% realmente lo necesita. La precisión es la métrica más afectada por el umbral bajo y refleja el tradeoff deliberado de diseño.
 
-- **F2 = 0.669:** Métrica objetivo, da doble peso al Recall. Valor razonable dado el desbalance.
+- **F2 = 0.677:** Métrica de optimización del umbral. Mejora marginalmente sobre `target_d_v2_hosp` pese al salto en AUC, porque F2 está acotado por la prevalencia y la restricción de mantener Recall ≥ 0.85.
 
-- **Specificity = 0.398:** El modelo solo identifica correctamente el 39.8% de los pacientes que NO necesitarían valoración. El 60.2% de los negativos son clasificados como positivos (FP rate). Esto es el precio de mantener Recall alto.
+- **Specificity = 0.651:** El modelo identifica correctamente el 65.1% de los pacientes que no requieren valoración, una mejora de 25 puntos sobre el target D (0.40). Esto se traduce directamente en una reducción de la carga de valoraciones innecesarias.
 
-- **Accuracy = 0.526:** Métrica engañosa aquí — el 52.6% de aciertos no es mejor que un modelo que siempre predice "positivo" (que tendría 72.3% de accuracy). La Accuracy no es útil cuando el dataset está desbalanceado.
+- **Predicted Positive Rate = 0.447:** El modelo remite a valoración al 44.7% de los pacientes, frente al 67% del target D, manteniendo un Recall equivalente. La mayor señal del target F permite discriminar mejor sin sacrificar sensibilidad.
 
-- **Brier Score = 0.156:** Error cuadrático medio de las probabilidades. Un modelo perfecto tendría Brier=0; un modelo aleatorio tendría Brier ≈ 0.277 × (1-0.277) ≈ 0.2. Brier 0.156 indica probabilidades razonablemente bien calibradas.
-
-- **Predicted Positive Rate = 0.673:** El modelo clasifica el 67.3% de todos los pacientes como positivos (con threshold=0.17). Esto refleja el threshold muy bajo — es deliberado para mantener Recall alto.
+- **Brier Score = 0.097:** Un modelo aleatorio con prevalencia 0.194 tendría Brier ≈ 0.156; el valor observado confirma que el modelo combina buena discriminación con probabilidades calibradas, interpretables como estimaciones de riesgo real. Los detalles de calibración se desarrollan en [06-calibracion.md](06-calibracion.md).
 
 ---
 
@@ -285,7 +316,7 @@ El salto de 0.636 a 0.757 al pasar de `target_d_v2` a `target_d_v2_hosp` confirm
 
 La curva ROC (Receiver Operating Characteristic) muestra el tradeoff entre Recall (TPR) y FP rate (1-Specificity) para todos los posibles thresholds. AUC = 0.759 significa que la curva está un 75.9% del camino entre la diagonal (modelo aleatorio, AUC=0.5) y la esquina superior izquierda (modelo perfecto, AUC=1.0).
 
-Los gráficos de curvas ROC están en `output/v1/plots/target_d_v2_hosp/{modelo}_roc_pr.png`.
+Los gráficos de curvas ROC están en `output/v2/plots/{target}/{modelo}_roc_pr.png`.
 
 ### 5.2 Curva Precision-Recall
 
@@ -294,15 +325,14 @@ La curva PR muestra el tradeoff entre Precisión y Recall para todos los thresho
 ### 5.3 Análisis de threshold
 
 Los gráficos `{modelo}_threshold.png` muestran cómo varían Recall, Precisión, F1 y F2 al cambiar el threshold. El threshold de 0.17 está en la zona donde:
-- Recall ≈ 0.86 (se empieza a caer precipitadamente si se sube el threshold)
-- F2 está cerca de su máximo
-- Precisión es 0.35 (baja pero aceptable para un sistema de screening)
+- Recall ≈ 0.86 (primer umbral que satisface Recall ≥ 0.85; sube el threshold y el Recall cae)
+- Precisión es 0.35 (máxima Precisión con la restricción de Recall ≥ 0.85)
 
 ---
 
-## 6. Matriz de confusión (threshold=0.17, test set)
+## 6. Matrices de confusión (test set, 4,678 pacientes)
 
-Para el Random Forest en `target_d_v2_hosp`:
+### `target_d_v2_hosp` — Random Forest (threshold=0.17)
 
 ```
                     Predicho Neg.    Predicho Pos.
@@ -310,22 +340,24 @@ Real Negativo (N=3383):    1348           2035     → FP rate = 60.2%
 Real Positivo (N=1295):     181           1114     → FN rate = 14.0%
 ```
 
-En términos prácticos sobre el test set de 4,678 pacientes:
-- **1,114 verdaderos positivos:** Pacientes que el modelo correctamente identifica como de riesgo.
-- **181 falsos negativos:** Pacientes de riesgo que el modelo no detecta — los más preocupantes.
-- **2,035 falsos positivos:** Pacientes enviados innecesariamente a valoración — carga adicional al sistema.
-- **1,348 verdaderos negativos:** Pacientes que el modelo correctamente identifica como de bajo riesgo.
+### `target_f_predictibilidad_maxima` — XGBoost (threshold=0.14)
+
+A partir de `Recall=0.853`, `Specificity=0.651`, prevalencia 0.194:
+
+```
+                    Predicho Neg.    Predicho Pos.
+Real Negativo (N≈3769):    2454           1315     → FP rate = 34.9%
+Real Positivo (N≈909):      134            775     → FN rate = 14.7%
+```
+
+El target F clasifica positivos en un 44.7% de los pacientes (vs. 67% en el target D) manteniendo el Recall en ~0.85. Es decir: identifica casi la misma fracción de positivos, pero con muchos menos falsos positivos, gracias a la mayor señal disponible.
 
 ---
 
-## 7. ¿Por qué todos los modelos convergen?
+## 7. ¿Por qué los modelos convergen dentro de cada target?
 
-Una pregunta natural es: ¿por qué no hay un modelo claramente mejor? Random Forest, XGBoost, HGB y stacking difieren en menos de 0.015 en AUC. La respuesta es la **señal limitada en los datos**:
+Dentro de un mismo target, RF, XGBoost, HGB, LightGBM, stacking y voting difieren en menos de 0.015 en AUC. Esta convergencia refleja la **señal limitada disponible en los datos preoperatorios**: con una MI máxima de 0.10 y una correlación de Pearson máxima de 0.23 para `target_d_v2_hosp`, todos los modelos extraen esencialmente la misma información. La diferencia entre un Random Forest y un Gradient Boosting resulta marginal cuando la señal disponible es baja, con independencia de la sofisticación algorítmica.
 
-Con las features disponibles (preoperatorias), la MI máxima con el target es 0.10 y la correlación máxima de Pearson es 0.23. Todos los modelos están extrayendo la misma señal limitada. La diferencia entre un Random Forest y un Gradient Boosting es marginal cuando la señal disponible es baja — ambos aprenden el mismo patrón de correlaciones débiles.
+Al cambiar el target, en cambio, todos los modelos mejoran simultáneamente: el AUC promedio de los modelos de árbol sube de ~0.757 con `target_d_v2_hosp` a ~0.853 con `target_f_predictibilidad_maxima`. Este salto de ~0.10 puntos en AUC es de un orden de magnitud mayor que cualquier diferencia entre algoritmos y confirma el principio central del proyecto: el target define el techo de rendimiento alcanzable; el algoritmo solo determina qué tan cerca se llega a ese techo.
 
-El verdadero cuello de botella no es el algoritmo sino:
-1. La definición del target (mezcla complicaciones predecibles con impredecibles)
-2. Las features disponibles (no capturan todos los factores de riesgo relevantes)
-
-Este diagnóstico está detallado en el [análisis posoperatorio](../analisis-posoperatorio/README.md) y en el documento de [selección de features](03-seleccion-features.md).
+Este diagnóstico está documentado en detalle en el [análisis posoperatorio](../analisis-posoperatorio/README.md) y en el documento de [selección de features](03-seleccion-features.md).
