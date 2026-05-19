@@ -9,26 +9,22 @@
 - [`src/cleaning/anomaly.py`](../../src/cleaning/anomaly.py) — Detección de anomalías
 - [`src/data/loader.py`](../../src/data/loader.py) — Carga de datos brutos
 
-**Outputs:**
-- [`output/v1/data_processed/preop_raw.parquet`](../../output/v1/data_processed/preop_raw.parquet) — Dataset preoperatorio limpio y codificado
-- [`output/v1/data_processed/posop_raw.parquet`](../../output/v1/data_processed/posop_raw.parquet) — Dataset posoperatorio con flags calculados
-- [`output/v1/data_processed/cleaned.parquet`](../../output/v1/data_processed/cleaned.parquet) — Dataset limpio final (mayores de 18 años)
-- [`output/v1/reports/cleaning_report.json`](../../output/v1/reports/cleaning_report.json) — Reporte de limpieza
-- [`output/v1/reports/validation_report.json`](../../output/v1/reports/validation_report.json) — Validación del dataset
+**Outputs (pipeline v2):**
+- [`output/v2/data_processed/preop_raw.parquet`](../../output/v2/data_processed/preop_raw.parquet) — Dataset preoperatorio limpio y codificado
+- [`output/v2/data_processed/posop_raw.parquet`](../../output/v2/data_processed/posop_raw.parquet) — Dataset posoperatorio con flags calculados
+- [`output/v2/data_processed/cleaned.parquet`](../../output/v2/data_processed/cleaned.parquet) — Dataset limpio final (mayores de 18 años)
+- [`output/v2/reports/cleaning_report.json`](../../output/v2/reports/cleaning_report.json) — Reporte de limpieza
+- [`output/v2/reports/validation_report.json`](../../output/v2/reports/validation_report.json) — Validación del dataset
+
+**Configuración:**
+- [`config/cleaning_config.yaml`](../../config/cleaning_config.yaml) — Reglas de outliers, vocabularios de tokens.
+- [`config/features_config.yaml`](../../config/features_config.yaml) — Mapa de correcciones de encoding (`encoding_fix_map` a nivel raíz), umbral de varianza mínima (`min_variance` bajo `feature_pruning`).
 
 ---
 
 ## 1. Contexto y desafíos
 
-Los datos brutos del sistema OPERA son registros hospitalarios diseñados para uso clínico, no para modelado estadístico. Esto implica múltiples problemas típicos de datos de salud reales:
-
-- **Texto libre no estandarizado:** campos como diagnósticos, procedimientos y antecedentes médicos son strings libres donde el mismo concepto aparece escrito de decenas de formas distintas ("hta", "HTA", "hipertensión arterial", "hiper arterial", etc.).
-- **Valores numéricos con formato inconsistente:** resultados de laboratorio como PT/INR aparecen como "14.5 / 1.2", "1.2 INR", "14seg 1.2", etc.
-- **Variables multilabel:** un paciente puede tener múltiples comorbilidades, múltiples alergias, múltiples antecedentes quirúrgicos — todo registrado en un solo campo de texto.
-- **Valores fuera de rango biológico:** por errores de digitación o formato, hay edades de 0 o 200, hemoglobinas de 0.1, tensiones arteriales de 999.
-- **Pacientes pediátricos:** el sistema registra pacientes de todas las edades, pero el proyecto solo aplica a adultos (≥18 años).
-- **Fuga de datos potencial:** algunas columnas del dataset posoperatorio registran información solo conocible después de la cirugía — se deben excluir cuidadosamente de las features.
-- **Codificación de caracteres:** nombres de columnas con caracteres especiales (ñ, tildes) presentaron problemas de encoding (UTF-8 vs. Latin-1) que generaron columnas con nombres como "TensiÃ³n Arterial".
+Los registros brutos del sistema OPERA fueron concebidos para uso clínico operativo, no para modelado estadístico. Esta naturaleza introduce los problemas típicos de los datos de salud en contextos reales. Los campos de diagnósticos, procedimientos y antecedentes médicos son texto libre donde el mismo concepto puede aparecer escrito de decenas de formas distintas ("hta", "HTA", "hipertensión arterial", "hiper arterial"). Los resultados de laboratorio como PT/INR llegan en formatos extremadamente variables: "14.5 / 1.2", "1.2 INR", "14seg 1.2", entre otros. Las variables de antecedentes son multilabel: un mismo campo de texto puede contener múltiples comorbilidades, alergias o antecedentes quirúrgicos. Errores de digitación producen valores biológicamente imposibles — edades de 0 o 200, hemoglobinas de 0.1, tensiones arteriales de 999. El sistema registra pacientes de todas las edades, pero el proyecto aplica únicamente a la población adulta (≥ 18 años). Algunas columnas del dataset posoperatorio registran información solo disponible después de la cirugía y deben excluirse cuidadosamente del espacio de features. Finalmente, los nombres de columnas con caracteres especiales (ñ, tildes) presentaron problemas de codificación (UTF-8 vs. Latin-1) que generaron nombres corruptos como "TensiÃ³n Arterial".
 
 ---
 
@@ -40,13 +36,13 @@ Los datos brutos del sistema OPERA son registros hospitalarios diseñados para u
 |-------|-------|----------|
 | Datos brutos | 30,962 | 236 |
 | Tras filtrado de edad (≥18) | 24,279 | 236 |
-| Tras limpieza y codificación | 24,279 | 238 (+2 columnas enriquecidas) |
+| Tras limpieza y codificación | 24,279 | 238+ (columnas One-Hot ICD-10 de Dx/Procedimiento/Antecedentes, columnas `score_*` de severidad BART-MNLI, y columnas ATC de RxNorm) |
 
 El filtro de edad elimina **6,683 registros** (21.6% del total) correspondientes a pacientes pediátricos — una porción significativa que confirma que el sistema incluye cirugías pediátricas.
 
 ### 2.2 Variables numéricas — Validación y parseo
 
-Las variables numéricas del dataset presentan tres problemas comunes: texto incrustado en el valor, separadores decimales inconsistentes (punto vs. coma), y valores biológicamente imposibles por error de digitación.
+Las variables numéricas del dataset presentan tres categorías de problemas: texto incrustado en el valor, separadores decimales inconsistentes (punto vs. coma) y valores biológicamente imposibles atribuibles a errores de digitación.
 
 **Parseo robusto de resultados de laboratorio (`src/cleaning/numeric_utils.py`):**
 
@@ -89,23 +85,15 @@ texto bruto → minúsculas → eliminar acentos → eliminar caracteres especia
 → lista de términos estandarizados
 ```
 
-**Función `normalize_tokens()`:** Mapea variantes ortográficas al término canónico. Por ejemplo:
-- "hta", "hipertension arterial", "hiper", "ht" → `hta`
-- "epoc", "enfermedad pulmonar obstructiva", "epco" → `epoc`
-- "diabetes", "dm", "dm2", "diabetes mellitus" → `diabetes`
+**Función `normalize_tokens()`:** Mapea variantes ortográficas al término canónico. Por ejemplo, "hta", "hipertension arterial", "hiper" y "ht" se unifican como `hta`; "epoc", "enfermedad pulmonar obstructiva" y "epco" como `epoc`; "diabetes", "dm", "dm2" y "diabetes mellitus" como `diabetes`.
 
-**Función `resolve_contradictory_term()`:** Maneja el caso de registros que dicen "negativo" para un sistema pero luego listan comorbilidades positivas en el mismo campo — la regla es que los términos positivos específicos tienen precedencia sobre "negativo".
+**Función `resolve_contradictory_term()`:** Gestiona el caso de registros que declaran "negativo" para un sistema orgánico pero a continuación listan comorbilidades positivas en el mismo campo. La regla aplicada es que los términos positivos específicos tienen precedencia sobre la negación genérica.
 
 ### 2.4 Variables multilabel — Codificación
 
-Las variables de antecedentes médicos (cardiovasculares, respiratorios, neurológicos, etc.) son campos de texto libre que pueden contener múltiples condiciones. Se procesan con `encode_multilabel()`:
+Los campos de antecedentes médicos (cardiovasculares, respiratorios, neurológicos, etc.) son texto libre que puede contener múltiples condiciones simultáneas. Se procesan con `encode_multilabel()`, que aplica el siguiente proceso: el texto libre se normaliza con `normalize_tokens()`, se obtiene el conjunto de términos estandarizados para ese registro y, por cada término reconocido en el vocabulario del sistema, se crea una columna binaria independiente.
 
-**Proceso:**
-1. El texto libre se normaliza con `normalize_tokens()`.
-2. Se genera un conjunto de términos para ese registro.
-3. Para cada término conocido en el vocabulario del sistema, se crea una columna binaria separada.
-
-**Resultado:** Un campo como "Antecedentes cardiovasculares" que contenía strings variables como "hta, arritmia, marcapaso" se convierte en columnas binarias independientes:
+Como resultado, un campo como "Antecedentes cardiovasculares" que contenía cadenas variables como "hta, arritmia, marcapaso" se convierte en columnas binarias separadas:
 
 | `Antecedentes cardiovasculares_hta` | `Antecedentes cardiovasculares_arritmias` | `Antecedentes cardiovasculares_cardiopatias` | ... |
 |-----|------|------|-----|
@@ -113,13 +101,13 @@ Las variables de antecedentes médicos (cardiovasculares, respiratorios, neurol�
 
 Este patrón se aplica a: antecedentes cardiovasculares, respiratorios, neurológicos, hematológicos, endocrinológicos, renales, gastrointestinales, anestesia previa, tipo de anestesia propuesta, condición actual, alergias, etc.
 
-### 2.5 Variables de diagnóstico y procedimiento — Clasificación con LLM
+### 2.5 Variables de diagnóstico y procedimiento — Enriquecimiento de diagnósticos y procedimientos (GoogleTranslator + ClinicalTables NLM + BART-large-MNLI)
 
 Las columnas `Dx Preoperatorio`, `Procedimiento propuesto` y `Antecedentes quirúrgicos` contienen descripciones en texto libre de diagnósticos y procedimientos médicos. La variabilidad es enorme: el mismo diagnóstico puede estar escrito como "cancer de colon", "Adenocarcinoma de colon", "neo colon", "Ca. colon" o simplemente un código CIE-10 incompleto.
 
 **Solución implementada (`src/cleaning/enrichment.py`):**
 
-Se utiliza un **modelo de lenguaje (LLM)** para clasificar cada descripción de diagnóstico o procedimiento en el capítulo del código CIE-10 o clasificación de procedimiento correspondiente. El resultado se codifica como variables One-Hot:
+Se utiliza un pipeline de tres herramientas para clasificar cada descripción de diagnóstico o procedimiento: **`GoogleTranslator`** (deep-translator, traducción ES→EN), **`ClinicalTables NLM API`** (búsqueda de códigos ICD-10), y **`BART-large-MNLI`** (clasificador zero-shot de severidad clínica). El resultado se codifica como variables One-Hot:
 
 ```
 "cancer de colon" → Capítulo C (Neoplasias malignas) → Dx_Preoperatorio_Code_C = 1
@@ -132,9 +120,7 @@ El mismo proceso se aplica a procedimientos, generando `Procedimiento propuesto 
 
 ### 2.6 Scores de severidad — Ingeniería de features clínica
 
-Uno de los aportes más importantes de la limpieza es la generación de **scores de severidad** para diagnósticos y procedimientos, una transformación que convierte texto clínico en información cuantitativa estructurada.
-
-Para cada diagnóstico y procedimiento, el enriquecimiento con LLM también asigna una categoría de severidad clínica. A partir de estas categorías se calculan scores binarios que indican si el diagnóstico/procedimiento del paciente es de alta, media, baja severidad, etc.:
+Una de las contribuciones más relevantes de esta etapa es la generación de **scores de severidad** para diagnósticos y procedimientos: una transformación que convierte texto clínico no estructurado en información cuantitativa útil para el modelo. El enriquecimiento con LLM asigna a cada diagnóstico y procedimiento una categoría de severidad clínica, a partir de la cual se calculan indicadores binarios:
 
 | Feature | Descripción |
 |---------|-------------|
@@ -150,17 +136,11 @@ Para cada diagnóstico y procedimiento, el enriquecimiento con LLM también asig
 | `score_dx_low_severity` | Diagnóstico de baja severidad (1/0) |
 | `score_proc_ant_*` | Mismo esquema para antecedentes quirúrgicos |
 
-Estos scores son las features **más importantes** del modelo final, como veremos en la etapa de selección de features.
+Estos scores resultan ser las features **más importantes** del modelo final, como se documenta en la etapa de selección de features.
 
 ### 2.7 Variables de tiempo
 
-De las fechas de la valoración preanestésica se extraen:
-- `anio` — año del registro
-- `mes` — mes del registro (1–12)
-- `dia_semana` — día de la semana (0=lunes, 6=domingo)
-- `Hora_decimal` — hora del día como número decimal (e.g., 14:30 → 14.5)
-
-Estas variables capturan potenciales efectos temporales: puede haber diferencias en la complejidad de los casos entre días de semana y fines de semana, o entre meses del año.
+A partir de las fechas de la valoración preanestésica se derivan cuatro variables: `anio` (año del registro), `mes` (mes, 1–12), `dia_semana` (0=lunes, 6=domingo) y `Hora_decimal` (hora del día como número decimal, por ejemplo 14:30 → 14.5). Estas variables permiten capturar posibles efectos temporales en los datos, como diferencias en la complejidad de los casos entre días hábiles y fines de semana, o variaciones estacionales a lo largo del año.
 
 ### 2.8 Corrección de encoding de columnas
 
@@ -178,19 +158,19 @@ encoding_fix_map = {
 ### 2.9 Imputación de valores faltantes
 
 Después de la limpieza, el dataset preoperatorio tiene **0% de valores nulos** (`null_pct_after: 0.0` en `cleaning_report.json`). La imputación se realiza:
-- **Variables numéricas:** mediana de la columna (robusta a outliers).
+- **Variables numéricas:** valor centinela -1 (`fillna(-1)`).
 - **Variables categóricas binarias:** 0 (ausencia del antecedente/condición).
-- **Valores fuera de rango biológico:** se reemplazan por el valor límite del rango o por la mediana.
+- **Valores fuera de rango biológico:** se reemplazan por el valor límite del rango.
 
 ---
 
 ## 3. Dataset posoperatorio — Construcción de flags
 
-El dataset posoperatorio (`posop_raw.parquet`) es procesado de manera diferente: en lugar de limpiar variables para modelado directo, el objetivo es **construir flags binarios** que resumen aspectos clínicamente relevantes de lo que ocurrió durante y después de la cirugía.
+El dataset posoperatorio (`posop_raw.parquet`) se procesa de forma distinta al preoperatorio: el objetivo no es limpiar variables para modelado directo, sino **construir flags binarios** que sinteticen los eventos clínicamente relevantes ocurridos durante y después de la cirugía.
 
 ### 3.1 Estructura de flags
 
-El pipeline de flags (`src/target/pipeline.py` con módulos en `src/target/specific/`) produce **57 flags** organizados en categorías:
+El pipeline de flags (`src/target/pipeline.py` con módulos en `src/target/specific/`) produce **~50 flags** organizados en categorías:
 
 **Flags de reservas de sangre:**
 - `flag_reserva_hemoderivados` — se reservaron hemoderivados para el procedimiento
@@ -201,7 +181,6 @@ El pipeline de flags (`src/target/pipeline.py` con módulos en `src/target/speci
 - `flag_presion_sistolica_anormal` — tensión arterial sistólica prequirúrgica fuera de rango normal
 - `flag_presion_diastolica_anormal` — tensión diastólica anormal
 - `flag_presion_media_anormal` — presión media anormal
-- `flag_frecuencia_cardiaca_anormal` — frecuencia cardíaca anormal
 - `flag_saturacion_oxigeno_anormal` — saturación de oxígeno anormal
 - `flag_temperatura_anormal` — temperatura anormal
 - `flag_glucometria_anormal` — glucometría anormal
@@ -213,7 +192,7 @@ El pipeline de flags (`src/target/pipeline.py` con módulos en `src/target/speci
 - `flag_tiempos` — superset: cualquier tiempo largo
 
 **Flags de vía aérea:**
-- `flag_induccion_compleja` — inducción anestésica compleja (secuencia de inducción rápida u otro protocolo especial)
+- `flag_induccion_compleja` — inducción anestésica compleja: es `1` cuando `Clase de inducción == 'Mixta'`
 - `flag_intubacion_dificil` — intubación difícil (>2 intentos, uso de dispositivo alternativo)
 - `flag_laringoscopia_alta` — laringoscopia Cormack-Lehane III o IV
 - `flag_tipo_intubacion_complejo` — tipo de intubación no estándar
@@ -291,7 +270,7 @@ Cada flag tiene una función dedicada en `src/target/specific/`. Por ejemplo:
 
 ## 4. Validación del dataset
 
-El reporte de validación (`output/v1/reports/validation_report.json`) confirma:
+El reporte de validación (`output/v2/reports/validation_report.json`) confirma las dimensiones de ambos datasets tras el procesamiento:
 
 | Métrica | Preoperatorio | Posoperatorio |
 |---------|---------------|---------------|
@@ -299,13 +278,13 @@ El reporte de validación (`output/v1/reports/validation_report.json`) confirma:
 | Columnas | 236 | 134 |
 | % nulos | 0.0% | 5.32% |
 
-**¿Por qué el posoperatorio tiene 5.32% de nulos?** Algunos campos de la hoja anestésica no se completan para todos los procedimientos (por ejemplo, los parámetros ventilatorios no aplican para cirugías con anestesia local o sedación mínima). Estos valores faltantes se manejan durante la construcción de flags con reglas específicas por campo.
+El 5.32% de valores nulos en el posoperatorio responde a que ciertos campos de la hoja anestésica no aplican a todos los procedimientos: los parámetros ventilatorios, por ejemplo, no se registran en cirugías realizadas con anestesia local o sedación mínima. Estos faltantes se gestionan durante la construcción de flags mediante reglas específicas por campo.
 
 ---
 
 ## 5. Reporte de limpieza
 
-El archivo `output/v1/reports/cleaning_report.json` resume:
+El archivo `output/v2/reports/cleaning_report.json` resume:
 
 ```json
 {
@@ -319,19 +298,16 @@ El archivo `output/v1/reports/cleaning_report.json` resume:
 }
 ```
 
-**Notas:**
-- `cols_after > cols_before`: Se añadieron 2 columnas de scores de severidad durante el enriquecimiento.
-- `null_pct_after = 0.0`: La imputación elimina todos los valores faltantes del dataset preoperatorio.
-- `rows_removed = 6683`: Solo por filtro de edad (menores de 18 años). No se eliminaron filas por calidad de datos.
+El incremento en el número de columnas (`cols_after > cols_before`) se debe al enriquecimiento, que añade columnas One-Hot por capítulo ICD-10 (para diagnósticos, procedimientos y antecedentes quirúrgicos), columnas `score_*` de severidad generadas por BART-MNLI y columnas ATC de RxNorm. El valor `null_pct_after = 0.0` confirma que la imputación elimina todos los faltantes del dataset preoperatorio. Las 6,683 filas eliminadas corresponden exclusivamente al filtro de edad para pacientes menores de 18 años; no se descartó ninguna fila por problemas de calidad de datos.
 
 ---
 
 ## 6. Análisis exploratorio (EDA)
 
-Los EDA están disponibles como gráficos en `output/v1/plots/`:
+Los EDA están disponibles como gráficos en `output/v2/plots/`:
 
-- `output/v1/plots/eda_preop_raw/` — distribuciones de variables del dataset preoperatorio antes de la limpieza
-- `output/v1/plots/eda_preop_clean/` — distribuciones después de la limpieza
-- `output/v1/plots/eda_posop_target_d_v2_hosp/` — distribuciones de flags posoperatorios para el target seleccionado
+- `output/v2/plots/eda_preop_raw/` — distribuciones de variables del dataset preoperatorio antes de la limpieza
+- `output/v2/plots/eda_preop_clean/` — distribuciones después de la limpieza
+- `output/v2/plots/eda_posop_{target}/` — distribuciones de flags posoperatorios para cada target activo
 
-Los análisis de correlación pre-post (qué variables preoperatorias se correlacionan con el target) están en `output/v1/reports/pre_post_signal/` — ver detalles en [03-seleccion-features.md](03-seleccion-features.md).
+Los análisis de correlación pre-post (qué variables preoperatorias se correlacionan con el target) están en [`output/v2/reports/pre_post_signal/`](../../output/v2/reports/pre_post_signal/) — ver detalles en [03-seleccion-features.md](03-seleccion-features.md).

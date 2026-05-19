@@ -1,51 +1,50 @@
-# Etapa 5 — Explicabilidad del Modelo
+# Etapa 5 — Explicabilidad del Modelo (importancias)
 
 **Código fuente:**
 - [`src/evaluation/explainability.py`](../../src/evaluation/explainability.py) — Cálculo de importancias globales y locales
 - [`src/reports/pre_post_analysis.py`](../../src/reports/pre_post_analysis.py) — Análisis de señal preop→posop
+- [`src/reports/shap_plots.py`](../../src/reports/shap_plots.py) — Generación de SHAP values y plots (beeswarm)
 
-**Outputs:**
-- `output/v1/reports/explainability/target_d_v2_hosp/explainability_global_{modelo}.csv` — Importancias globales por feature
-- `output/v1/reports/explainability/target_d_v2_hosp/explainability_cases_{modelo}.csv` — Importancias locales por caso
+**Outputs (pipeline v2):**
+- `output/v2/reports/explainability/{target}/explainability_global_{modelo}.csv` — Importancias globales por feature (nativas + permutation fallback)
+- `output/v2/reports/explainability/{target}/explainability_cases_{modelo}.csv` — Importancias locales por caso, etiquetadas como TP/FN/FP/TN
+- `output/v2/reports/shap/{target}/shap_values_{modelo}.npy` — Matriz SHAP del test set
+- `output/v2/reports/shap/{target}/shap_beeswarm_{modelo}.png` — Plot beeswarm de contribuciones SHAP por feature
+- `output/v2/reports/shap/{target}/fn_waterfall/` — Plots waterfall por caso falso negativo (generados por `src/reports/shap_plots.plot_shap_waterfall_fn()`)
+
+> **Nota:** Este documento cubre la importancia global y local con técnicas de **permutación e importancia nativa**. El análisis SHAP por **grupo clínico** (TP vs. FN vs. FP vs. TN) tiene su propio documento — ver [07-shap-grupos.md](07-shap-grupos.md).
 
 ---
 
 ## 1. ¿Por qué es necesaria la explicabilidad?
 
-En un contexto médico, un modelo de ML no puede ser una caja negra. Los médicos y administradores del hospital necesitan saber:
-
-1. **¿Por qué el modelo dice que este paciente necesita valoración?** — Explicación local (caso por caso).
-2. **¿Qué factores son más importantes para el modelo en general?** — Explicación global.
-3. **¿El modelo está usando las variables "correctas" desde el punto de vista clínico?** — Validación de sensatez.
-4. **¿Hay sesgos en el modelo?** — Por ejemplo, ¿está discriminando por sexo o por grupo étnico?
-
-La explicabilidad también es necesaria para identificar problemas del modelo: si el factor más importante es una variable proxy de algo que el modelo no debería usar, eso indica fuga de datos u otros problemas.
+En un entorno médico, un modelo de ML no puede operar como una caja negra. Los clínicos y administradores del hospital requieren comprender qué factores determinan que un paciente sea marcado como de alto riesgo, qué variables son las más influyentes a nivel global y si el modelo emplea las variables clínicamente correctas. Además, el análisis de explicabilidad es la principal herramienta para detectar problemas de diseño: si el predictor más importante resulta ser una variable proxy de información no disponible en el momento de la valoración, eso puede señalar fuga de datos u otras inconsistencias metodológicas.
 
 ---
 
-## 2. Importancia global de features — Permutation Importance
+## 2. Importancia global de features — Importancia nativa (técnica primaria) y por permutación (fallback)
 
-La técnica principal de explicabilidad global es la **Importancia por Permutación** (Permutation Importance).
+El pipeline calcula importancia global con **dos técnicas**:
+
+1. **Importancia nativa del modelo** (técnica **prioritaria**): `feature_importances_` para modelos de árbol (RF, XGBoost, LightGBM, HGB, ExtraTrees — MDI, Mean Decrease in Impurity) y `coef_` para modelos lineales. El archivo CSV registra en la columna `Source` el valor `native_feature_importance` cuando se usa esta vía.
+
+2. **Importancia por permutación** (**fallback** para modelos sin esos atributos: Stacking, Voting, MLP).
 
 ### ¿Cómo funciona?
-1. Se evalúa el modelo en el test set y se registra el AUC base.
-2. Se baraja aleatoriamente **una feature a la vez** (rompiendo su relación con el target).
-3. Se vuelve a evaluar el modelo con esa feature permutada.
-4. La caída en AUC al permutar la feature = su importancia de permutación.
 
-Una feature con importancia 0.04 significa que permutarla hace caer el AUC en 0.04 — es una feature que el modelo usa activamente y que contribuye 0.04 puntos al AUC.
+Se evalúa el modelo en el test set y se registra el AUC base. A continuación, se permuta aleatoriamente una feature a la vez —rompiendo su relación con el target— y se vuelve a evaluar el modelo. La caída en AUC al permutar una feature representa su importancia de permutación: una importancia de 0.04 indica que esa feature contribuye 0.04 puntos al AUC global y que el modelo la utiliza activamente.
 
-### ¿Por qué permutation importance en lugar de feature importances de árbol?
-
-La importancia nativa de los árboles de decisión (MDI, Mean Decrease in Impurity) tiene sesgos conocidos: sobrestima la importancia de features numéricas continuas y de alta cardinalidad. La permutation importance no tiene este sesgo — mide el impacto real en la métrica de evaluación.
+La importancia nativa de los árboles (MDI, Mean Decrease in Impurity) tiene sesgos conocidos, en particular la sobrestimación de features numéricas continuas y de alta cardinalidad. La importancia por permutación no presenta ese sesgo porque mide el impacto directo sobre la métrica de evaluación.
 
 ---
 
-## 3. Resultados de explicabilidad global — Random Forest
+## 3. Resultados de explicabilidad global
 
-Las 20 features con mayor importancia de permutación para el Random Forest en `target_d_v2_hosp`:
+### 3.1 Random Forest sobre `target_d_v2_hosp` (importancia nativa MDI — `feature_importances_`)
 
-| Posición | Feature | Importancia de permutación |
+Las 20 features con mayor importancia nativa MDI para el Random Forest en `target_d_v2_hosp` (de [`output/v2/reports/explainability/target_d_v2_hosp/explainability_global_random_forest.csv`](../../output/v2/reports/explainability/target_d_v2_hosp/explainability_global_random_forest.csv)):
+
+| Posición | Feature | Importancia MDI |
 |----------|---------|---------------------------|
 | 1 | `Tipo de anestesia propuesta_sedacion` | **0.04360** |
 | 2 | `Tipo de anestesia propuesta_raquidea` | **0.03373** |
@@ -68,33 +67,50 @@ Las 20 features con mayor importancia de permutación para el Random Forest en `
 | 19 | `Sexo_encoded` | 0.00178 |
 | 20 | `Dx Preoperatorio Code_H` | 0.00177 |
 
+### 3.2 XGBoost sobre `target_f_predictibilidad_maxima` (importancia nativa)
+
+Las 20 features con mayor importancia nativa para el XGBoost en `target_f_predictibilidad_maxima` (de [`output/v2/reports/explainability/target_f_predictibilidad_maxima/explainability_global_xgboost.csv`](../../output/v2/reports/explainability/target_f_predictibilidad_maxima/explainability_global_xgboost.csv)). Estas son las importancias `feature_importances_` en escala normalizada (la suma total sobre **todas** las features del modelo es 1.0; la tabla muestra solo el top-20):
+
+| Posición | Feature | Importancia |
+|----------|---------|-------------|
+| 1 | `Tipo de anestesia propuesta_raquidea` | **0.1217** |
+| 2 | `Tipo de anestesia propuesta_sedacion` | 0.0941 |
+| 3 | `Tipo de anestesia propuesta_peridural` | 0.0938 |
+| 4 | `Dx Preoperatorio Code_O` (embarazo/parto) | 0.0528 |
+| 5 | `Dx Preoperatorio Code_A` (infecciosas) | 0.0451 |
+| 6 | `Tipo de anestesia propuesta_general` | 0.0396 |
+| 7 | `Dx Preoperatorio Code_Z` (factores de salud) | 0.0337 |
+| 8 | `Tipo de anestesia propuesta_sin dato` | 0.0308 |
+| 9 | `Dx Preoperatorio Code_S` (traumatismos) | 0.0296 |
+| 10 | `Antecedente renales_litiasis` | 0.0290 |
+| 11 | `Tipo de anestesia propuesta_local` | 0.0271 |
+| 12 | `Antecedente renales_negativo` | 0.0269 |
+| 13 | `Antecedente hematológicos_negativo` | 0.0146 |
+| 14 | `Procedimiento propuesto Code_A` | 0.0140 |
+| 15 | `Grupo Sanguíneo_Sin Dato` | 0.0137 |
+| 16 | `Sexo_encoded` | 0.0135 |
+| 17 | `Dx Preoperatorio Code_H` (ojo/oído) | 0.0119 |
+| 18 | `Dx Preoperatorio Code_K` (digestivo) | 0.0114 |
+| 19 | `Examen_Hemoglobina(g/dl)` | 0.0108 |
+| 20 | `score_dx_low_severity` | 0.0098 |
+
+En `target_f`, los códigos CIE-10 del diagnóstico ganan peso (4 de las top-10), lo que refleja que el modelo aprende asociaciones específicas entre ciertos diagnósticos y hospitalización o ingreso a UCI más allá del score de severidad agregado. `Antecedente renales_litiasis` asciende a la posición 10 — una patología específica que en `target_d_v2_hosp` quedaba diluida dentro del conjunto. Los scores de severidad agregados retroceden en el ranking de `target_f`: el modelo se apoya más en el tipo de procedimiento y diagnóstico (códigos) que en sus categorías de severidad.
+
 ---
 
 ## 4. Análisis profundo de las variables más importantes
 
 ### 4.1 `Tipo de anestesia propuesta_sedacion` (importancia: 0.044) — El predictor más importante
 
-Esta es la variable con mayor importancia de permutación en el modelo. Que "anestesia propuesta = sedación" sea el predictor más importante llama la atención — ¿qué información captura?
+Esta es la variable con mayor importancia nativa MDI en el modelo Random Forest. Los procedimientos bajo sedación son típicamente procedimientos diagnósticos o intervencionistas menores (colonoscopia, endoscopia, cateterismos, biopsias), de modo que la sedación funciona como proxy de baja complejidad y, por extensión, de menor probabilidad de hospitalización no anticipada, ingreso a UCI o complicaciones mayores. Permutar aleatoriamente esta variable destruye esa señal, haciendo caer el AUC en 0.04.
 
-**Interpretación:** Los procedimientos realizados con sedación son típicamente procedimientos diagnósticos o intervencionistas menores (colonoscopia, endoscopia, cateterismos, biopsias bajo sedación). En este contexto:
-- La sedación se asocia con **procedimientos de baja complejidad** → baja probabilidad de complicaciones graves.
-- Si el paciente va a sedación, el modelo aprende que el riesgo de hospitalización no anticipada, UCI, o complicaciones mayores es menor.
-- Permutando esta variable (mezclando aleatoriamente quién va a sedación y quién no) destruye esta señal — el modelo pierde 0.04 en AUC.
-
-**Implicación clínica:** El modelo está usando el tipo de anestesia propuesta como proxy de la complejidad del procedimiento. Esto tiene sentido clínico: el tipo de anestesia es determinado en gran parte por el tipo de procedimiento.
-
-**Posible problema:** Si el tipo de anestesia es determinado *durante* la valoración preanestésica (en la misma consulta cuyos datos se usan como features), podría haber un elemento de circularidad. El modelo puede estar aprendiendo "el anestesiólogo ya decidió anestesia raquídea → el procedimiento es de cierto tipo → el riesgo es determinado". En ese caso, la feature no añade información adicional a la que el anestesiólogo ya tiene.
+El tipo de anestesia propuesta actúa, en última instancia, como un proxy de la complejidad del procedimiento quirúrgico, lo cual es clínicamente coherente. Una limitación a considerar es que si el tipo de anestesia se determina durante la misma consulta preanestésica que genera los datos de entrada al modelo, puede existir un elemento de circularidad: el modelo estaría aprendiendo una decisión ya tomada por el anestesiólogo, más que información adicional sobre el riesgo del paciente.
 
 ---
 
 ### 4.2 `Tipo de anestesia propuesta_raquidea` (importancia: 0.034) — Segundo predictor
 
-La anestesia raquídea (espinal) se usa para procedimientos en miembros inferiores y abdomen bajo: cesáreas, cirugías ortopédicas de cadera/rodilla, herniorrafias, etc. Tiene características de riesgo específicas:
-- Es una técnica regional que evita los riesgos de la intubación endotraqueal.
-- Los pacientes que reciben raquídea tienen perfiles de riesgo distintos a los de anestesia general.
-- Las complicaciones de la raquídea son diferentes a las de la anestesia general.
-
-Al igual que con la sedación, el modelo usa la raquídea como proxy del tipo de procedimiento y su perfil de riesgo asociado.
+La anestesia raquídea se utiliza para procedimientos en miembros inferiores y abdomen bajo: cesáreas, cirugías ortopédicas de cadera y rodilla, herniorrafias, entre otros. Es una técnica regional que evita los riesgos propios de la intubación endotraqueal, y los pacientes que la reciben tienen perfiles de riesgo clínicamente distintos a los de la anestesia general. Al igual que con la sedación, el modelo emplea la anestesia raquídea como proxy del tipo de procedimiento y del perfil de riesgo perioperatorio asociado.
 
 ---
 
@@ -106,9 +122,7 @@ Similar a la raquídea pero para procedimientos más prolongados y con infusión
 
 ### 4.4 `Edad` (importancia: 0.0069) — Cuarta feature más importante
 
-La edad es la variable continua más importante. Es el predictor clínico más intuitivo del riesgo perioperatorio: a mayor edad, mayor prevalencia de comorbilidades, menor reserva fisiológica y mayor riesgo de complicaciones.
-
-Sin embargo, el análisis de subgrupos (Enfoque B) mostró que el AUC varía poco entre grupos de edad (0.744–0.762). Esto significa que la edad aporta información al modelo pero no es la fuente principal de sus errores ni de sus aciertos.
+La edad es la variable continua más influyente y el predictor clínico más intuitivo del riesgo perioperatorio: a mayor edad, mayor prevalencia de comorbilidades, menor reserva fisiológica y mayor riesgo de complicaciones. Sin embargo, el análisis de subgrupos (Enfoque B) muestra que el AUC varía poco entre grupos etarios (0.744–0.762), lo que indica que la edad aporta información al modelo pero no constituye la fuente principal de sus aciertos ni de sus errores.
 
 ---
 
@@ -136,63 +150,39 @@ El capítulo S del CIE-10 incluye traumatismos, fracturas y lesiones. Estos paci
 
 ## 5. Patrón global de la explicabilidad: ¿qué está aprendiendo el modelo?
 
-Al analizar el conjunto de las 20 features más importantes, emerge un patrón claro:
+Del análisis conjunto de las 20 features más importantes emerge un patrón consistente. El modelo aprende principalmente el tipo de anestesia propuesta (proxy de complejidad del procedimiento), la severidad del procedimiento, la severidad y tipo del diagnóstico (por capítulo CIE-10) y, en menor medida, variables demográficas y de examen como Edad, Hemoglobina y Sexo.
 
-**El modelo aprende principalmente:**
-1. **El tipo de anestesia propuesta** (features 1, 2, 3, 10) — proxy de complejidad del procedimiento.
-2. **La severidad del procedimiento** (features 5, 8, 11, 12, 13) — complejidad directa.
-3. **La severidad del diagnóstico** (features 9, 14, 18) — gravedad de la condición base.
-4. **El tipo de diagnóstico** (features 7, 15, 16, 20) — capítulo CIE-10.
-5. **Variables demográficas y de examen** (features 4, 6, 19) — Edad, Hemoglobina, Sexo.
-
-**Notablemente ausentes de las top 20:**
-- HTA (`Antecedentes cardiovasculares_hta`) — aparece en posición 64 del ranking de selección
-- Diabetes (`Antecedente endocrinológicos_diabetes`) — debajo del umbral de selección
-- EPOC, insuficiencia renal, obesidad — no en top 20
-- Mallampati — posición 58 en el ranking
-
-**Conclusión:** El modelo predice principalmente en función de QUÉ se va a hacer (procedimiento y diagnóstico) más que en función del estado clínico del paciente. Las comorbilidades que una valoración preanestésica evalúa específicamente (HTA, diabetes, función cardíaca, respiratoria) no son los predictores dominantes.
-
-Esto es consistente con el análisis de subgrupos del Enfoque B, donde los pacientes endocrinológicos (AUC=0.54) y cardiovasculares (FN rate=24%) son los subgrupos con peor rendimiento.
+Están notablemente ausentes de las primeras posiciones las comorbilidades que una valoración preanestésica formal evalúa de forma específica: HTA aparece en la posición 64 del ranking de selección; diabetes queda por debajo del umbral de selección; EPOC, insuficiencia renal y obesidad no figuran en el top 20; y la escala de Mallampati ocupa la posición 58. El modelo predice fundamentalmente en función de qué procedimiento se va a realizar, más que del estado clínico del paciente. Esto es coherente con los hallazgos del Enfoque B, donde los pacientes endocrinológicos (AUC=0.54) y cardiovasculares (tasa de FN del 24%) presentan el peor rendimiento — son precisamente los subgrupos donde las comorbilidades deberían tener mayor relevancia predictiva pero tienen señal débil en el modelo actual.
 
 ---
 
 ## 6. Explicabilidad local — Análisis por casos
 
-Además de la importancia global, se calcula la importancia local para casos individuales. El archivo `explainability_cases_{modelo}.csv` contiene, para cada paciente del test set, qué features contribuyeron más a que el modelo le asignara esa probabilidad.
+Además de la importancia global, se calcula la importancia local para casos individuales. El archivo `explainability_cases_{modelo}.csv` contiene, para cada paciente seleccionado del test set, qué features contribuyeron más a que el modelo le asignara esa probabilidad.
 
-Esta información es útil para:
-- Explicar a un médico por qué el modelo marcó a un paciente específico como de alto riesgo.
-- Identificar si la predicción tiene una justificación clínica coherente o si parece arbitraria.
-- Detectar casos donde el modelo se apoya en features inesperadas (potencial señal de problema).
+**Cómo se seleccionan los casos:** Por defecto se eligen hasta 10 casos por grupo clínico (TP, FN, FP, TN) usando la columna `case_type`. Los archivos incluyen:
+- `case_index`: índice original del DataFrame en el test set.
+- `case_type`: clasificación clínica (TP/FN/FP/TN).
+- Una columna por feature con la contribución SHAP a la probabilidad final.
+
+**Visualizaciones derivadas:**
+- `output/v2/reports/shap/{target}/shap_beeswarm_{modelo}.png` — Beeswarm SHAP estándar para el modelo: cada punto es un paciente, eje X es la contribución SHAP, color por valor de la feature.
+- `output/v2/reports/shap/{target}/fn_waterfall/` — Waterfall por paciente FN, mostrando la "ruta" de decisión del modelo desde el valor base hasta la probabilidad final.
+
+Esta información permite explicar a un clínico por qué el modelo marcó a un paciente específico como de alto riesgo, verificar si la predicción tiene una justificación clínicamente coherente y detectar casos en los que el modelo se apoya en features inesperadas — posible indicador de problemas metodológicos. Para un análisis **agregado** por grupo clínico que identifique qué distingue sistemáticamente a los falsos negativos de los verdaderos positivos, ver [07-shap-grupos.md](07-shap-grupos.md).
 
 ---
 
 ## 7. Implicaciones para el despliegue clínico
 
-### 7.1 Transparencia necesaria
+### 7.1 Requisitos de transparencia
 
-Antes de desplegar el modelo en producción, se debe poder responder a preguntas como:
-- "¿Por qué este paciente fue marcado?" → Requiere explicación local por caso.
-- "¿El modelo no discrimina por sexo o raza?" → Requiere análisis de equidad por subgrupo.
-- "¿Es coherente con el juicio clínico?" → Requiere validación con anestesiólogos.
+Antes de desplegar el modelo en producción, el equipo clínico debe poder responder con fundamento a las siguientes preguntas: por qué el modelo marcó a un paciente específico (requiere explicación local por caso), si el modelo discrimina por sexo u otras características protegidas (requiere análisis de equidad por subgrupo) y si sus predicciones son coherentes con el juicio clínico (requiere validación con anestesiólogos experimentados).
 
 ### 7.2 Limitaciones identificadas
 
-1. **El modelo predice complejidad del procedimiento más que riesgo del paciente.** Un modelo que simplemente mira el tipo de procedimiento y anestesia propuesta podría aproximar el 80% del rendimiento del modelo de ML. El valor añadido real está en la integración de comorbilidades, examen físico y laboratorios — que actualmente tienen señal débil.
-
-2. **Los pacientes de alto riesgo médico son los menos detectados.** Pacientes endocrinológicos, cardiovasculares y de trauma tienen las peores métricas, precisamente los subgrupos que más se benefician de valoración formal.
-
-3. **La hemoglobina puede estar siendo usada como indicador de "dato ausente".** Si el modelo aprende "hemoglobina baja = dato ausente = perfil específico de paciente", la feature puede ser un artefacto del proceso de limpieza más que información clínica real.
+El análisis de explicabilidad expone tres limitaciones relevantes para el despliegue. Primero, el modelo predice complejidad del procedimiento más que riesgo del paciente: un modelo que simplemente observe el tipo de procedimiento y la anestesia propuesta podría aproximar el 80% del rendimiento del modelo de ML. El valor diferencial reside en la integración de comorbilidades, examen físico y laboratorios, que en la versión actual tienen señal débil. Segundo, los pacientes de mayor riesgo médico — endocrinológicos, cardiovasculares y de trauma — son precisamente los que el modelo detecta con menor fiabilidad, aunque son también los que más se beneficiarían de una valoración formal. Tercero, la hemoglobina puede estar siendo utilizada como indicador de dato ausente más que como valor clínico real: su media de 4.14 g/dl en el dataset limpio es biológicamente incompatible con los rangos normales (12–17 g/dl), lo que sugiere un problema de parseo.
 
 ### 7.3 Recomendaciones para la siguiente iteración
 
-Basado en el análisis de explicabilidad:
-
-1. **Investigar y corregir el parseo de hemoglobina** — el valor medio de 4.14 g/dl es incoherente con valores clínicos normales.
-
-2. **Enriquecer con features de comorbilidades más detalladas** — en lugar de flags binarios ("tiene diabetes sí/no"), incluir métricas de control (HbA1c para diabetes, creatinina para función renal, FEVI para función cardíaca).
-
-3. **Redefinir el target** hacia eventos donde las comorbilidades del paciente son predictores más fuertes — `flag_hospitalizacion_no_anticipada`, `flag_glucometria_anormal`, `flag_interconsultas` — como sugiere el Enfoque C.
-
-4. **Considerar modelos separados por tipo de procedimiento** — un modelo para procedimientos de alta complejidad y otro para procedimientos menores, permitiendo que cada uno aprenda las señales específicas de su subpoblación.
+El análisis de explicabilidad fundamenta cuatro recomendaciones concretas para iteraciones futuras. Primero, investigar y corregir el parseo de hemoglobina, cuyo valor medio de 4.14 g/dl es incoherente con valores clínicos normales. Segundo, enriquecer las features de comorbilidades con indicadores cuantitativos de control en lugar de flags binarios: HbA1c para diabetes, creatinina para función renal y FEVI para función cardíaca, entre otros. Tercero, redefinir el target hacia eventos donde las comorbilidades del paciente son predictores más fuertes — `flag_hospitalizacion_no_anticipada`, `flag_glucometria_anormal`, `flag_interconsultas` —, como sugiere el Enfoque C. Cuarto, considerar el entrenamiento de modelos separados por tipo de procedimiento, permitiendo que cada submodelo aprenda las señales específicas de riesgo de su subpoblación.
