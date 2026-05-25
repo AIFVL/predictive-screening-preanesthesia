@@ -5,6 +5,7 @@ import { DynamicForm } from "./components/DynamicForm";
 import { ExcelUploader } from "./components/ExcelUploader";
 import { ModelSelector } from "./components/ModelSelector";
 import { PredictionResult } from "./components/PredictionResult";
+import { ShapExplanation } from "./components/ShapExplanation";
 import { TargetSelector } from "./components/TargetSelector";
 import type {
   ModelSchema,
@@ -25,6 +26,7 @@ export default function App() {
   const [mode, setMode] = useState<InputMode>("manual");
 
   const [singlePrediction, setSinglePrediction] = useState<PredictionResponse | null>(null);
+  const [singleFeatures, setSingleFeatures] = useState<Record<string, number | null> | null>(null);
   const [batchPredictions, setBatchPredictions] = useState<PredictionResponse[] | null>(null);
   const [batchInputs, setBatchInputs] = useState<Record<string, number | null>[] | null>(null);
 
@@ -69,6 +71,7 @@ export default function App() {
 
   const resetResults = () => {
     setSinglePrediction(null);
+    setSingleFeatures(null);
     setBatchPredictions(null);
     setBatchInputs(null);
     setPredictError(null);
@@ -81,6 +84,7 @@ export default function App() {
     try {
       const result = await api.predict(selectedTarget, selectedAlgorithm, features);
       setSinglePrediction(result);
+      setSingleFeatures(features);
     } catch (err) {
       const e = err as ApiClientError;
       setPredictError(
@@ -99,6 +103,7 @@ export default function App() {
       if (rows.length === 1) {
         const result = await api.predict(selectedTarget, selectedAlgorithm, rows[0]);
         setSinglePrediction(result);
+        setSingleFeatures(rows[0]);
         setBatchInputs(rows);
         setBatchPredictions([result]);
       } else {
@@ -210,16 +215,26 @@ export default function App() {
               title="Resultado"
               description="Probabilidad calibrada y nivel de riesgo estimado por el modelo seleccionado."
             >
-              {singlePrediction && !batchPredictions && (
-                <PredictionResult result={singlePrediction} />
-              )}
-              {batchPredictions && batchInputs && schema && (
-                <BatchPredictionResults
-                  schema={schema}
-                  inputs={batchInputs}
-                  predictions={batchPredictions}
-                />
-              )}
+              <div className="space-y-4">
+                {singlePrediction && !batchPredictions && (
+                  <PredictionResult result={singlePrediction} />
+                )}
+                {batchPredictions && batchInputs && schema && (
+                  <BatchPredictionResults
+                    schema={schema}
+                    inputs={batchInputs}
+                    predictions={batchPredictions}
+                  />
+                )}
+                {/* Explicabilidad SHAP — sólo para predicciones individuales */}
+                {singlePrediction && singleFeatures && selectedTarget && selectedAlgorithm && (
+                  <ShapExplanation
+                    target={selectedTarget}
+                    algorithm={selectedAlgorithm}
+                    features={singleFeatures}
+                  />
+                )}
+              </div>
             </Section>
           ) : null}
         </div>

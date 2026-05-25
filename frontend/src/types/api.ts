@@ -83,3 +83,16 @@ export interface BatchPredictResponse {
   predictions: PredictionResponse[];
   n: number;
 }
+
+export interface ShapContribution {
+  feature: string;
+  value: number | null;
+  shap_value: number;
+}
+
+export interface ExplainResponse {
+  contributions: ShapContribution[];
+  top_n: number;
+  algorithm: string;
+  model_id: string;
+}

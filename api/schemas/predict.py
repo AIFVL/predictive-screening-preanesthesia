@@ -75,9 +75,24 @@ def build_batch_predict_request_validator(manifest: ModelManifest) -> type[BaseM
     return BatchPredictRequestModel
 
 
+class ShapContributionSchema(BaseModel):
+    feature: str
+    value: float | None
+    shap_value: float
+
+
+class ExplainResponse(BaseModel):
+    contributions: list[ShapContributionSchema]
+    top_n: int
+    algorithm: str
+    model_id: str
+
+
 __all__ = [
     "PredictResponse",
     "BatchPredictResponse",
+    "ExplainResponse",
+    "ShapContributionSchema",
     "build_predict_request_validator",
     "build_batch_predict_request_validator",
     "ValidationError",

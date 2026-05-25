@@ -10,10 +10,13 @@ from api.domain.registry import ModelRegistry
 from api.schemas.common import error_response, success_response
 from api.schemas.predict import (
     BatchPredictResponse,
+    ExplainResponse,
     PredictResponse,
+    ShapContributionSchema,
     build_batch_predict_request_validator,
     build_predict_request_validator,
 )
+from api.services.explainer import explain_one
 from api.services.predictor import predict_batch, predict_one
 
 logger = get_logger("router.predict")
@@ -81,6 +84,67 @@ async def predict(target: str, algorithm: str, request: Request) -> dict:
         calibrated=result.calibrated,
         prevalence_train=manifest.prevalence.get("train"),
         warnings=result.warnings,
+    )
+    return success_response(response.model_dump(mode="json"), model_id=manifest.model_id)
+
+
+@router.post("/{target}/{algorithm}/explain")
+async def explain(target: str, algorithm: str, request: Request) -> dict:
+    """Devuelve las top-N contribuciones SHAP para una observación."""
+    registry: ModelRegistry = request.app.state.registry
+    manifest = _require_manifest(registry, target, algorithm)
+
+    body = await request.json()
+
+    # Extraer top_n antes de validar: el validador tiene extra="forbid" y
+    # rechazaría cualquier campo que no sea "features".
+    top_n = int(body.get("top_n", 10))
+    top_n = max(1, min(top_n, len(manifest.feature_names)))
+    validate_body = {k: v for k, v in body.items() if k != "top_n"}
+
+    Validator = _get_validator_single(manifest)
+    try:
+        validated = Validator.model_validate(validate_body)
+    except ValidationError as exc:
+        first = exc.errors()[0]
+        field_path = ".".join(str(p) for p in first.get("loc", ()))
+        return error_response(
+            code="invalid_input",
+            message=first.get("msg", "Input inválido"),
+            field=field_path or None,
+            model_id=manifest.model_id,
+        )
+
+    features_dict = validated.features.model_dump()
+
+    try:
+        contributions = explain_one(features_dict, manifest, registry, top_n=top_n)
+    except ImportError:
+        return error_response(
+            code="shap_not_available",
+            message="La biblioteca SHAP no está instalada en el servidor.",
+            model_id=manifest.model_id,
+        )
+    except Exception as exc:
+        logger.exception(f"Error al calcular SHAP para {target}/{algorithm}: {exc}")
+        return error_response(
+            code="explain_error",
+            message=f"No fue posible calcular la explicabilidad: {exc}",
+            model_id=manifest.model_id,
+        )
+
+    response = ExplainResponse(
+        contributions=[
+            ShapContributionSchema(
+                feature=c.feature,
+                value=c.value,
+                shap_value=c.shap_value,
+            )
+            for c in contributions
+        ],
+        top_n=top_n,
+        algorithm=manifest.algorithm,
+        model_id=manifest.model_id,
     )
     return success_response(response.model_dump(mode="json"), model_id=manifest.model_id)
 

@@ -1,6 +1,7 @@
 import type {
   ApiEnvelope,
   BatchPredictResponse,
+  ExplainResponse,
   ModelSchema,
   ModelSummary,
   PredictionResponse,
@@ -64,6 +65,16 @@ export const api = {
     request<BatchPredictResponse>(
       `/models/${target}/${algorithm}/predict/batch`,
       { method: "POST", body: JSON.stringify({ items }) },
+    ),
+  explain: (
+    target: string,
+    algorithm: string,
+    features: Record<string, number | null>,
+    topN = 10,
+  ) =>
+    request<ExplainResponse>(
+      `/models/${target}/${algorithm}/explain`,
+      { method: "POST", body: JSON.stringify({ features, top_n: topN }) },
     ),
 };
 
