@@ -277,6 +277,8 @@ ANTECEDENTES_COLS = [
 def clean_antecedente(df: pd.DataFrame, column: str) -> pd.DataFrame:
     def clean(text):
         text = standardize_text(text, ignore_chars=[","])
+        if pd.isna(text):
+            return "negativo"
         text = text.replace(";", ",")
         return resolve_contradictory_term(text, ",")
 

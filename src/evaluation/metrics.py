@@ -19,6 +19,8 @@ from src.utils.logger import get_logger
 
 logger = get_logger("evaluation.metrics")
 
+_BOOTSTRAP_METRICS = ("ROC_AUC", "F2", "Recall", "Precision")
+
 
 def compute_classification_metrics(
     y_true,
@@ -50,6 +52,58 @@ def compute_classification_metrics(
         "FN_Rate": fn_rate,
         "Threshold": float(threshold),
     }
+
+
+def bootstrap_confidence_intervals(
+    y_true,
+    y_proba,
+    threshold: float,
+    n_bootstrap: int = 1000,
+    alpha: float = 0.05,
+    seed: int = 42,
+) -> dict[str, dict[str, float]]:
+    """
+    Estima intervalos de confianza (1-alpha) para ROC_AUC, F2, Recall y Precision
+    mediante bootstrap percentil sobre el conjunto de prueba.
+
+    Retorna dict: {metric: {"mean": ..., "ci_lower": ..., "ci_upper": ...}}
+    """
+    rng = np.random.default_rng(seed)
+    y_true_arr = np.asarray(y_true)
+    y_proba_arr = np.asarray(y_proba)
+    n = len(y_true_arr)
+
+    samples: dict[str, list[float]] = {m: [] for m in _BOOTSTRAP_METRICS}
+
+    for _ in range(n_bootstrap):
+        idx = rng.integers(0, n, size=n)
+        yt = y_true_arr[idx]
+        yp = y_proba_arr[idx]
+
+        if len(np.unique(yt)) < 2:
+            continue
+
+        yhat = (yp >= threshold).astype(int)
+        samples["ROC_AUC"].append(float(roc_auc_score(yt, yp)))
+        samples["F2"].append(float(fbeta_score(yt, yhat, beta=2, zero_division=0)))
+        samples["Recall"].append(float(recall_score(yt, yhat, zero_division=0)))
+        samples["Precision"].append(float(precision_score(yt, yhat, zero_division=0)))
+
+    lo, hi = alpha / 2, 1 - alpha / 2
+    result: dict[str, dict[str, float]] = {}
+    for metric, vals in samples.items():
+        arr = np.array(vals)
+        result[metric] = {
+            "mean": float(arr.mean()),
+            "ci_lower": float(np.quantile(arr, lo)),
+            "ci_upper": float(np.quantile(arr, hi)),
+            "n_valid_samples": len(vals),
+        }
+        logger.debug(
+            f"Bootstrap {metric}: {result[metric]['mean']:.3f} "
+            f"[{result[metric]['ci_lower']:.3f}, {result[metric]['ci_upper']:.3f}]"
+        )
+    return result
 
 
 def find_optimal_threshold(

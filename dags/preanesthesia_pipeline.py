@@ -221,7 +221,7 @@ def make_task_evaluate_model(target_name: str, model_key: str):
         import pandas as pd
         from src.utils.io import read_parquet, read_json, write_json
         from src.models.trainer import load_model
-        from src.evaluation.metrics import compute_classification_metrics
+        from src.evaluation.metrics import compute_classification_metrics, bootstrap_confidence_intervals
         from src.evaluation.subgroups import cross_validate_model
 
         proc_dir = cfg.output_path() / "data_processed"
@@ -248,12 +248,15 @@ def make_task_evaluate_model(target_name: str, model_key: str):
             optimize_for=cfg.optimize_for,
             recall_min=cfg.recall_min,
         )
+        bootstrap_ci = bootstrap_confidence_intervals(y_test, y_proba, threshold)
 
-        write_json({"test": test_metrics, "cv": cv_metrics},
+        write_json({"test": test_metrics, "cv": cv_metrics, "bootstrap_ci": bootstrap_ci},
                    models_dir / f"{model_key}_eval.json")
+        auc_ci = bootstrap_ci.get("ROC_AUC", {})
         logger.info(
             f"[{target_name}/{model_key}] Test F2={test_metrics['F2']:.3f} | "
-            f"CV F2={cv_metrics['F2_mean']:.3f}±{cv_metrics['F2_std']:.3f}"
+            f"CV F2={cv_metrics['F2_mean']:.3f}±{cv_metrics['F2_std']:.3f} | "
+            f"AUC 95% CI [{auc_ci.get('ci_lower', 0):.3f}, {auc_ci.get('ci_upper', 0):.3f}]"
         )
     _task.__name__ = f"task_evaluate_{model_key}_{target_name}"
     return _task

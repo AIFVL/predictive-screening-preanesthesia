@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
+import numpy as np
 import pandas as pd
 
 
@@ -51,8 +52,8 @@ def standardize_text(
     ignore_chars: list = None,
     replace_char: str = "",
 ) -> str:
-    if pd.isna(text):
-        return text
+    if pd.isna(text) or (isinstance(text, str) and text.strip().lower() == "nan"):
+        return np.nan
     result = str(text)
     if remove_accents_flag:
         result = remove_accents(result)
@@ -72,6 +73,7 @@ def remove_stopwords_es(text: str, extra_stopwords: set = None) -> str:
         return ""
     import nltk
     from nltk.corpus import stopwords
+    nltk.download("stopwords", quiet=True)
     tokens = re.findall(r"\b\w+\b", text.lower())
     stop_words = set(stopwords.words("spanish"))
     if extra_stopwords:
