@@ -12,7 +12,8 @@ RUN apt-get update \
 
 WORKDIR /build
 COPY api/requirements.txt /build/requirements.txt
-RUN pip install --user --no-cache-dir -r /build/requirements.txt
+RUN pip install --user --no-cache-dir -r /build/requirements.txt \
+    && python -m nltk.downloader -d /root/nltk_data stopwords
 
 # ────────────────────────────────────────────────────────────────── runtime
 FROM python:3.11-slim AS runtime
@@ -31,8 +32,13 @@ USER api
 WORKDIR /app
 
 COPY --from=builder --chown=api:api /root/.local /home/api/.local
+COPY --from=builder --chown=api:api /root/nltk_data /home/api/nltk_data
+
+ENV NLTK_DATA=/home/api/nltk_data
 
 COPY --chown=api:api api/ /app/api/
+COPY --chown=api:api src/ /app/src/
+COPY --chown=api:api config/ /app/config/
 
 EXPOSE 8000
 

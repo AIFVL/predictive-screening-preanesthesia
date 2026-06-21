@@ -221,8 +221,7 @@
     "brier": 0.09835373592813132,
     "accuracy": 0.6467129877071085
   },
-  "warnings": [
-    "generated_by_backfill"
-  ],
-  "created_at": "2026-05-02T05:41:09.650323+00:00"
+  "warnings": [],
+  "created_at": "2026-06-21T17:34:37.571575+00:00",
+  "raw_input_schema": null
 }

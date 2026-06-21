@@ -1,27 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import type { PatientData } from "../api/client";
 import type { ModelSchema } from "../types/api";
 
 interface Props {
   schema: ModelSchema;
   loading: boolean;
-  onSubmit: (features: Record<string, number | null>) => void;
+  onSubmit: (patient: PatientData) => void;
 }
 
-function isIntDtype(dtype: string): boolean {
+function isNumericDtype(dtype: string): boolean {
   const d = dtype.toLowerCase();
-  return d.startsWith("int") || d.startsWith("uint") || d.startsWith("bool");
-}
-
-function parseValue(raw: string, dtype: string): number | null {
-  if (raw === "") return null;
-  const n = isIntDtype(dtype) ? parseInt(raw, 10) : parseFloat(raw);
-  return Number.isFinite(n) ? n : null;
-}
-
-function formatMedianForPlaceholder(median: number, dtype: string): string {
-  if (isIntDtype(dtype)) return String(Math.trunc(median));
-  // Máximo 4 decimales; sin ceros finales innecesarios.
-  return parseFloat(median.toFixed(4)).toString();
+  return d.startsWith("int") || d.startsWith("uint") || d.startsWith("float") || d.startsWith("bool");
 }
 
 export function DynamicForm({ schema, loading, onSubmit }: Props) {
@@ -36,7 +25,11 @@ export function DynamicForm({ schema, loading, onSubmit }: Props) {
   const filteredFeatures = useMemo(() => {
     const q = filter.trim().toLowerCase();
     if (!q) return schema.features;
-    return schema.features.filter((f) => f.name.toLowerCase().includes(q));
+    return schema.features.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        (f.description?.toLowerCase().includes(q) ?? false),
+    );
   }, [schema.features, filter]);
 
   const filledCount = Object.values(values).filter((v) => v !== "").length;
@@ -44,18 +37,26 @@ export function DynamicForm({ schema, loading, onSubmit }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const features: Record<string, number | null> = {};
+    const patient: PatientData = {};
     for (const f of schema.features) {
       const raw = values[f.name];
-      features[f.name] = raw == null || raw === "" ? null : parseValue(raw, f.dtype);
+      if (raw == null || raw === "") {
+        patient[f.name] = null;
+      } else if (isNumericDtype(f.dtype)) {
+        const n = parseFloat(raw);
+        patient[f.name] = Number.isFinite(n) ? n : null;
+      } else {
+        patient[f.name] = raw.trim() || null;
+      }
     }
-    onSubmit(features);
+    onSubmit(patient);
   };
 
-  const fillAllWithMedians = () => {
+  const loadExample = () => {
+    if (!schema.input_example) return;
     const next: Record<string, string> = {};
-    for (const f of schema.features) {
-      next[f.name] = f.median != null ? String(f.median) : "";
+    for (const [key, val] of Object.entries(schema.input_example)) {
+      if (val != null) next[key] = String(val);
     }
     setValues(next);
   };
@@ -67,17 +68,11 @@ export function DynamicForm({ schema, loading, onSubmit }: Props) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-fvl-700">
-            Variables clínicas del paciente
+            Datos clínicos del paciente
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Las variables sin valor se imputan automáticamente según la
-            estrategia del modelo
-            <span className="ml-1 text-slate-500">
-              (estrategia: <code className="rounded bg-fvl-surface px-1">{schema.imputation.strategy}</code>
-              {schema.imputation.value !== undefined && (
-                <>, valor: <code className="rounded bg-fvl-surface px-1">{schema.imputation.value}</code></>
-              )}).
-            </span>
+            Ingrese los valores disponibles. Los campos vacíos se imputan
+            automáticamente por el modelo.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -104,13 +99,15 @@ export function DynamicForm({ schema, loading, onSubmit }: Props) {
             ⌕
           </span>
         </div>
-        <button
-          type="button"
-          onClick={fillAllWithMedians}
-          className="rounded-lg border border-fvl-line bg-white px-4 py-2.5 text-sm font-medium text-fvl-700 transition hover:border-fvl-mint-border hover:bg-fvl-mint/40"
-        >
-          Cargar valores medianos
-        </button>
+        {schema.input_example && (
+          <button
+            type="button"
+            onClick={loadExample}
+            className="rounded-lg border border-fvl-line bg-white px-4 py-2.5 text-sm font-medium text-fvl-700 transition hover:border-fvl-mint-border hover:bg-fvl-mint/40"
+          >
+            Cargar ejemplo
+          </button>
+        )}
         <button
           type="button"
           onClick={clearAll}
@@ -120,36 +117,35 @@ export function DynamicForm({ schema, loading, onSubmit }: Props) {
         </button>
       </div>
 
-      <div className="grid max-h-[460px] gap-4 overflow-y-auto rounded-xl border border-fvl-line bg-fvl-surface p-5 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredFeatures.map((f) => (
-          <div key={f.name} className="space-y-1">
-            <label
-              htmlFor={`f-${f.name}`}
-              className="block text-xs font-semibold text-fvl-700"
-              title={f.dtype}
-            >
-              {f.name}
-              <span className="ml-1 text-[10px] font-normal text-slate-400">
-                ({f.dtype})
-              </span>
-            </label>
-            <input
-              id={`f-${f.name}`}
-              type="number"
-              step={isIntDtype(f.dtype) ? "1" : "any"}
-              value={values[f.name] ?? ""}
-              placeholder={
-                f.median != null
-                  ? `mediana: ${formatMedianForPlaceholder(f.median, f.dtype)}`
-                  : "—"
-              }
-              onChange={(e) =>
-                setValues((prev) => ({ ...prev, [f.name]: e.target.value }))
-              }
-              className="w-full rounded-md border border-fvl-line bg-white px-3 py-1.5 text-sm tabular-nums shadow-sm focus:border-fvl-lime focus:outline-none focus:ring-2 focus:ring-fvl-lime/30"
-            />
-          </div>
-        ))}
+      <div className="grid max-h-[520px] gap-4 overflow-y-auto rounded-xl border border-fvl-line bg-fvl-surface p-5 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredFeatures.map((f) => {
+          const isNumeric = isNumericDtype(f.dtype);
+          return (
+            <div key={f.name} className="space-y-1">
+              <label
+                htmlFor={`f-${f.name}`}
+                className="block text-xs font-semibold text-fvl-700"
+                title={f.description ?? f.dtype}
+              >
+                {f.name}
+              </label>
+              {f.description && (
+                <p className="text-[10px] text-slate-400 leading-tight">{f.description}</p>
+              )}
+              <input
+                id={`f-${f.name}`}
+                type={isNumeric ? "number" : "text"}
+                step={isNumeric ? "any" : undefined}
+                value={values[f.name] ?? ""}
+                placeholder={isNumeric ? "numérico" : "texto libre"}
+                onChange={(e) =>
+                  setValues((prev) => ({ ...prev, [f.name]: e.target.value }))
+                }
+                className="w-full rounded-md border border-fvl-line bg-white px-3 py-1.5 text-sm shadow-sm focus:border-fvl-lime focus:outline-none focus:ring-2 focus:ring-fvl-lime/30"
+              />
+            </div>
+          );
+        })}
         {filteredFeatures.length === 0 && (
           <p className="col-span-full text-sm text-slate-500">
             Ninguna variable coincide con la búsqueda.

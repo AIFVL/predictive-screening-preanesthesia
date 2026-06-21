@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { ApiClientError, api } from "../api/client";
+import { ApiClientError, api, type PatientData } from "../api/client";
 import type { ExplainResponse, ShapContribution } from "../types/api";
 
 interface Props {
   target: string;
   algorithm: string;
-  features: Record<string, number | null>;
+  patient: PatientData;
 }
 
 /** Formatea el nombre de la variable para que sea más legible */
@@ -65,7 +65,7 @@ function ContributionBar({ contribution, maxAbs }: BarProps) {
   );
 }
 
-export function ShapExplanation({ target, algorithm, features }: Props) {
+export function ShapExplanation({ target, algorithm, patient }: Props) {
   const [data, setData] = useState<ExplainResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export function ShapExplanation({ target, algorithm, features }: Props) {
     setLoading(true);
     setError(null);
     api
-      .explain(target, algorithm, features, topN)
+      .explain(target, algorithm, patient, topN)
       .then((res) => setData(res))
       .catch((e: ApiClientError) => setError(e.message))
       .finally(() => setLoading(false));

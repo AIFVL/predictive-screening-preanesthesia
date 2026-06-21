@@ -1,6 +1,5 @@
 import type {
   ApiEnvelope,
-  BatchPredictResponse,
   ExplainResponse,
   ModelSchema,
   ModelSummary,
@@ -47,34 +46,27 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body.data;
 }
 
+export type PatientData = Record<string, string | number | null>;
+
 export const api = {
   listTargets: () => request<TargetInfo[]>("/targets"),
   listModels: () => request<ModelSummary[]>("/models"),
   getSchema: (target: string, algorithm: string) =>
     request<ModelSchema>(`/models/${target}/${algorithm}/schema`),
-  predict: (target: string, algorithm: string, features: Record<string, number | null>) =>
+  predict: (target: string, algorithm: string, patient: PatientData) =>
     request<PredictionResponse>(
       `/models/${target}/${algorithm}/predict`,
-      { method: "POST", body: JSON.stringify({ features }) },
-    ),
-  predictBatch: (
-    target: string,
-    algorithm: string,
-    items: Record<string, number | null>[],
-  ) =>
-    request<BatchPredictResponse>(
-      `/models/${target}/${algorithm}/predict/batch`,
-      { method: "POST", body: JSON.stringify({ items }) },
+      { method: "POST", body: JSON.stringify({ patient }) },
     ),
   explain: (
     target: string,
     algorithm: string,
-    features: Record<string, number | null>,
+    patient: PatientData,
     topN = 10,
   ) =>
     request<ExplainResponse>(
       `/models/${target}/${algorithm}/explain`,
-      { method: "POST", body: JSON.stringify({ features, top_n: topN }) },
+      { method: "POST", body: JSON.stringify({ patient, top_n: topN }) },
     ),
 };
 

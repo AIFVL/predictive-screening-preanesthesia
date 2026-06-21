@@ -1,47 +1,24 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import ValidationError
+from pathlib import Path
 
-from api.core.config import get_settings
+from fastapi import APIRouter, HTTPException, Request
+
 from api.core.logging import get_logger
 from api.domain.manifest import ModelManifest
 from api.domain.registry import ModelRegistry
 from api.schemas.common import error_response, success_response
 from api.schemas.predict import (
-    BatchPredictResponse,
     ExplainResponse,
     PredictResponse,
     ShapContributionSchema,
-    build_batch_predict_request_validator,
-    build_predict_request_validator,
 )
+from api.services.clinical_preprocessor import preprocess_raw
 from api.services.explainer import explain_one
-from api.services.predictor import predict_batch, predict_one
+from api.services.predictor import predict_one
 
 logger = get_logger("router.predict")
 router = APIRouter(prefix="/models", tags=["predict"])
-
-_validator_cache_single: dict[tuple[str, str], type] = {}
-_validator_cache_batch: dict[tuple[str, str], type] = {}
-
-
-def _get_validator_single(manifest: ModelManifest) -> type:
-    key = (manifest.model_id, str(manifest.model_path))
-    cached = _validator_cache_single.get(key)
-    if cached is None:
-        cached = build_predict_request_validator(manifest)
-        _validator_cache_single[key] = cached
-    return cached
-
-
-def _get_validator_batch(manifest: ModelManifest) -> type:
-    key = (manifest.model_id, str(manifest.model_path))
-    cached = _validator_cache_batch.get(key)
-    if cached is None:
-        cached = build_batch_predict_request_validator(manifest)
-        _validator_cache_batch[key] = cached
-    return cached
 
 
 def _require_manifest(registry: ModelRegistry, target: str, algorithm: str) -> ModelManifest:
@@ -56,24 +33,42 @@ def _require_manifest(registry: ModelRegistry, target: str, algorithm: str) -> M
 
 @router.post("/{target}/{algorithm}/predict")
 async def predict(target: str, algorithm: str, request: Request) -> dict:
+    """
+    Acepta datos clínicos crudos (claves = nombre de columna del dataset),
+    ejecuta el pipeline completo de limpieza y enriquecimiento, y devuelve
+    la predicción calibrada.
+    """
     registry: ModelRegistry = request.app.state.registry
     manifest = _require_manifest(registry, target, algorithm)
 
     body = await request.json()
-    Validator = _get_validator_single(manifest)
-    try:
-        validated = Validator.model_validate(body)
-    except ValidationError as exc:
-        first = exc.errors()[0]
-        field_path = ".".join(str(p) for p in first.get("loc", ()))
+    patient = body.get("patient")
+    if not isinstance(patient, dict):
         return error_response(
             code="invalid_input",
-            message=first.get("msg", "Input inválido"),
-            field=field_path or None,
+            message="El campo 'patient' es requerido y debe ser un objeto JSON.",
             model_id=manifest.model_id,
         )
 
-    features_dict = validated.features.model_dump()
+    cleaning_cfg: dict = request.app.state.cleaning_cfg
+    cache_dir: Path = request.app.state.settings.cache_dir
+
+    try:
+        df = preprocess_raw(
+            patient=patient,
+            manifest=manifest,
+            cache_dir=cache_dir,
+            cleaning_cfg=cleaning_cfg,
+        )
+    except Exception as exc:
+        logger.exception(f"Error en preprocesamiento para {target}/{algorithm}: {exc}")
+        return error_response(
+            code="preprocessing_error",
+            message=f"Error al preprocesar los datos clínicos: {exc}",
+            model_id=manifest.model_id,
+        )
+
+    features_dict = df.iloc[0].to_dict()
     result = predict_one(features_dict, manifest, registry)
 
     response = PredictResponse(
@@ -90,35 +85,37 @@ async def predict(target: str, algorithm: str, request: Request) -> dict:
 
 @router.post("/{target}/{algorithm}/explain")
 async def explain(target: str, algorithm: str, request: Request) -> dict:
-    """Devuelve las top-N contribuciones SHAP para una observación."""
+    """
+    Devuelve las top-N contribuciones SHAP para una observación clínica cruda.
+    Body: { "patient": {...}, "top_n": 10 }
+    """
     registry: ModelRegistry = request.app.state.registry
     manifest = _require_manifest(registry, target, algorithm)
 
     body = await request.json()
-
-    # Extraer top_n antes de validar: el validador tiene extra="forbid" y
-    # rechazaría cualquier campo que no sea "features".
-    top_n = int(body.get("top_n", 10))
-    top_n = max(1, min(top_n, len(manifest.feature_names)))
-    validate_body = {k: v for k, v in body.items() if k != "top_n"}
-
-    Validator = _get_validator_single(manifest)
-    try:
-        validated = Validator.model_validate(validate_body)
-    except ValidationError as exc:
-        first = exc.errors()[0]
-        field_path = ".".join(str(p) for p in first.get("loc", ()))
+    patient = body.get("patient")
+    if not isinstance(patient, dict):
         return error_response(
             code="invalid_input",
-            message=first.get("msg", "Input inválido"),
-            field=field_path or None,
+            message="El campo 'patient' es requerido y debe ser un objeto JSON.",
             model_id=manifest.model_id,
         )
 
-    features_dict = validated.features.model_dump()
+    top_n = int(body.get("top_n", 10))
+    top_n = max(1, min(top_n, len(manifest.feature_names)))
+
+    cleaning_cfg: dict = request.app.state.cleaning_cfg
+    cache_dir: Path = request.app.state.settings.cache_dir
 
     try:
-        contributions = explain_one(features_dict, manifest, registry, top_n=top_n)
+        contributions = explain_one(
+            patient=patient,
+            manifest=manifest,
+            registry=registry,
+            cache_dir=cache_dir,
+            cleaning_cfg=cleaning_cfg,
+            top_n=top_n,
+        )
     except ImportError:
         return error_response(
             code="shap_not_available",
@@ -147,58 +144,3 @@ async def explain(target: str, algorithm: str, request: Request) -> dict:
         model_id=manifest.model_id,
     )
     return success_response(response.model_dump(mode="json"), model_id=manifest.model_id)
-
-
-@router.post("/{target}/{algorithm}/predict/batch")
-async def predict_batch_endpoint(target: str, algorithm: str, request: Request) -> dict:
-    settings = get_settings()
-    registry: ModelRegistry = request.app.state.registry
-    manifest = _require_manifest(registry, target, algorithm)
-
-    body = await request.json()
-    Validator = _get_validator_batch(manifest)
-    try:
-        validated = Validator.model_validate(body)
-    except ValidationError as exc:
-        first = exc.errors()[0]
-        field_path = ".".join(str(p) for p in first.get("loc", ()))
-        return error_response(
-            code="invalid_input",
-            message=first.get("msg", "Input inválido"),
-            field=field_path or None,
-            model_id=manifest.model_id,
-        )
-
-    items = validated.items
-    if len(items) == 0:
-        return error_response(
-            code="empty_batch",
-            message="Batch vacío.",
-            model_id=manifest.model_id,
-        )
-    if len(items) > settings.max_batch_size:
-        return error_response(
-            code="batch_too_large",
-            message=f"Batch excede el máximo permitido ({settings.max_batch_size}).",
-            model_id=manifest.model_id,
-        )
-
-    features_list = [item.model_dump() for item in items]
-    results = predict_batch(features_list, manifest, registry)
-
-    payload = BatchPredictResponse(
-        predictions=[
-            PredictResponse(
-                predicted_class=r.predicted_class,
-                probability=r.probability,
-                threshold=r.threshold,
-                risk_level=r.risk_level,
-                calibrated=r.calibrated,
-                prevalence_train=manifest.prevalence.get("train"),
-                warnings=r.warnings,
-            )
-            for r in results
-        ],
-        n=len(results),
-    )
-    return success_response(payload.model_dump(mode="json"), model_id=manifest.model_id)

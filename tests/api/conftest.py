@@ -13,7 +13,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 def _configure_env() -> None:
     os.environ.setdefault("PROJECT_ROOT", str(PROJECT_ROOT))
     os.environ.setdefault("MODELS_DIR", str(PROJECT_ROOT / "output" / "v2" / "models"))
-    os.environ.setdefault("MAX_BATCH_SIZE", "100")
     os.environ.setdefault("LOG_LEVEL", "WARNING")
 
 
@@ -63,62 +62,41 @@ def threshold(manifest) -> float:
 
 
 @pytest.fixture
-def empty_features() -> dict:
-    return {}
-
-
-@pytest.fixture
-def low_risk_features() -> dict:
-    return {
-        "Edad": 35,
-        "Peso (Kg)": 68,
-        "Talla (cm)": 170,
-        "IMC": 23.5,
-        "Tipo de anestesia propuesta_local": 1,
-        "Tipo de anestesia propuesta_general": 0,
-        "score_proc_low_severity": 1,
-        "score_proc_high_severity": 0,
-        "score_proc_critical": 0,
-        "score_dx_critical": 0,
-        "score_dx_high_severity": 0,
-        "Examen_Hemoglobina(g/dl)": 14.2,
-        "Antecedente endocrinológicos_negativo": 1,
-        "Antecedente renales_negativo": 1,
-        "Antecedente hematológicos _negativo": 1,
-    }
-
-
-@pytest.fixture
-def high_risk_features() -> dict:
-    return {
-        "Edad": 78,
-        "Peso (Kg)": 92,
-        "Talla (cm)": 165,
-        "IMC": 33.8,
-        "Tipo de anestesia propuesta_general": 1,
-        "Tipo de anestesia propuesta_local": 0,
-        "score_proc_critical": 1,
-        "score_proc_high_severity": 1,
-        "score_proc_low_severity": 0,
-        "score_dx_critical": 1,
-        "score_dx_high_severity": 1,
-        "Examen_Hemoglobina(g/dl)": 9.1,
-    }
-
-
-def _predict_url(target: str, algorithm: str) -> str:
+def predict_url(target, algorithm) -> str:
     return f"/models/{target}/{algorithm}/predict"
 
 
-def _batch_predict_url(target: str, algorithm: str) -> str:
-    return f"/models/{target}/{algorithm}/predict/batch"
+@pytest.fixture
+def low_risk_patient() -> dict:
+    """Paciente de bajo riesgo clínico — datos crudos con claves de columna del dataset."""
+    return {
+        "Edad": 35,
+        "Sexo": "Masculino",
+        "Atención": "Electivo",
+        "Peso (Kg)": 68,
+        "Talla (cm)": 170,
+        "IMC": 23.5,
+        "Tipo de anestesia propuesta": "Local",
+        "Examen_Hemoglobina(g/dl)": 14.2,
+        "Dx Preoperatorio": "procedimiento menor electivo sin comorbilidades",
+        "Procedimiento propuesto": "biopsia de piel",
+    }
 
 
 @pytest.fixture
-def predict_url(target, algorithm) -> str:
-    return _predict_url(target, algorithm)
-
-
-@pytest.fixture
-def batch_predict_url(target, algorithm) -> str:
-    return _batch_predict_url(target, algorithm)
+def high_risk_patient() -> dict:
+    """Paciente de alto riesgo clínico — datos crudos con claves de columna del dataset."""
+    return {
+        "Edad": 78,
+        "Sexo": "Masculino",
+        "Atención": "Urgente",
+        "Peso (Kg)": 92,
+        "Talla (cm)": 165,
+        "IMC": 33.8,
+        "Tipo de anestesia propuesta": "General",
+        "Examen_Hemoglobina(g/dl)": 9.1,
+        "Dx Preoperatorio": "insuficiencia cardíaca congestiva descompensada, sepsis",
+        "Procedimiento propuesto": "laparotomía exploratoria de emergencia",
+        "Antecedentes cardiovasculares": "hipertensión arterial, fibrilación auricular",
+        "Antecedente endocrinológicos": "diabetes mellitus tipo 2 insulinorrequiriente",
+    }

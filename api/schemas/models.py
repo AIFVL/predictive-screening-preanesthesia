@@ -30,7 +30,6 @@ class FeatureSpec(BaseModel):
     name: str
     dtype: str
     required: bool
-    median: float | None
     description: str | None = None
 
 
@@ -44,8 +43,8 @@ class ModelSchema(BaseModel):
     prevalence: dict[str, Any]
     calibrated: bool
     calibration_method: str | None
-    imputation: dict[str, Any]
     warnings: list[str]
+    input_example: dict | None = None
 
 
 class ModelDetail(BaseModel):

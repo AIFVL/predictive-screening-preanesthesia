@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { ApiClientError, api, apiBaseUrl } from "./api/client";
-import { BatchPredictionResults } from "./components/BatchPredictionResults";
+import { ApiClientError, api, apiBaseUrl, type PatientData } from "./api/client";
 import { DynamicForm } from "./components/DynamicForm";
-import { ExcelUploader } from "./components/ExcelUploader";
 import { ModelSelector } from "./components/ModelSelector";
 import { PredictionResult } from "./components/PredictionResult";
 import { ShapExplanation } from "./components/ShapExplanation";
@@ -14,8 +12,6 @@ import type {
   TargetInfo,
 } from "./types/api";
 
-type InputMode = "manual" | "excel";
-
 export default function App() {
   const [targets, setTargets] = useState<TargetInfo[]>([]);
   const [models, setModels] = useState<ModelSummary[]>([]);
@@ -23,12 +19,8 @@ export default function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>(null);
   const [schema, setSchema] = useState<ModelSchema | null>(null);
 
-  const [mode, setMode] = useState<InputMode>("manual");
-
-  const [singlePrediction, setSinglePrediction] = useState<PredictionResponse | null>(null);
-  const [singleFeatures, setSingleFeatures] = useState<Record<string, number | null> | null>(null);
-  const [batchPredictions, setBatchPredictions] = useState<PredictionResponse[] | null>(null);
-  const [batchInputs, setBatchInputs] = useState<Record<string, number | null>[] | null>(null);
+  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
+  const [lastPatient, setLastPatient] = useState<PatientData | null>(null);
 
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const [predicting, setPredicting] = useState(false);
@@ -70,47 +62,19 @@ export default function App() {
   }, [selectedTarget, selectedAlgorithm]);
 
   const resetResults = () => {
-    setSinglePrediction(null);
-    setSingleFeatures(null);
-    setBatchPredictions(null);
-    setBatchInputs(null);
+    setPrediction(null);
+    setLastPatient(null);
     setPredictError(null);
   };
 
-  const handleManualSubmit = async (features: Record<string, number | null>) => {
+  const handleSubmit = async (patient: PatientData) => {
     if (!selectedTarget || !selectedAlgorithm) return;
     setPredicting(true);
     resetResults();
     try {
-      const result = await api.predict(selectedTarget, selectedAlgorithm, features);
-      setSinglePrediction(result);
-      setSingleFeatures(features);
-    } catch (err) {
-      const e = err as ApiClientError;
-      setPredictError(
-        e.field ? `Validación fallida en "${e.field}": ${e.message}` : e.message,
-      );
-    } finally {
-      setPredicting(false);
-    }
-  };
-
-  const handleExcelSubmit = async (rows: Record<string, number | null>[]) => {
-    if (!selectedTarget || !selectedAlgorithm) return;
-    setPredicting(true);
-    resetResults();
-    try {
-      if (rows.length === 1) {
-        const result = await api.predict(selectedTarget, selectedAlgorithm, rows[0]);
-        setSinglePrediction(result);
-        setSingleFeatures(rows[0]);
-        setBatchInputs(rows);
-        setBatchPredictions([result]);
-      } else {
-        const result = await api.predictBatch(selectedTarget, selectedAlgorithm, rows);
-        setBatchPredictions(result.predictions);
-        setBatchInputs(rows);
-      }
+      const result = await api.predict(selectedTarget, selectedAlgorithm, patient);
+      setPrediction(result);
+      setLastPatient(patient);
     } catch (err) {
       const e = err as ApiClientError;
       setPredictError(
@@ -123,7 +87,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-fvl-surface">
-      {/* Header institucional */}
       <header className="bg-fvl-700 text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-6 md:flex-row md:items-center md:justify-between">
           <div>
@@ -180,25 +143,14 @@ export default function App() {
             <Section
               number="3"
               title="Datos del paciente"
-              description="Ingrese los valores clínicos manualmente o cargue un archivo Excel con uno o varios pacientes."
+              description="Ingrese los valores clínicos disponibles. Los campos vacíos son imputados automáticamente."
             >
               <div className="space-y-6 rounded-2xl border border-fvl-line bg-white p-6 shadow-sm">
-                <ModeToggle mode={mode} onChange={setMode} />
-                <div>
-                  {mode === "manual" ? (
-                    <DynamicForm
-                      schema={schema}
-                      loading={predicting}
-                      onSubmit={handleManualSubmit}
-                    />
-                  ) : (
-                    <ExcelUploader
-                      schema={schema}
-                      loading={predicting}
-                      onSubmit={handleExcelSubmit}
-                    />
-                  )}
-                </div>
+                <DynamicForm
+                  schema={schema}
+                  loading={predicting}
+                  onSubmit={handleSubmit}
+                />
               </div>
             </Section>
           )}
@@ -209,34 +161,24 @@ export default function App() {
             </div>
           )}
 
-          {(singlePrediction && !batchPredictions) || (batchPredictions && schema && batchInputs) ? (
+          {prediction && (
             <Section
               number="4"
               title="Resultado"
               description="Probabilidad calibrada y nivel de riesgo estimado por el modelo seleccionado."
             >
               <div className="space-y-4">
-                {singlePrediction && !batchPredictions && (
-                  <PredictionResult result={singlePrediction} />
-                )}
-                {batchPredictions && batchInputs && schema && (
-                  <BatchPredictionResults
-                    schema={schema}
-                    inputs={batchInputs}
-                    predictions={batchPredictions}
-                  />
-                )}
-                {/* Explicabilidad SHAP — sólo para predicciones individuales */}
-                {singlePrediction && singleFeatures && selectedTarget && selectedAlgorithm && (
+                <PredictionResult result={prediction} />
+                {lastPatient && selectedTarget && selectedAlgorithm && (
                   <ShapExplanation
                     target={selectedTarget}
                     algorithm={selectedAlgorithm}
-                    features={singleFeatures}
+                    patient={lastPatient}
                   />
                 )}
               </div>
             </Section>
-          ) : null}
+          )}
         </div>
       </main>
 
@@ -276,50 +218,5 @@ function Section({
       </div>
       {children}
     </section>
-  );
-}
-
-function ModeToggle({
-  mode,
-  onChange,
-}: {
-  mode: InputMode;
-  onChange: (m: InputMode) => void;
-}) {
-  const baseBtn =
-    "flex-1 rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-fvl-lime focus:ring-offset-2 sm:flex-initial";
-  return (
-    <div
-      role="tablist"
-      aria-label="Modo de carga"
-      className="inline-flex w-full gap-1 rounded-lg bg-fvl-mint p-1 sm:w-auto"
-    >
-      <button
-        type="button"
-        role="tab"
-        aria-selected={mode === "manual"}
-        onClick={() => onChange("manual")}
-        className={`${baseBtn} ${
-          mode === "manual"
-            ? "bg-white text-fvl-700 shadow-sm"
-            : "text-fvl-700/70 hover:text-fvl-700"
-        }`}
-      >
-        Carga manual
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={mode === "excel"}
-        onClick={() => onChange("excel")}
-        className={`${baseBtn} ${
-          mode === "excel"
-            ? "bg-white text-fvl-700 shadow-sm"
-            : "text-fvl-700/70 hover:text-fvl-700"
-        }`}
-      >
-        Carga por archivo Excel
-      </button>
-    </div>
   );
 }

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +28,8 @@ class ModelManifest:
     warnings: list[str]
     created_at: str | None
     raw: dict[str, Any]        # JSON original por si se necesita debug
+    raw_input_schema: list[dict] | None = field(default=None)
+    raw_input_example: dict | None = field(default=None)
 
 
 def load_manifest(manifest_path: Path) -> ModelManifest:
@@ -60,4 +62,6 @@ def load_manifest(manifest_path: Path) -> ModelManifest:
         warnings=list(data.get("warnings", [])),
         created_at=data.get("created_at"),
         raw=data,
+        raw_input_schema=data.get("raw_input_schema"),
+        raw_input_example=data.get("raw_input_example"),
     )

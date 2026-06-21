@@ -50,6 +50,8 @@ def _target_version_to_alias() -> dict[str, TargetAlias]:
 class Settings:
     project_root: Path
     models_dir: Path
+    cache_dir: Path
+    config_dir: Path
     cors_origins: list[str]
     log_level: str
     api_title: str = "Preanesthesia Screening API"
@@ -73,9 +75,13 @@ def _parse_csv_env(name: str, default: str) -> list[str]:
 def get_settings() -> Settings:
     project_root = Path(os.environ.get("PROJECT_ROOT", ".")).resolve()
     models_dir = Path(os.environ.get("MODELS_DIR", project_root / "output" / "v2" / "models")).resolve()
+    cache_dir = Path(os.environ.get("CACHE_DIR", project_root / "cache")).resolve()
+    config_dir = Path(os.environ.get("CONFIG_DIR", project_root / "config")).resolve()
     return Settings(
         project_root=project_root,
         models_dir=models_dir,
+        cache_dir=cache_dir,
+        config_dir=config_dir,
         cors_origins=_parse_csv_env("CORS_ORIGINS", "*"),
         log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
         max_batch_size=int(os.environ.get("MAX_BATCH_SIZE", "100")),

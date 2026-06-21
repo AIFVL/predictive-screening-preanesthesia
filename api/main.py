@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
+import yaml
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,10 +23,19 @@ async def lifespan(app: FastAPI):
 
     apply_sklearn_compat_patches()
 
+    cleaning_cfg_path = settings.config_dir / "cleaning_config.yaml"
+    if cleaning_cfg_path.exists():
+        with open(cleaning_cfg_path, "r", encoding="utf-8") as f:
+            cleaning_cfg = yaml.safe_load(f) or {}
+    else:
+        logger.warning(f"cleaning_config.yaml no encontrado en {settings.config_dir}. Raw preprocessing no disponible.")
+        cleaning_cfg = {}
+
     registry = ModelRegistry(settings)
     registry.discover()
     app.state.settings = settings
     app.state.registry = registry
+    app.state.cleaning_cfg = cleaning_cfg
 
     if registry.n_registered() == 0:
         logger.warning("La API arrancó sin modelos registrados.")

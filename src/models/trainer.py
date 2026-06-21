@@ -31,6 +31,8 @@ def train_model(
     threshold_metric: str = "f2",
     optimize_for: str | None = "recall_constraint",
     recall_min: float = 0.85,
+    raw_input_schema: list[dict] | None = None,
+    raw_input_example: dict | None = None,
 ) -> dict:
     """
     Entrena un modelo intentando calibrarlo, encuentra threshold óptimo (post-calibración),
@@ -110,6 +112,8 @@ def train_model(
         calibration_info=calib_final,
         metrics=metrics,
         extra_warnings=extra_warnings,
+        raw_input_schema=raw_input_schema,
+        raw_input_example=raw_input_example,
     )
     write_manifest(manifest, manifest_path)
 

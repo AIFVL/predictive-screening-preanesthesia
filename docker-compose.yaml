@@ -71,12 +71,18 @@ services:
       - "${API_PORT:-8000}:8000"
     environment:
       MODELS_DIR: /app/output/v2/models
+      CACHE_DIR: /app/cache
+      CONFIG_DIR: /app/config
+      HF_HOME: /app/hf_cache
       LOG_LEVEL: "${API_LOG_LEVEL:-INFO}"
       CORS_ORIGINS: "${API_CORS_ORIGINS:-*}"
       MAX_BATCH_SIZE: "${API_MAX_BATCH_SIZE:-100}"
       MODEL_CACHE_SIZE: "${API_MODEL_CACHE_SIZE:-8}"
     volumes:
       - ./output:/app/output:ro
+      - ./cache:/app/cache
+      - ./config:/app/config:ro
+      - hf_cache:/app/hf_cache
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:8000/health"]
       interval: 30s

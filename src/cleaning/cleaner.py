@@ -954,7 +954,7 @@ def clean_alergenos(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_clean = encode_multilabel(df_clean, "Alérgeno")
     df_clean.drop(columns=["Alérgeno"], inplace=True)
-    df_clean.drop(columns=["Alergias"], inplace=True)
+    df_clean.drop(columns=["Alergias"], inplace=True, errors="ignore")
     return df_clean
 
 

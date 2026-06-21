@@ -63,6 +63,8 @@ def build_manifest(
     calibration_info: dict,
     metrics: dict,
     extra_warnings: list[str] | None = None,
+    raw_input_schema: list[dict] | None = None,
+    raw_input_example: dict | None = None,
 ) -> dict:
     """
     Construye el manifest a partir de los artefactos de entrenamiento.
@@ -132,6 +134,8 @@ def build_manifest(
         "performance": performance,
         "warnings": warnings_list,
         "created_at": datetime.now(timezone.utc).isoformat(),
+        "raw_input_schema": raw_input_schema,
+        "raw_input_example": raw_input_example,
     }
 
     return manifest

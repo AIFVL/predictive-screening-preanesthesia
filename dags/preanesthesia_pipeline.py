@@ -51,12 +51,42 @@ def task_clean_data(**kwargs):
     from src.cleaning.cleaner import clean_preop
     from src.cleaning.enrichment import enrich_preop
     from src.cleaning.report import generate_cleaning_report
-    from src.utils.io import write_parquet
+    from src.cleaning.schema import RAW_INPUT_SCHEMA
+    from src.utils.io import write_parquet, write_json
 
     raw_dir = PROJECT_ROOT / cfg.raw_data_path()
     proc_dir = cfg.output_path() / "data_processed"
     cache_dir = PROJECT_ROOT / "cache"
+    cleaned_parquet = proc_dir / "cleaned.parquet"
+
+    if cleaned_parquet.exists() and (proc_dir / "raw_input_example.json").exists():
+        logger.info("cleaned.parquet encontrado — omitiendo limpieza")
+        return
+
     df_pre, _ = load_raw_data(raw_dir, proc_dir)
+
+    # Capturar un paciente representativo antes de limpiar — se persiste en el manifest
+    # como raw_input_example para que el frontend pueda ofrecer un ejemplo real.
+    schema_names = {f.name for f in RAW_INPUT_SCHEMA}
+    raw_cols = [c for c in df_pre.columns if c in schema_names]
+    df_example_candidates = df_pre[raw_cols].dropna(thresh=int(len(raw_cols) * 0.6))
+    if not df_example_candidates.empty:
+        example_row = df_example_candidates.iloc[0]
+        import pandas as _pd
+
+        def _to_json_safe(v):
+            if hasattr(v, "item"):
+                return v.item()
+            if isinstance(v, _pd.Timestamp):
+                return v.isoformat()
+            return v
+
+        raw_input_example = {
+            k: _to_json_safe(v)
+            for k, v in example_row.items()
+            if v is not None and v == v  # excluye NaN
+        }
+        write_json(raw_input_example, proc_dir / "raw_input_example.json")
 
     # Etapas deterministas (sin APIs)
     df_clean = clean_preop(df_pre, cfg.cleaning)
@@ -169,15 +199,19 @@ def make_task_eda_correlation(target_name: str):
 
 def make_task_train_model(target_name: str, model_key: str):
     def _task(**kwargs):
-        from src.utils.io import read_parquet
+        from src.utils.io import read_parquet, read_json
         from src.models.trainer import train_model
         from src.models.hyperparameter_search import search_hyperparameters
+        from src.cleaning.schema import raw_input_schema_as_dict
 
         proc_dir = cfg.output_path() / "data_processed"
         splits_dir = proc_dir / target_name / "splits"
 
         X_train = read_parquet(splits_dir / "X_train.parquet")
         y_train = read_parquet(splits_dir / "y_train.parquet")["target"]
+
+        example_path = proc_dir / "raw_input_example.json"
+        raw_input_example = read_json(example_path) if example_path.exists() else None
 
         all_models = cfg.enabled_models()
         model_cfg = dict(all_models[model_key])
@@ -211,6 +245,8 @@ def make_task_train_model(target_name: str, model_key: str):
             threshold_metric=model_cfg.get("target_metric", "f2"),
             optimize_for=cfg.optimize_for,
             recall_min=cfg.recall_min,
+            raw_input_schema=raw_input_schema_as_dict(),
+            raw_input_example=raw_input_example,
         )
     _task.__name__ = f"task_train_{model_key}_{target_name}"
     return _task

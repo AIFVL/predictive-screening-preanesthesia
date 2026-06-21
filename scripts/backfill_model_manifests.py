@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV
 
+from src.cleaning.schema import raw_input_schema_as_dict
 from src.models.manifest import build_manifest, manifest_path_for, write_manifest
 from src.models.registry import (
     CALIBRATION_FALLBACK_ORDER,
@@ -266,6 +267,7 @@ def _process_one_model(
         calibration_info=calibration_info,
         metrics=metrics_for_manifest,
         extra_warnings=["generated_by_backfill"],
+        raw_input_schema=raw_input_schema_as_dict(),
     )
     out_manifest = manifest_path_for(target_dir, algorithm)
     write_manifest(manifest, out_manifest)

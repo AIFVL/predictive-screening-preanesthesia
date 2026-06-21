@@ -260,7 +260,7 @@
   "calibrated": true,
   "calibration": {
     "method": "isotonic",
-    "cv": "frozen",
+    "cv": 5,
     "fallback_reason": null
   },
   "prevalence": {
@@ -282,8 +282,249 @@
     "accuracy": 0.5416889363976484
   },
   "warnings": [
-    "calibrated_in_backfill_using_test_split",
     "generated_by_backfill"
   ],
-  "created_at": "2026-05-02T05:41:05.811293+00:00"
+  "created_at": "2026-06-21T17:30:17.461062+00:00",
+  "raw_input_schema": [
+    {
+      "name": "Edad",
+      "dtype": "float64",
+      "description": "Edad del paciente (años)"
+    },
+    {
+      "name": "Sexo",
+      "dtype": "object",
+      "description": "Sexo biológico — valores: \"M\" o \"F\""
+    },
+    {
+      "name": "Atención",
+      "dtype": "object",
+      "description": "Tipo de atención — valores: \"Electivo\", \"Urgencia\", \"Urgencia Programada\""
+    },
+    {
+      "name": "Peso (Kg)",
+      "dtype": "float64",
+      "description": "Peso corporal (kg)"
+    },
+    {
+      "name": "Talla (cm)",
+      "dtype": "float64",
+      "description": "Talla (cm)"
+    },
+    {
+      "name": "IMC",
+      "dtype": "float64",
+      "description": "Índice de masa corporal (kg/m²)"
+    },
+    {
+      "name": "Tensión Arterial Sistólica (mm/Hg)",
+      "dtype": "float64",
+      "description": "Presión arterial sistólica (mmHg)"
+    },
+    {
+      "name": "Tensión Arterial Diastólica (mm/Hg)",
+      "dtype": "float64",
+      "description": "Presión arterial diastólica (mmHg)"
+    },
+    {
+      "name": "Tensión Arterial Media (mm/Hg)",
+      "dtype": "float64",
+      "description": "Presión arterial media (mmHg)"
+    },
+    {
+      "name": "Frecuencia Respiratoria",
+      "dtype": "float64",
+      "description": "Frecuencia respiratoria (resp/min)"
+    },
+    {
+      "name": "Temperatura",
+      "dtype": "float64",
+      "description": "Temperatura corporal (°C)"
+    },
+    {
+      "name": "Fecha",
+      "dtype": "object",
+      "description": "Fecha de valoración preanestésica (YYYY-MM-DD)"
+    },
+    {
+      "name": "Hora",
+      "dtype": "object",
+      "description": "Hora de valoración preanestésica (HH:MM)"
+    },
+    {
+      "name": "Grupo Sanguíneo",
+      "dtype": "object",
+      "description": "Grupo sanguíneo ABO — valores: \"A\", \"B\", \"AB\", \"O\""
+    },
+    {
+      "name": "RH",
+      "dtype": "object",
+      "description": "Factor RH — valores: \"Positivo\", \"Negativo\""
+    },
+    {
+      "name": "Examen_Hemoglobina(g/dl)",
+      "dtype": "float64",
+      "description": "Hemoglobina (g/dL)"
+    },
+    {
+      "name": "Examen_PT (INR)",
+      "dtype": "float64",
+      "description": "Tiempo de protrombina — INR"
+    },
+    {
+      "name": "Antecedente neurológicos",
+      "dtype": "object",
+      "description": "Antecedentes neurológicos (texto libre; p. ej. epilepsia, ACV)"
+    },
+    {
+      "name": "Antecedente respiratorios",
+      "dtype": "object",
+      "description": "Antecedentes respiratorios (texto libre; p. ej. asma, EPOC)"
+    },
+    {
+      "name": "Antecedentes cardiovasculares",
+      "dtype": "object",
+      "description": "Antecedentes cardiovasculares (texto libre; p. ej. HTA, FA)"
+    },
+    {
+      "name": "Antecedente hematológicos ",
+      "dtype": "object",
+      "description": "Antecedentes hematológicos (texto libre)"
+    },
+    {
+      "name": "Antecedente endocrinológicos",
+      "dtype": "object",
+      "description": "Antecedentes endocrinológicos (texto libre; p. ej. DM2, hipotiroidismo)"
+    },
+    {
+      "name": "Antecedente renales",
+      "dtype": "object",
+      "description": "Antecedentes renales (texto libre)"
+    },
+    {
+      "name": "Antecedente gastrointestinales",
+      "dtype": "object",
+      "description": "Antecedentes gastrointestinales (texto libre)"
+    },
+    {
+      "name": "Antecedentes anestésicos",
+      "dtype": "object",
+      "description": "Antecedentes anestésicos (texto libre; p. ej. intubación difícil)"
+    },
+    {
+      "name": "Antecedentes quirúrgicos",
+      "dtype": "object",
+      "description": "Antecedentes quirúrgicos (texto libre; p. ej. apendicectomía 2015)"
+    },
+    {
+      "name": "Anestesia previa",
+      "dtype": "object",
+      "description": "Tipo de anestesia en cirugías previas (texto libre; p. ej. general, raquidea)"
+    },
+    {
+      "name": "Clase Funcional (NYHA) ",
+      "dtype": "object",
+      "description": "Clase funcional NYHA — valores: \"I\", \"II\", \"III\", \"IV\""
+    },
+    {
+      "name": "Cuello Móvil",
+      "dtype": "object",
+      "description": "Movilidad cervical — valores: \"Normal\", \"Reducido\", \"Fijo\""
+    },
+    {
+      "name": "Apertura Oral",
+      "dtype": "object",
+      "description": "Apertura oral — valores: \"> 3 cm\"  o  \"< 3 cm\""
+    },
+    {
+      "name": "Puntaje Mallampati",
+      "dtype": "float64",
+      "description": "Clasificación Mallampati — valor numérico: 1, 2, 3 o 4"
+    },
+    {
+      "name": "Estado Nutricional",
+      "dtype": "object",
+      "description": "Estado nutricional — valores: \"Normal\", \"Bajo peso\", \"Sobrepeso\", \"Obesidad\" (se recalcula desde IMC si está vacío)"
+    },
+    {
+      "name": "Color de Piel",
+      "dtype": "object",
+      "description": "Color de piel (texto libre)"
+    },
+    {
+      "name": "Sistema Nervioso",
+      "dtype": "object",
+      "description": "Sistema nervioso — p. ej. \"normal\", \"somnolencia\", \"confuso\""
+    },
+    {
+      "name": "Apertura Visual",
+      "dtype": "object",
+      "description": "Glasgow — apertura ocular: \"espontanea\", \"a la voz\", \"al dolor\", \"ninguna\""
+    },
+    {
+      "name": "Respuesta Verbal",
+      "dtype": "object",
+      "description": "Glasgow — respuesta verbal: \"conversacion orientada\", \"conversacion confusa\", \"palabras inapropiadas\", \"ruidos incomprensibles\", \"ninguna\""
+    },
+    {
+      "name": "Respuesta Motora",
+      "dtype": "object",
+      "description": "Glasgow — respuesta motora: \"obedece ordenes\", \"localiza el dolor\", \"retira al dolor\", \"flexiona al dolor\", \"flacido\""
+    },
+    {
+      "name": "Sistema Respiratorio",
+      "dtype": "object",
+      "description": "Hallazgos respiratorios (texto libre; p. ej. \"normal\", \"disnea, roncus\")"
+    },
+    {
+      "name": "Sistema cardiovascular",
+      "dtype": "object",
+      "description": "Hallazgos cardiovasculares (texto libre; p. ej. \"normal\", \"soplo sistólico\")"
+    },
+    {
+      "name": "Abdomen",
+      "dtype": "object",
+      "description": "Hallazgos abdominales (texto libre; p. ej. \"normal\", \"distendido\")"
+    },
+    {
+      "name": "Arritmia",
+      "dtype": "object",
+      "description": "Arritmia documentada — valores: \"Si\" o \"No\""
+    },
+    {
+      "name": "Angina",
+      "dtype": "object",
+      "description": "Angina documentada — escriba \"x\" si hay angina, deje vacío si no"
+    },
+    {
+      "name": "Condición",
+      "dtype": "object",
+      "description": "Condición general del paciente (texto libre; p. ej. \"lúcido, orientado\")"
+    },
+    {
+      "name": "Tipo de anestesia propuesta",
+      "dtype": "object",
+      "description": "Tipo de anestesia (texto libre; p. ej. \"general\", \"raquidea\", \"general, epidural\")"
+    },
+    {
+      "name": "Prótesis Dental",
+      "dtype": "object",
+      "description": "Prótesis dental — valores: \"Si\" o \"No\""
+    },
+    {
+      "name": "Alérgeno",
+      "dtype": "object",
+      "description": "Alérgenos conocidos (texto libre; p. ej. penicilina, látex)"
+    },
+    {
+      "name": "Dx Preoperatorio",
+      "dtype": "object",
+      "description": "Diagnóstico preoperatorio (texto libre)"
+    },
+    {
+      "name": "Procedimiento propuesto",
+      "dtype": "object",
+      "description": "Procedimiento quirúrgico propuesto (texto libre)"
+    }
+  ]
 }

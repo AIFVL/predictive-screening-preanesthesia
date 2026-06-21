@@ -41,7 +41,7 @@ def test_tc05_model_detail_returns_metadata(client, target, algorithm, manifest)
     assert data["n_features"] == len(manifest.feature_names)
 
 
-def test_tc06_model_schema_lists_features(client, target, algorithm, manifest):
+def test_tc06_model_schema_lists_raw_input_fields(client, target, algorithm, manifest):
     response = client.get(f"/models/{target}/{algorithm}/schema")
     assert response.status_code == 200, response.text
     body = response.json()
@@ -52,11 +52,13 @@ def test_tc06_model_schema_lists_features(client, target, algorithm, manifest):
     assert data["algorithm"] == algorithm
     assert data["threshold"] == manifest.threshold
 
+    raw_schema = manifest.raw_input_schema or []
+    expected_names = [f["name"] for f in raw_schema]
     schema_names = [f["name"] for f in data["features"]]
-    assert schema_names == manifest.feature_names, (
-        "El orden y composición de features del schema debe coincidir con el manifest."
+    assert schema_names == expected_names, (
+        "El schema de entrada cruda debe coincidir con manifest.raw_input_schema."
     )
 
     for feature in data["features"]:
-        assert feature["dtype"] in {"int64", "float64", "bool"}, feature
+        assert feature["dtype"] in {"int64", "float64", "bool", "object"}, feature
         assert feature["required"] is False

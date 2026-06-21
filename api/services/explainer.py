@@ -19,9 +19,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 from api.domain.manifest import ModelManifest
 from api.domain.registry import ModelRegistry
-from api.services.preprocessor import preprocess
+from api.services.clinical_preprocessor import preprocess_raw
 
 # Modelos que usan TreeExplainer
 _TREE_ALGORITHMS = {
@@ -125,9 +127,11 @@ def _extract_shap_vector(shap_values: Any, n_features: int) -> np.ndarray:
 
 
 def explain_one(
-    features: dict,
+    patient: dict,
     manifest: ModelManifest,
     registry: ModelRegistry,
+    cache_dir: Path,
+    cleaning_cfg: dict,
     top_n: int = 10,
 ) -> list[ShapContribution]:
     """
@@ -135,12 +139,16 @@ def explain_one(
 
     Parameters
     ----------
-    features : dict
-        Valores crudos del paciente (pueden tener None).
+    patient : dict
+        Datos crudos del paciente con claves en nombre de columna del dataset.
     manifest : ModelManifest
         Manifest del modelo.
     registry : ModelRegistry
         Registry para cargar el modelo.
+    cache_dir : Path
+        Directorio de caché para modelos HuggingFace.
+    cleaning_cfg : dict
+        Configuración del pipeline de limpieza.
     top_n : int
         Número de contribuciones principales a devolver.
 
@@ -156,8 +164,8 @@ def explain_one(
     model = registry.load_model(target_slug=target_slug, algorithm=manifest.algorithm)
     base_model = _unwrap_calibrated(model)
 
-    # Preprocesar como siempre
-    df = preprocess(features, manifest)
+    # Preprocesar datos crudos → features del modelo
+    df = preprocess_raw(patient, manifest, cache_dir, cleaning_cfg)
     # Numpy array: evita que SHAP/XGBoost intente sobreescribir feature_names_in_
     arr = df.values
 
@@ -201,14 +209,19 @@ def explain_one(
     sv = _extract_shap_vector(shap_values, n_features=len(manifest.feature_names))
 
     feature_names = manifest.feature_names
+    processed_row = df.iloc[0].to_dict()
 
     contributions = []
     for i, fname in enumerate(feature_names):
-        raw_val = features.get(fname)  # valor original (puede ser None)
+        processed_val = processed_row.get(fname)
+        try:
+            val = float(processed_val) if processed_val is not None else None
+        except (TypeError, ValueError):
+            val = None
         contributions.append(
             ShapContribution(
                 feature=fname,
-                value=float(raw_val) if raw_val is not None else None,
+                value=val,
                 shap_value=float(sv[i]),
             )
         )

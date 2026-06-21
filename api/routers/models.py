@@ -53,20 +53,21 @@ async def get_model(target: str, algorithm: str, request: Request) -> dict:
 @router.get("/{target}/{algorithm}/schema")
 async def get_model_schema(target: str, algorithm: str, request: Request) -> dict:
     """
-    Schema accionable para el frontend: lista de features con dtype y mediana
-    (sirve como default para inputs numéricos).
+    Schema de entrada cruda para el frontend: lista de campos clínicos con
+    nombre de columna, dtype y descripción.
     """
     registry: ModelRegistry = request.app.state.registry
     manifest = _require_manifest(registry, target, algorithm)
 
+    raw_fields = manifest.raw_input_schema or []
     features = [
         FeatureSpec(
-            name=name,
-            dtype=manifest.feature_dtypes.get(name, "float64"),
-            required=False,  # todas opcionales — el preprocessor imputa
-            median=manifest.feature_medians.get(name),
+            name=field["name"],
+            dtype=field["dtype"],
+            required=False,
+            description=field.get("description"),
         )
-        for name in manifest.feature_names
+        for field in raw_fields
     ]
     schema = ModelSchema(
         model_id=manifest.model_id,
@@ -78,7 +79,7 @@ async def get_model_schema(target: str, algorithm: str, request: Request) -> dic
         prevalence=manifest.prevalence,
         calibrated=manifest.calibrated,
         calibration_method=manifest.calibration.get("method"),
-        imputation=manifest.imputation,
         warnings=manifest.warnings,
+        input_example=manifest.raw_input_example,
     )
     return success_response(schema.model_dump(mode="json"), model_id=manifest.model_id)

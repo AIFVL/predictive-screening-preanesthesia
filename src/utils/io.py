@@ -32,11 +32,19 @@ def read_json(path: Path | str) -> dict:
         return json.load(f)
 
 
+def _json_default(obj):
+    if hasattr(obj, "isoformat"):
+        return obj.isoformat()
+    if hasattr(obj, "item"):
+        return obj.item()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+
 def write_json(data: dict, path: Path | str) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        json.dump(data, f, indent=2, ensure_ascii=False, default=_json_default)
 
 
 def write_joblib(obj, path: Path | str) -> None:

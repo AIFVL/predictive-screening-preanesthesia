@@ -49,7 +49,6 @@ export interface FeatureSpec {
   name: string;
   dtype: string;
   required: boolean;
-  median: number | null;
   description: string | null;
 }
 
@@ -63,8 +62,8 @@ export interface ModelSchema {
   prevalence: { train?: number; n_positive?: number; n_negative?: number; n_total?: number };
   calibrated: boolean;
   calibration_method: string | null;
-  imputation: { strategy: string; value?: number };
   warnings: string[];
+  input_example: Record<string, string | number | null> | null;
 }
 
 export type RiskLevel = "low" | "moderate" | "elevated" | "high";
@@ -77,11 +76,6 @@ export interface PredictionResponse {
   calibrated: boolean;
   prevalence_train: number | null;
   warnings: string[];
-}
-
-export interface BatchPredictResponse {
-  predictions: PredictionResponse[];
-  n: number;
 }
 
 export interface ShapContribution {
