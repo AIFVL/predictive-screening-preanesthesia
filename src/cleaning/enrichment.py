@@ -17,6 +17,7 @@ import hashlib
 import math
 import os
 import re
+import csv
 import time
 from pathlib import Path
 
@@ -61,13 +62,16 @@ def _flush_append_csv(path: str, df_new: pd.DataFrame, subset_cols: list = None)
         return
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     if os.path.exists(path):
-        base = pd.read_csv(path)
+        try:
+            base = pd.read_csv(path, quoting=csv.QUOTE_ALL, on_bad_lines="skip")
+        except Exception:
+            base = pd.DataFrame(columns=df_new.columns)
         out = pd.concat([base, df_new], ignore_index=True)
     else:
         out = df_new.copy()
     if subset_cols:
         out = out.drop_duplicates(subset=subset_cols, keep="last")
-    out.to_csv(path, index=False)
+    out.to_csv(path, index=False, quoting=csv.QUOTE_ALL)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
