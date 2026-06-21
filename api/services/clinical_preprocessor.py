@@ -65,11 +65,24 @@ def preprocess_raw(
       3. Llama enrich_preop() (ICD coding + severidad BART-MNLI).
       4. Reindexar e imputar según el manifest.
     """
-    row: dict = {
-        k: v for k, v in patient.items()
-        if v is not None and not (isinstance(v, str) and v.strip().lower() == "nan")
-    }
+    def _is_empty(v) -> bool:
+        if v is None:
+            return True
+        if isinstance(v, float) and v != v:  # NaN
+            return True
+        if isinstance(v, str) and v.strip().lower() in ("nan", ""):
+            return True
+        return False
+
+    row: dict = {k: v for k, v in patient.items() if not _is_empty(v)}
     row = _normalize_strict(row)
+
+    # Garantizar que todas las columnas del schema raw estén presentes en el DataFrame
+    # (con None) para que el cleaner no falle con KeyError en columnas opcionales ausentes.
+    if manifest.raw_input_schema:
+        for field_def in manifest.raw_input_schema:
+            if field_def["name"] not in row:
+                row[field_def["name"]] = None
 
     # clean_fecha_hora() requiere Fecha como datetime, no string
     if "Fecha" in row:

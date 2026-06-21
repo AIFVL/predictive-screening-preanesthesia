@@ -54,39 +54,49 @@ def task_clean_data(**kwargs):
     from src.cleaning.schema import RAW_INPUT_SCHEMA
     from src.utils.io import write_parquet, write_json
 
+    import pandas as _pd
+
+    def _to_json_safe(v):
+        if hasattr(v, "item"):
+            return v.item()
+        if isinstance(v, _pd.Timestamp):
+            return v.isoformat()
+        return v
+
+    def _is_empty(v) -> bool:
+        if v is None:
+            return True
+        if v != v:  # float NaN
+            return True
+        if isinstance(v, str) and v.strip().lower() in ("nan", ""):
+            return True
+        return False
+
     raw_dir = PROJECT_ROOT / cfg.raw_data_path()
     proc_dir = cfg.output_path() / "data_processed"
     cache_dir = PROJECT_ROOT / "cache"
     cleaned_parquet = proc_dir / "cleaned.parquet"
-
-    if cleaned_parquet.exists() and (proc_dir / "raw_input_example.json").exists():
-        logger.info("cleaned.parquet encontrado — omitiendo limpieza")
-        return
+    example_path = proc_dir / "raw_input_example.json"
 
     df_pre, _ = load_raw_data(raw_dir, proc_dir)
 
-    # Capturar un paciente representativo antes de limpiar — se persiste en el manifest
-    # como raw_input_example para que el frontend pueda ofrecer un ejemplo real.
-    schema_names = {f.name for f in RAW_INPUT_SCHEMA}
-    raw_cols = [c for c in df_pre.columns if c in schema_names]
-    df_example_candidates = df_pre[raw_cols].dropna(thresh=int(len(raw_cols) * 0.6))
-    if not df_example_candidates.empty:
-        example_row = df_example_candidates.iloc[0]
-        import pandas as _pd
+    # Generar el ejemplo siempre que falte — independiente del cache de limpieza
+    if not example_path.exists():
+        schema_names = {f.name for f in RAW_INPUT_SCHEMA}
+        raw_cols = [c for c in df_pre.columns if c in schema_names]
+        df_candidates = df_pre[raw_cols].dropna(thresh=int(len(raw_cols) * 0.6))
+        if not df_candidates.empty:
+            example_row = df_candidates.iloc[0]
+            raw_input_example = {
+                k: _to_json_safe(v)
+                for k, v in example_row.items()
+                if not _is_empty(v)
+            }
+            write_json(raw_input_example, example_path)
 
-        def _to_json_safe(v):
-            if hasattr(v, "item"):
-                return v.item()
-            if isinstance(v, _pd.Timestamp):
-                return v.isoformat()
-            return v
-
-        raw_input_example = {
-            k: _to_json_safe(v)
-            for k, v in example_row.items()
-            if v is not None and v == v  # excluye NaN
-        }
-        write_json(raw_input_example, proc_dir / "raw_input_example.json")
+    if cleaned_parquet.exists():
+        logger.info("cleaned.parquet encontrado — omitiendo limpieza")
+        return
 
     # Etapas deterministas (sin APIs)
     df_clean = clean_preop(df_pre, cfg.cleaning)

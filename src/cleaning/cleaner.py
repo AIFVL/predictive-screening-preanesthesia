@@ -507,8 +507,8 @@ def clean_categorical_systems(df: pd.DataFrame) -> pd.DataFrame:
     dfc["Sistema Respiratorio"] = dfc["Sistema Respiratorio"].apply(
         lambda x: standardize_text(x, remove_non_letters_flag=False)
     )
-    dfc["Sistema Respiratorio"] = dfc["Sistema Respiratorio"].str.replace(";", "", regex=False)
     dfc["Sistema Respiratorio"] = dfc["Sistema Respiratorio"].fillna("normal")
+    dfc["Sistema Respiratorio"] = dfc["Sistema Respiratorio"].str.replace(";", "", regex=False)
     dfc["Disnea"] = dfc["Sistema Respiratorio"].apply(
         lambda x: "x" if "disnea" in str(x).lower() else x
     )
@@ -518,8 +518,8 @@ def clean_categorical_systems(df: pd.DataFrame) -> pd.DataFrame:
     dfc["Sistema cardiovascular"] = dfc["Sistema cardiovascular"].apply(
         lambda x: standardize_text(x, remove_non_letters_flag=False)
     )
-    dfc["Sistema cardiovascular"] = dfc["Sistema cardiovascular"].str.replace(";", "", regex=False)
     dfc["Sistema cardiovascular"] = dfc["Sistema cardiovascular"].fillna("normal")
+    dfc["Sistema cardiovascular"] = dfc["Sistema cardiovascular"].str.replace(";", "", regex=False)
     dfc = encode_multilabel(dfc, "Sistema cardiovascular", delimiter=",")
     dfc = dfc.drop(columns=["Sistema cardiovascular"])
 
@@ -555,8 +555,8 @@ def clean_categorical_specific_conditions(df: pd.DataFrame) -> pd.DataFrame:
     dfc["Condición"] = dfc["Condición"].apply(
         lambda x: standardize_text(x, remove_non_letters_flag=False)
     )
-    dfc["Condición"] = dfc["Condición"].str.replace(";", ",", regex=False)
     dfc["Condición"] = dfc["Condición"].fillna("ninguna")
+    dfc["Condición"] = dfc["Condición"].str.replace(";", ",", regex=False)
     dfc = encode_multilabel(dfc, "Condición", delimiter=",")
     dfc = dfc.drop(columns=["Condición"])
     return dfc
