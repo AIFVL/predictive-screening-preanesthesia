@@ -25,7 +25,7 @@ Este proyecto implementa un pipeline de aprendizaje automático de producción p
 **¿Qué hace el sistema en concreto?**
 
 - **Entrena modelos automáticamente:** Apache Airflow orquesta el pipeline completo —validación, limpieza (incluida normalización de medicamentos y diagnósticos vía NLP), ingeniería de características, selección de variables, entrenamiento de hasta 9 familias de modelos con calibración probabilística y optimización de umbral— y guarda los resultados en `output/v2/`.
-- **Sirve predicciones vía API REST:** Un servidor FastAPI carga los modelos entrenados y expone un esquema dinámico por modelo. Se envía JSON con datos del paciente y se obtiene un score de riesgo calibrado, junto con nivel de riesgo (`low`, `medium`, `high`).
+- **Sirve predicciones vía API REST:** Un servidor FastAPI carga los modelos entrenados y expone, por modelo, el esquema de variables clínicas crudas que acepta. Se envía JSON con los datos del paciente (nombres de columna del dataset), la API aplica internamente el mismo pipeline de limpieza y enriquecimiento del entrenamiento, y devuelve un score de riesgo calibrado con nivel de riesgo (`low`, `moderate`, `elevated`, `high`) y, opcionalmente, las contribuciones SHAP del caso.
 - **Corre completamente en Docker:** No se requiere instalación local de Python. Un solo comando levanta toda la infraestructura.
 
 **Dos variables objetivo están disponibles:**
@@ -49,9 +49,9 @@ predictive-screening-preanesthesia/
 │   ├── main.py                    # Punto de entrada, lifespan, registro de rutas
 │   ├── core/                      # Configuración, logging, parches de compatibilidad sklearn
 │   ├── domain/                    # Registro de modelos y tipos de dominio (manifests)
-│   ├── routers/                   # Rutas: /health, /targets, /models, /predict
-│   ├── schemas/                   # Generación dinámica de esquemas Pydantic por modelo
-│   └── services/                  # Lógica de predicción, preprocesamiento, estratificación
+│   ├── routers/                   # Rutas: /health, /targets, /models, /predict, /explain
+│   ├── schemas/                   # Contratos Pydantic de respuesta (predict, explain, modelos)
+│   └── services/                  # Predicción, preprocesamiento clínico crudo, imputación, SHAP
 │
 ├── src/                           # Librería Python del pipeline (paquete importable)
 │   ├── cleaning/                  # Limpieza de datos, detección de outliers, enriquecimiento NLP
@@ -281,18 +281,19 @@ Todos los modelos se calibran con Platt scaling y se les optimiza el umbral de d
 
 El servidor FastAPI está disponible en [http://localhost:8000](http://localhost:8000). La documentación interactiva (Swagger UI) se encuentra en [http://localhost:8000/docs](http://localhost:8000/docs).
 
-El servidor escanea `output/v2/models/` al inicio y registra todos los targets y algoritmos para los cuales exista un `*_manifest.json` válido. Los esquemas de entrada Pydantic se generan dinámicamente por modelo desde el manifest.
+El servidor escanea `output/v2/models/` al inicio y registra todos los targets y algoritmos para los cuales exista un `*_manifest.json` válido. Cada modelo expone su **esquema de variables clínicas crudas** (`raw_input_schema`, embebido en el manifest) más un ejemplo de paciente real. La API recibe los datos crudos del paciente y aplica internamente el mismo pipeline de limpieza y enriquecimiento (codificación ICD + severidad con BART-MNLI) usado en entrenamiento, garantizando paridad train/serve.
 
 ### Referencia de endpoints
 
-| Método  | Ruta                                    | Descripción                                              |
-| -------- | --------------------------------------- | --------------------------------------------------------- |
-| `GET`  | `/health`                             | Verificación de disponibilidad del servicio              |
-| `GET`  | `/targets`                            | Lista de targets de predicción disponibles               |
-| `GET`  | `/models?target={target}`             | Lista de algoritmos disponibles para un target            |
-| `GET`  | `/models/{target}/{algorithm}/schema` | Esquema de features de entrada para un modelo específico |
-| `POST` | `/predict/{target}/{algorithm}`       | Predicción para un único paciente                       |
-| `POST` | `/predict/{target}/{algorithm}/batch` | Predicción en lote (hasta 100 registros)                 |
+| Método  | Ruta                                       | Descripción                                                       |
+| -------- | ------------------------------------------ | ----------------------------------------------------------------- |
+| `GET`  | `/health`, `/ready`                      | Liveness y readiness del servicio                                 |
+| `GET`  | `/targets`                               | Lista de targets de predicción disponibles                       |
+| `GET`  | `/models`                                | Lista plana de todos los modelos servidos                         |
+| `GET`  | `/models/{target}/{algorithm}`           | Metadata completa de un modelo                                     |
+| `GET`  | `/models/{target}/{algorithm}/schema`    | Esquema de variables clínicas crudas + ejemplo de paciente        |
+| `POST` | `/models/{target}/{algorithm}/predict`   | Predicción para un paciente (datos clínicos crudos)              |
+| `POST` | `/models/{target}/{algorithm}/explain`   | Top-N contribuciones SHAP del caso                                |
 
 ### Ejemplos con curl
 
@@ -302,56 +303,53 @@ El servidor escanea `output/v2/models/` al inicio y registra todos los targets y
 curl -s http://localhost:8000/health | python -m json.tool
 ```
 
-**Listar targets disponibles:**
+**Listar targets y modelos:**
 
 ```bash
 curl -s http://localhost:8000/targets | python -m json.tool
+curl -s http://localhost:8000/models | python -m json.tool
 ```
 
-**Listar modelos para un target:**
+**Consultar el esquema de entrada de un modelo (campos crudos + ejemplo real):**
 
 ```bash
-curl -s "http://localhost:8000/models?target=hospitalization_risk" | python -m json.tool
-```
-
-**Consultar el esquema de features de un modelo:**
-
-```bash
-curl -s http://localhost:8000/models/hospitalization_risk/logistic_regression/schema \
+curl -s http://localhost:8000/models/hospitalization_risk/xgboost/schema \
   | python -m json.tool
 ```
 
-**Predicción individual:**
+**Predicción individual** (claves = nombres de columna del dataset, todos opcionales):
 
 ```bash
-curl -s -X POST http://localhost:8000/predict/hospitalization_risk/logistic_regression \
+curl -s -X POST http://localhost:8000/models/hospitalization_risk/xgboost/predict \
   -H "Content-Type: application/json" \
   -d '{
-    "Edad": 62,
-    "Peso (Kg)": 78,
-    "Talla (cm)": 168,
-    "IMC": 27.6,
-    "Tensión Arterial Sistólica (mm/Hg)": 140,
-    "Frecuencia Cardíaca (lpm)": 82,
-    "Saturación de Oxígeno (%)": 97
+    "patient": {
+      "Edad": 62,
+      "Sexo": "M",
+      "Atención": "Electivo",
+      "Peso (Kg)": 78,
+      "Talla (cm)": 168,
+      "IMC": 27.6,
+      "Tensión Arterial Sistólica (mm/Hg)": 140,
+      "Examen_Hemoglobina(g/dl)": 13.1,
+      "Dx Preoperatorio": "hernia inguinal",
+      "Procedimiento propuesto": "herniorrafia inguinal"
+    }
   }' | python -m json.tool
 ```
 
 > [!NOTE]
-> **Todos los campos son opcionales.** Los valores faltantes se imputan automáticamente con la mediana del conjunto de entrenamiento. Se recomienda incluir al menos: edad, IMC, signos vitales y tipo de anestesia propuesta para obtener predicciones más confiables.
+> **Todos los campos del paciente son opcionales.** Los datos ausentes se completan a lo largo del pipeline de limpieza/enriquecimiento e imputación. Cuantos más datos clínicos se envíen (edad, IMC, signos vitales, antecedentes y, sobre todo, diagnóstico y procedimiento como texto libre), más confiable es la predicción. La lista completa de campos aceptados está en el endpoint `/schema`.
 
-**Predicción en lote:**
+**Explicabilidad (SHAP) del mismo paciente:**
 
 ```bash
-curl -s -X POST http://localhost:8000/predict/hospitalization_risk/random_forest/batch \
+curl -s -X POST http://localhost:8000/models/hospitalization_risk/xgboost/explain \
   -H "Content-Type: application/json" \
-  -d '[
-    {"Edad": 62, "IMC": 27.6, "Tensión Arterial Sistólica (mm/Hg)": 140},
-    {"Edad": 45, "IMC": 30.1}
-  ]' | python -m json.tool
+  -d '{"patient": {"Edad": 78, "IMC": 33.8}, "top_n": 5}' | python -m json.tool
 ```
 
-### Estructura de la respuesta
+### Estructura de la respuesta de `/predict`
 
 ```json
 {
@@ -359,27 +357,31 @@ curl -s -X POST http://localhost:8000/predict/hospitalization_risk/random_forest
   "data": {
     "predicted_class": 1,
     "probability": 0.73,
-    "threshold": 0.19,
+    "threshold": 0.14,
     "risk_level": "high",
     "calibrated": true,
-    "prevalence_train": 0.258,
+    "prevalence_train": 0.194,
     "warnings": []
   },
   "meta": {
     "request_id": "a3f1c2...",
-    "model_id": "target_f_predictibilidad_maxima__logistic_regression"
+    "model_id": "target_f_predictibilidad_maxima__xgboost"
   }
 }
 ```
 
-| Campo               | Descripción                                                         |
+| Campo               | Descripción                                                          |
 | ------------------- | -------------------------------------------------------------------- |
 | `predicted_class` | `1` = paciente en riesgo, `0` = menor riesgo                     |
 | `probability`     | Probabilidad calibrada del evento adverso (0.0–1.0)                 |
 | `threshold`       | Umbral de decisión aplicado (optimizado para F2,`recall >= 0.85`) |
-| `risk_level`      | Nivel de riesgo estratificado:`"low"`, `"medium"` o `"high"`   |
-| `calibrated`      | Si se aplicó calibración de probabilidades (Platt scaling)         |
+| `risk_level`      | Nivel de riesgo estratificado:`"low"`, `"moderate"`, `"elevated"` o `"high"` |
+| `calibrated`      | Si se aplicó calibración de probabilidades                          |
+| `prevalence_train`| Prevalencia del target en entrenamiento (referencia)                |
 | `warnings`        | Alertas de calidad para esta predicción                             |
+
+> [!NOTE]
+> No existe endpoint de predicción en lote. El procesamiento masivo se realiza directamente con el pipeline de Airflow; la API está orientada a la predicción individual en el flujo de valoración preanestésica.
 
 ---
 

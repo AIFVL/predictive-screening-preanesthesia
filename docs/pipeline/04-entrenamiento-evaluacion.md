@@ -12,7 +12,7 @@
 **Outputs (pipeline v2):**
 - `output/v2/models/{target}/{modelo}_model.joblib` — Modelo entrenado serializado (calibrado cuando aplica)
 - `output/v2/models/{target}/{modelo}_metrics.json` — Métricas finales en test (con threshold óptimo aplicado)
-- `output/v2/models/{target}/{modelo}_eval.json` — Evaluación completa: bloque `test` + bloque `cv` (10-fold cross-validation, según `n_folds: 10` en `config/pipeline_config.yaml`)
+- `output/v2/models/{target}/{modelo}_eval.json` — Evaluación completa: bloque `test`, bloque `cv` (10-fold cross-validation, según `n_folds: 10` en `config/pipeline_config.yaml`) y bloque `bootstrap_ci` (intervalos de confianza al 95% por bootstrap percentil — ver §4.4)
 - `output/v2/models/{target}/{modelo}_manifest.json` — Contrato del modelo: feature_names, dtypes, threshold, calibration, prevalence — consumido por la API
 - `output/v2/plots/{target}/{modelo}_roc_pr.png` — Curvas ROC y PR
 - `output/v2/plots/{target}/{modelo}_confusion.png` — Matriz de confusión
@@ -307,6 +307,27 @@ Datos de [`output/v2/models/target_f_predictibilidad_maxima/xgboost_metrics.json
 - **Predicted Positive Rate = 0.447:** El modelo remite a valoración al 44.7% de los pacientes, frente al 67% del target D, manteniendo un Recall equivalente. La mayor señal del target F permite discriminar mejor sin sacrificar sensibilidad.
 
 - **Brier Score = 0.097:** Un modelo aleatorio con prevalencia 0.194 tendría Brier ≈ 0.156; el valor observado confirma que el modelo combina buena discriminación con probabilidades calibradas, interpretables como estimaciones de riesgo real. Los detalles de calibración se desarrollan en [06-calibracion.md](06-calibracion.md).
+
+---
+
+### 4.4 Intervalos de confianza por bootstrap
+
+Las métricas puntuales del test set (§4.3) no comunican la incertidumbre derivada del tamaño finito del conjunto de prueba. Para cuantificarla, la función [`bootstrap_confidence_intervals()`](../../src/evaluation/metrics.py) estima intervalos de confianza al 95% mediante **bootstrap percentil**: se generan `n_bootstrap = 1000` remuestreos con reemplazo del conjunto de prueba (`seed = 42`, reproducible), se recalculan `ROC_AUC`, `F2`, `Recall` y `Precision` en cada réplica y se toman los percentiles 2.5 y 97.5 de la distribución resultante. Las réplicas que quedan con una sola clase (sin positivos o sin negativos) se descartan para evitar AUC indefinido.
+
+El resultado se persiste en el bloque `bootstrap_ci` de cada `{modelo}_eval.json`. Ejemplo real para Random Forest / `target_f_predictibilidad_maxima`:
+
+```json
+{
+  "bootstrap_ci": {
+    "ROC_AUC":   { "mean": 0.846, "ci_lower": 0.832, "ci_upper": 0.861, "n_valid_samples": 1000 },
+    "F2":        { "mean": 0.660, "ci_lower": 0.638, "ci_upper": 0.682, "n_valid_samples": 1000 },
+    "Recall":    { "mean": 0.832, "ci_lower": 0.807, "ci_upper": 0.856, "n_valid_samples": 1000 },
+    "Precision": { "mean": 0.362, "ci_lower": 0.341, "ci_upper": 0.383, "n_valid_samples": 1000 }
+  }
+}
+```
+
+Estos intervalos respaldan las comparaciones entre modelos: cuando los IC de ROC_AUC de dos modelos no se solapan, la diferencia de discriminación es estadísticamente robusta y no un artefacto del split particular. El cálculo se ejecuta automáticamente en la tarea `evaluate_models_{target}` del DAG; los `eval.json` regenerados tras esta incorporación incluyen el bloque, y los modelos previos lo adquieren al reevaluarse.
 
 ---
 
